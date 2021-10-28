@@ -24,7 +24,14 @@ const ExtensionUtils = imports.misc.extensionUtils;
 // const { GObject, St } = imports.gi;
 const {Gio, Shell, Meta} = imports.gi;
 const Main = imports.ui.main;
-//const Shell = imports.gi.Shell;
+// const GObject = imports.gi.GObject;
+// const Shell = imports.gi.Shell;
+// const Meta = imports.gi.Meta;
+// const St = imports.gi.St;
+// const Clutter = imports.gi.Clutter;
+// const Gio = imports.gi.Gio;
+// const Workspace = imports.ui.workspace;
+
 const Me = ExtensionUtils.getCurrentExtension();
 const _ = ExtensionUtils.gettext;
 
@@ -44,30 +51,47 @@ function getSettings () {
   return new Gio.Settings({ settings_schema : schemaObj });
 }
 
-// FUNCTION, 
+// FUNCTION,  
 function moveWindow() {
   log('LOGGER:shortcut action...');
   const workspaceManager = global.workspace_manager;
-  const newIndex = workspaceManager.get_active_workspace_index() + 1;
+  let myIndex = workspaceManager.get_active_workspace_index();
+  let newIndex = myIndex + 1;
+  log(myIndex);
   log(newIndex);
-  //const mywin = global.window_manager.get_default();
-  const mywin = Shell.WindowTracker.get_default();
 
+  //1) get the Focused / active  window
+  let myWin = getFocusWin();
+
+  //2) create  new  workspace
   Main.wm.insertWorkspace(newIndex);
-  Meta.Window.change_workspace_by_index(newIndex, false);
-  
-  // Shell.wm.moveWindow
-  //Main.wm.change_workspace_by_index(newIndex, false);
-  //const newWS = workspaceManager.get_workspace_by_index(newIndex);
-  //const myWindow = Meta.display.get_focus_window();
-  //const myWindow = Shell.WindowTracker.get_default();
-  //log(objToString(myWindow))
-  //log(JSON.stringify(window))
-  //Main.wm.actionMoveWindow(newWS, window); //swapped from window
-  //window.change_workspace_by_index(newIndex, false);
-  //mywin.moveWindow(newIndex)
+
+  //3) on the Focused Meta.Window object, call change_workspace_by_index(space_index, append)
+  myWin.change_workspace_by_index(newIndex, false);
+
 }
 
+function getFocusWin(){
+  // let myWin = global.get_window_actors()[0].get_meta_window();
+  // log(myWin.title); 
+
+  let myWins = global.get_window_actors();
+  let focusWin = myWins.forEach(findFocus);
+  log("DEBUG, win was returned---"+ focusWin.title );
+
+  return focusWin;
+
+}
+
+function findFocus(item) {
+  let win = item.get_meta_window();
+  let focstat = win.has_focus();
+
+  if ( focstat ){
+    log("DEBUG, focus:"+ focstat +"---"+ win.title  );
+    return win;
+  }
+}
 
 class Extension {
     constructor(uuid) {

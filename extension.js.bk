@@ -92,3 +92,32 @@ function disable () {
 //   const newWs = workspaceManager.get_workspace_by_index(newIndex);
 //   Main.wm.actionMoveWindow(newWs, window);
 // }
+
+
+  //const winManager = global.window_manager;
+  //const myWin = global.get_window_actors()[0].meta_window;
+  //const myWin = myWins.get_meta_window();
+  //const myWin = global.gettheMetaWindow;
+  //const myWin = app.get_windows();
+  //myWin[0].change_workspace_by_index(newIndex, false);
+  //Meta.Window.change_workspace_by_index(newIndex, false);
+  //const mywin = global.window_manager.get_default();
+  //const mywin = Shell.WindowTracker.get_default();
+  //Shell.WM.change_workspace_by_index(newIndex, false);
+  //Main.wm.change_workspace_by_index(newIndex, false);
+  //Meta.Window.change_workspace_by_index(newIndex, false);
+  //const winManager = global.window_manager;
+  //winManager::switch-workspace(object, p0, p1);// how do i use a Signal?s
+  //Meta.Window.change_workspace_by_index(newIndex, false);
+  //Meta.Window.moveWindow(newIndex);
+  
+  // Shell.wm.moveWindow
+  //Main.wm.change_workspace_by_index(newIndex, false);
+  //const newWS = workspaceManager.get_workspace_by_index(newIndex);
+  //const myWindow = Meta.display.get_focus_window();
+  //const myWindow = Shell.WindowTracker.get_default();
+  //log(objToString(myWindow))
+  //log(JSON.stringify(window))
+  //Main.wm.actionMoveWindow(newWS, window); //swapped from window
+  //window.change_workspace_by_index(newIndex, false);
+  //mywin.moveWindow(newIndex)
