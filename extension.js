@@ -46,25 +46,23 @@ function getSettings () {
 
 // FUNCTION,  
 function moveWindow() {
-  log('LOGGER:shortcut action...');
+  log('NewWorkspaceShortcutLogger:shortcut action...');
   const workspaceManager = global.workspace_manager;
   let myIndex = workspaceManager.get_active_workspace_index();
   let newIndex = myIndex + 1;
-  log(myIndex);
-  log(newIndex);
 
-  //1) get the Focused / active  window
+  //1. get the Focused / active  window
   let myWin = getFocusWin();
-  log(typeof myWin);
 
-  //2) create  new  workspace
+  //2. create  new  workspace
   Main.wm.insertWorkspace(newIndex);
 
-  //3) on the Focused Meta.Window object, call change_workspace_by_index(space_index, append)
+  //3. on the Focused Meta.Window object, call change_workspace_by_index(space_index, append)
   myWin.change_workspace_by_index(newIndex, false);
 
-  //4) move me to new workspace
-  
+  //4. move me to new workspace:  activate_with_focus(myWin, timestamp)
+  //Meta.Workspace  global.workspace.activate_with_focus(myWin); 
+  myWin.focus(0);
 }
 
 function getFocusWin(){
@@ -72,18 +70,13 @@ function getFocusWin(){
   let myWins = global.get_window_actors();
   let focusWin;
   myWins.forEach((winCont) => {
-    // log("im here");
     let win = winCont.get_meta_window();
     let focstat = win.has_focus();
     if ( focstat ){
-      log(typeof win)
-      log("DEBUG, focus:"+ focstat +"---"+ win.title  );
+      log("NewWorkspaceShortcutLogger: focus:"+ win.title  );
       focusWin = win;
     }
   });
-
-  log(typeof focusWin);
-  log("DEBUG, win was returned---"+ focusWin.title );
   return focusWin;
 }
 
@@ -94,7 +87,7 @@ class Extension {
     }
 
     enable() {
-        log('LOGGER:newworkspaceshortcut is enabled.');
+        log('NewWorkspaceShortcutLogger:newworkspaceshortcut is enabled.');
         let mode = Shell.ActionMode.ALL;
         let flag = Meta.KeyBindingFlags.NONE;
         let settings = getSettings();
@@ -106,7 +99,7 @@ class Extension {
 
     disable() {
         Main.wm.removeKeybinding("nwshortcut");
-        log('LOGGER: newworkspaceshortcut is disabled.');
+        log('NewWorkspaceShortcutLogger: newworkspaceshortcut is disabled.');
     }
 }
 
