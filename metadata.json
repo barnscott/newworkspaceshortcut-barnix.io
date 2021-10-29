@@ -1,0 +1,8 @@
+{
+  "name": "New Workspace Shortcut",
+  "description": "Use a shorcut to insert a new workspace to the right of your current workspace",
+  "uuid": "newworkspaceshortcut@barnix.io",
+  "shell-version": [
+    "41"
+  ]
+}

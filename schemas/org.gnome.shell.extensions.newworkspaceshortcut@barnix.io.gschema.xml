@@ -1,0 +1,18 @@
+<!-- Recompile this schema with `glib-compile-schemas schemas/` -->
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+
+  <schema id="org.gnome.shell.extensions.newworkspaceshortcut"
+    path="/org/gnome/shell/extensions/newworkspaceshortcut/">
+
+    <key type="as" name="nwshortcut">
+      <default><![CDATA[['<Super><Alt><Shift>n']]]></default>
+      <summary>New Workspace Shortcut</summary>
+      <description>
+        New Workspace Shortcut key binding
+      </description>
+    </key>
+
+  </schema>
+
+</schemalist>
