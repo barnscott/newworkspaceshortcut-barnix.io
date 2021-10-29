@@ -44,7 +44,11 @@ function getSettings () {
   return new Gio.Settings({ settings_schema : schemaObj });
 }
 
-// FUNCTION,  
+// function reorderWS() {
+  //https://gjs-docs.gnome.org/meta8~8_api/meta.workspacemanager#method-reorder_workspace
+// }
+
+// FUNCTION, move the window to the new workspace
 function moveWindow() {
   log('NewWorkspaceShortcutLogger:shortcut action...');
   const workspaceManager = global.workspace_manager;
@@ -57,12 +61,14 @@ function moveWindow() {
   //2. create  new  workspace
   Main.wm.insertWorkspace(newIndex);
 
-  //3. on the Focused Meta.Window object, call change_workspace_by_index(space_index, append)
+  //3. on the Focused Meta.Window object
   myWin.change_workspace_by_index(newIndex, false);
 
-  //4. move me to new workspace:  activate_with_focus(myWin, timestamp)
+  //4. move me to new workspace
   //Meta.Workspace  global.workspace.activate_with_focus(myWin); 
-  myWin.focus(0);
+  let myTime = global.get_current_time();
+  let ws = workspaceManager.get_workspace_by_index(newIndex);
+  ws.activate_with_focus(myWin, myTime);
 }
 
 function getFocusWin(){
