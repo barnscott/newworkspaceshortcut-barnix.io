@@ -1,5 +1,10 @@
 # New Workspace Shortcut extension for Gnome Desktop
 
+## TLDR
+This shortcut can:
+- Use a shortcut to move a window to a new and empty workspace on the right of your current workspace: `Meta-Key + Alt + Shift + n`
+- Use a shortcut to move an entire workspace left or right of the current workspace: `ALT+Left` <or> `ALT+Right`
+
 ## Purpose
 
 This extension provides a shortcut that will move the active window to a new workspace that is to the right of the current workspace.
@@ -7,6 +12,8 @@ This extension provides a shortcut that will move the active window to a new wor
 This is useful, for example, if you have 3 populated workspaces, but you want to move a window that is on workspace-1 to a new and empty workspace to the right of workspace-1.
 
 While vanilla Gnome provides mouse functionalty for this task, a keyboard shortcut is not available.
+
+Additionally, there are  shortcuts to move Workspace left and right. Sometimes this is handy too! This second feature was an afterthought since I saw the reorder workspace method in the documentation for gjs.
 
 ## Backstory
 
@@ -22,9 +29,7 @@ Currenlty, this extention is only tested on the following releases
 
 ## How to use
 
-After installing the extension, simply use the shortcut:
-
-`Meta-Key + Alt + Shift + n`
+After installing the extension, simply use the shortcuts. There are not currently an UI elements available.
 
 ## How to install
 
@@ -45,8 +50,6 @@ gnome-extensions enable newworkspaceshortcut@barnix.io
 I would like to add the following features, but don't have any priority on doing so:
 
 - [ ] Code cleanup / optimization
-  
-- [ ] Add shortcuts for reordering the workspaces themselves (ie, swap order/location of workspace 1 and 2)
   
 - [ ] Add a extension preferences window to allow to modify shortcut key binding
   

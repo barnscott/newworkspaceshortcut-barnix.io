@@ -27,6 +27,7 @@ const Main = imports.ui.main;
 
 const Me = ExtensionUtils.getCurrentExtension();
 const _ = ExtensionUtils.gettext;
+const workspaceManager = global.workspace_manager;
 
 // FUNCTION, GET SCHEMA
 function getSettings () {
@@ -44,14 +45,9 @@ function getSettings () {
   return new Gio.Settings({ settings_schema : schemaObj });
 }
 
-// function reorderWS() {
-  //https://gjs-docs.gnome.org/meta8~8_api/meta.workspacemanager#method-reorder_workspace
-// }
-
 // FUNCTION, move the window to the new workspace
 function moveWindow() {
   log('NewWorkspaceShortcutLogger:shortcut action...');
-  const workspaceManager = global.workspace_manager;
   let myIndex = workspaceManager.get_active_workspace_index();
   let newIndex = myIndex + 1;
 
@@ -65,12 +61,12 @@ function moveWindow() {
   myWin.change_workspace_by_index(newIndex, false);
 
   //4. move me to new workspace
-  //Meta.Workspace  global.workspace.activate_with_focus(myWin); 
   let myTime = global.get_current_time();
   let ws = workspaceManager.get_workspace_by_index(newIndex);
   ws.activate_with_focus(myWin, myTime);
 }
 
+// FUNCTION, find Win that currently has shell focus
 function getFocusWin(){
 
   let myWins = global.get_window_actors();
@@ -86,10 +82,32 @@ function getFocusWin(){
   return focusWin;
 }
 
+function reorderWS() {
+
+  this.left = function () {
+    let ws = workspaceManager.get_active_workspace();
+    let myIndex = workspaceManager.get_active_workspace_index();
+    log("myIndex:"+myIndex)
+    let newIndex = myIndex - 1;
+    this.moveWS(ws,newIndex);
+  }
+  this.right = function () {
+    let ws = workspaceManager.get_active_workspace();
+    let myIndex = workspaceManager.get_active_workspace_index();
+    let newIndex = myIndex + 1;
+    this.moveWS(ws,newIndex);
+  }
+  this.moveWS = function(ws,newIndex){
+    log('NewWorkspaceShortcutLogger:reorder workspace to:'+newIndex);
+    workspaceManager.reorder_workspace(ws, newIndex);
+  }
+}
+
 class Extension {
     constructor(uuid) {
         this._uuid = uuid;
         ExtensionUtils.initTranslations(GETTEXT_DOMAIN);
+        this.rWS = new reorderWS();
     }
 
     enable() {
@@ -101,10 +119,19 @@ class Extension {
         Main.wm.addKeybinding("nwshortcut", settings, flag, mode, () => {
           moveWindow();
         });
+
+        Main.wm.addKeybinding("workspaceleft", settings, flag, mode, () => {
+          this.rWS.left();
+        });
+        Main.wm.addKeybinding("workspaceright", settings, flag, mode, () => {
+          this.rWS.right();
+        });
     }
 
     disable() {
         Main.wm.removeKeybinding("nwshortcut");
+        Main.wm.removeKeybinding("workspaceleft");
+        Main.wm.removeKeybinding("workspaceright");
         log('NewWorkspaceShortcutLogger: newworkspaceshortcut is disabled.');
     }
 }

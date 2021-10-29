@@ -13,6 +13,22 @@
       </description>
     </key>
 
+    <key type="as" name="workspaceleft">
+      <default><![CDATA[['<Alt>Left']]]></default>
+      <summary>Move Workspace Left</summary>
+      <description>
+        Move Workspace Left Shortcut key binding
+      </description>
+    </key>
+
+    <key type="as" name="workspaceright">
+      <default><![CDATA[['<Alt>Right']]]></default>
+      <summary>Move Workspace Right</summary>
+      <description>
+        Move Workspace Right Shortcut key binding
+      </description>
+    </key>
+
   </schema>
 
 </schemalist>
