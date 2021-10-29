@@ -21,16 +21,9 @@
 const GETTEXT_DOMAIN = 'new-workspace-shortcut';
 const ExtensionUtils = imports.misc.extensionUtils;
 
-// const { GObject, St } = imports.gi;
 const {Gio, Shell, Meta} = imports.gi;
 const Main = imports.ui.main;
-// const GObject = imports.gi.GObject;
-// const Shell = imports.gi.Shell;
 // const Meta = imports.gi.Meta;
-// const St = imports.gi.St;
-// const Clutter = imports.gi.Clutter;
-// const Gio = imports.gi.Gio;
-// const Workspace = imports.ui.workspace;
 
 const Me = ExtensionUtils.getCurrentExtension();
 const _ = ExtensionUtils.gettext;
@@ -62,6 +55,7 @@ function moveWindow() {
 
   //1) get the Focused / active  window
   let myWin = getFocusWin();
+  log(typeof myWin);
 
   //2) create  new  workspace
   Main.wm.insertWorkspace(newIndex);
@@ -69,28 +63,28 @@ function moveWindow() {
   //3) on the Focused Meta.Window object, call change_workspace_by_index(space_index, append)
   myWin.change_workspace_by_index(newIndex, false);
 
+  //4) move me to new workspace
+  
 }
 
 function getFocusWin(){
-  // let myWin = global.get_window_actors()[0].get_meta_window();
-  // log(myWin.title); 
 
   let myWins = global.get_window_actors();
-  let focusWin = myWins.forEach(findFocus);
+  let focusWin;
+  myWins.forEach((winCont) => {
+    // log("im here");
+    let win = winCont.get_meta_window();
+    let focstat = win.has_focus();
+    if ( focstat ){
+      log(typeof win)
+      log("DEBUG, focus:"+ focstat +"---"+ win.title  );
+      focusWin = win;
+    }
+  });
+
+  log(typeof focusWin);
   log("DEBUG, win was returned---"+ focusWin.title );
-
   return focusWin;
-
-}
-
-function findFocus(item) {
-  let win = item.get_meta_window();
-  let focstat = win.has_focus();
-
-  if ( focstat ){
-    log("DEBUG, focus:"+ focstat +"---"+ win.title  );
-    return win;
-  }
 }
 
 class Extension {
