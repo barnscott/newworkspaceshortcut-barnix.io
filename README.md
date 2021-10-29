@@ -36,7 +36,7 @@ cd .local/share/gnome-shell/extensions/
 
 git clone git@github.com:barnscott/newworkspaceshortcut-barnix.io.git
 
-mv newworkspaceshortcut-barnix.io.git newworkspaceshortcut@barnix.io.git
+mv newworkspaceshortcut-barnix.io newworkspaceshortcut@barnix.io
 
 gnome-extensions enable newworkspaceshortcut@barnix.io
 ```
