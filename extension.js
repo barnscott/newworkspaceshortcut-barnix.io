@@ -87,15 +87,20 @@ function reorderWS() {
   this.left = function () {
     let ws = workspaceManager.get_active_workspace();
     let myIndex = workspaceManager.get_active_workspace_index();
-    log("myIndex:"+myIndex)
-    let newIndex = myIndex - 1;
-    this.moveWS(ws,newIndex);
+    let newIndex = myIndex;
+    if ( (myIndex-1) >= 0){
+      newIndex = myIndex-1;
+      this.moveWS(ws,newIndex);
+    }
   }
   this.right = function () {
     let ws = workspaceManager.get_active_workspace();
     let myIndex = workspaceManager.get_active_workspace_index();
-    let newIndex = myIndex + 1;
-    this.moveWS(ws,newIndex);
+    let newIndex = myIndex;
+    if ( (myIndex+1) <= (workspaceManager.n_workspaces-1)){
+      newIndex = myIndex+1;
+      this.moveWS(ws,newIndex);
+    }
   }
   this.moveWS = function(ws,newIndex){
     log('NewWorkspaceShortcutLogger:reorder workspace to:'+newIndex);
@@ -107,11 +112,11 @@ class Extension {
     constructor(uuid) {
         this._uuid = uuid;
         ExtensionUtils.initTranslations(GETTEXT_DOMAIN);
-        this.rWS = new reorderWS();
     }
 
     enable() {
         log('NewWorkspaceShortcutLogger:newworkspaceshortcut is enabled.');
+        this.rWS = new reorderWS();
         let mode = Shell.ActionMode.ALL;
         let flag = Meta.KeyBindingFlags.NONE;
         let settings = getSettings();
