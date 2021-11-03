@@ -25,7 +25,7 @@ Currenlty, this extention is only tested on the following releases
 
 ## How to use
 
-After installing the extension, simply use the shortcuts. There are not currently an UI elements available.
+After installing the extension, simply use the shortcuts. There are not currently any UI elements available.
 
 ## How to install
 
@@ -50,4 +50,3 @@ I would like to add the following features, but don't have any priority on doing
   
 - [ ] Add a extension preferences window to allow to modify shortcut key binding
   
-- [ ] Integrate with the Gnome Keyboard shortcuts settings panel
