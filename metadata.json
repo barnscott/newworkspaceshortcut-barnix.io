@@ -4,5 +4,7 @@
   "uuid": "newworkspaceshortcut@barnix.io",
   "shell-version": [
     "41"
-  ]
+  ],
+  "url": "https://github.com/barnscott/newworkspaceshortcut-barnix.io",
+  "settings-schema": "org.gnome.shell.extensions.newworkspaceshortcut"
 }
