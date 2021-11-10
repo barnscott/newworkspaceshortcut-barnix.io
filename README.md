@@ -32,12 +32,17 @@ After installing the extension, simply use the shortcuts. There are not currentl
 Use the following commands to install this extension:
 
 ```
-cd .local/share/gnome-shell/extensions/
+# change-directory to your home, or your prefered directory
+cd ~ 
 
+# copy down the source code repository
 git clone git@github.com:barnscott/newworkspaceshortcut-barnix.io.git
 
-mv newworkspaceshortcut-barnix.io newworkspaceshortcut@barnix.io
+# symbolic-link the extention-code to the extension directory
+ln -s newworkspaceshortcut-barnix.io/newworkspaceshortcut@barnix.io ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io
 
+# if on X11, reset shell with ALT-F2 and enter "r". On Wayland, see note below.
+# then, enable the extension. 
 gnome-extensions enable newworkspaceshortcut@barnix.io
 ```
 If you are on Wayland, after you complete the  installation, you may need to log-out and log-in for the shell to register the key-bindings.

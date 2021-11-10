@@ -1,10 +1,11 @@
 {
   "name": "New Workspace Shortcut",
-  "description": "Use a shorcut to insert a new workspace to the right of your current workspace",
+  "description": "Use a shorcut to insert a new workspace to the right of your current workspace. Use a second shortcut to move order of workspaces.",
   "uuid": "newworkspaceshortcut@barnix.io",
   "shell-version": [
     "41"
   ],
+  "version": 0.1,
   "url": "https://github.com/barnscott/newworkspaceshortcut-barnix.io",
   "settings-schema": "org.gnome.shell.extensions.newworkspaceshortcut"
 }

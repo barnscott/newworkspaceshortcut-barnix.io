@@ -1,0 +1,1 @@
+For manual installation, see the "How to install" section of README.md

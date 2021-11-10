@@ -1,0 +1,1 @@
+newworkspaceshortcut@barnix.io
