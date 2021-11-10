@@ -29,6 +29,14 @@ After installing the extension, simply use the shortcuts. There are not currentl
 
 ## How to install
 
+### GNOME Extensions Website
+
+This extension is available on [GNOME Extensions Website](https://extensions.gnome.org/extension/4597/new-workspace-shortcut/).
+
+[![Available on extensions.gnome.org](img/gnome.svg)](https://extensions.gnome.org/extension/4597/new-workspace-shortcut/)
+
+### Manually
+
 Use the following commands to install this extension:
 
 ```
