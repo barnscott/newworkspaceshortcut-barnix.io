@@ -23,31 +23,13 @@ const ExtensionUtils = imports.misc.extensionUtils;
 
 const {Gio, Shell, Meta} = imports.gi;
 const Main = imports.ui.main;
-// const Meta = imports.gi.Meta;
 
 const Me = ExtensionUtils.getCurrentExtension();
 const _ = ExtensionUtils.gettext;
 const workspaceManager = global.workspace_manager;
 
-// FUNCTION, GET SCHEMA
-function getSettings () {
-  let GioSSS = Gio.SettingsSchemaSource;
-  let schemaSource = GioSSS.new_from_directory(
-    Me.dir.get_child("schemas").get_path(),
-    GioSSS.get_default(),
-    false
-  );
-  let schemaObj = schemaSource.lookup(
-    'org.gnome.shell.extensions.newworkspaceshortcut', true);
-  if (!schemaObj) {
-    throw new Error('cannot find schemas');
-  }
-  return new Gio.Settings({ settings_schema : schemaObj });
-}
-
 // FUNCTION, move the window to the new workspace
 function moveWindow() {
-  log('NewWorkspaceShortcutLogger:shortcut action...');
   let myIndex = workspaceManager.get_active_workspace_index();
   let newIndex = myIndex + 1;
 
@@ -75,7 +57,6 @@ function getFocusWin(){
     let win = winCont.get_meta_window();
     let focstat = win.has_focus();
     if ( focstat ){
-      log("NewWorkspaceShortcutLogger: focus:"+ win.title  );
       focusWin = win;
     }
   });
@@ -103,23 +84,22 @@ function reorderWS() {
     }
   }
   this.moveWS = function(ws,newIndex){
-    log('NewWorkspaceShortcutLogger:reorder workspace to:'+newIndex);
     workspaceManager.reorder_workspace(ws, newIndex);
   }
 }
 
 class Extension {
-    constructor(uuid) {
+    constructor(uuid,settings_schema) {
         this._uuid = uuid;
+        this._settings_schema = settings_schema;
         ExtensionUtils.initTranslations(GETTEXT_DOMAIN);
     }
 
     enable() {
-        log('NewWorkspaceShortcutLogger:newworkspaceshortcut is enabled.');
         this.rWS = new reorderWS();
         let mode = Shell.ActionMode.ALL;
         let flag = Meta.KeyBindingFlags.NONE;
-        let settings = getSettings();
+        let settings = ExtensionUtils.getSettings(this._settings_schema);
       
         Main.wm.addKeybinding("nwshortcut", settings, flag, mode, () => {
           moveWindow();
@@ -137,10 +117,9 @@ class Extension {
         Main.wm.removeKeybinding("nwshortcut");
         Main.wm.removeKeybinding("workspaceleft");
         Main.wm.removeKeybinding("workspaceright");
-        log('NewWorkspaceShortcutLogger: newworkspaceshortcut is disabled.');
     }
 }
 
 function init(meta) {
-    return new Extension(meta.uuid);
+    return new Extension(meta.uuid,meta.settings_schema);
 }
