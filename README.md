@@ -47,7 +47,7 @@ cd ~
 git clone git@github.com:barnscott/newworkspaceshortcut-barnix.io.git
 
 # symbolic-link the extention-code to the extension directory
-ln -s newworkspaceshortcut-barnix.io/newworkspaceshortcut@barnix.io ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io
+ln -s $PWD/newworkspaceshortcut-barnix.io/newworkspaceshortcut@barnix.io ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io
 
 # if on X11, reset shell with ALT-F2 and enter "r". On Wayland, see note below.
 # then, enable the extension. 
