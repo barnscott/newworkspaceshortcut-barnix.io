@@ -1,13 +1,13 @@
 # New Workspace Shortcut extension for Gnome Desktop
 
 ## TLDR
-This shortcut can:
+This extension will enable the following:
 
 - Use a shortcut to move the in-focus window to a *new* workspace on the right of your current workspace: `Super + Alt + Shift + n`. Or to the left / *backward*: `Super + Alt + Shift + b`.
 - Use a shortcut to create an *empty* workspace on the right: `Super + Alt + n`. Or to the left / *backward*: `Super + Alt + b`
 - Use a shortcut to move an entire workspace left or right of the current workspace: `Ctl + Super + Left` or `Ctl + Super + Right`. As there is not any UI feedback for this event, you will want to be in the Overview so you can see your Workspace-Thumbnail moving left and right. 
 
-This shortcut is created to work logically with the vanilla gnome shortcuts including change-workspace (`Super + ALT + Left/Right`) and move-window-to-next-workspace (`Shift + Super + ALT + Left/Right`).
+These shortcuts are created to work logically with the vanilla gnome shortcuts including change-workspace (`Super + ALT + Left/Right`) and move-window-to-next-workspace (`Shift + Super + ALT + Left/Right`).
 
 ## Purpose
 
