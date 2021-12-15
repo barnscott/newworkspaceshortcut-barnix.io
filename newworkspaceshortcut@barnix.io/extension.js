@@ -29,9 +29,8 @@ const _ = ExtensionUtils.gettext;
 const workspaceManager = global.workspace_manager;
 
 // FUNCTION, move the window to the new workspace
-function moveWindow() {
-  let myIndex = workspaceManager.get_active_workspace_index();
-  let newIndex = myIndex + 1;
+function moveWindow(m) {
+  let newIndex = getNewIndex(m);
 
   //1. get the Focused / active  window
   let myWin = getFocusWin();
@@ -46,6 +45,31 @@ function moveWindow() {
   let myTime = global.get_current_time();
   let ws = workspaceManager.get_workspace_by_index(newIndex);
   ws.activate_with_focus(myWin, myTime);
+}
+
+// FUNCTION, create an empty workspace
+function emptyWS(m) {
+  let newIndex = getNewIndex(m);
+
+  //1. create  new  workspace
+  Main.wm.insertWorkspace(newIndex);
+
+  //2. move me to new workspace
+  let myTime = global.get_current_time();
+  let ws = workspaceManager.get_workspace_by_index(newIndex);
+  ws.activate(myTime);
+}
+
+// FUNCTION, define the workspace # we are moving to
+function getNewIndex(m){
+  let myIndex = workspaceManager.get_active_workspace_index();
+  let newIndex = myIndex;
+  if (m == 'n' || m == 'en'){
+    newIndex = newIndex + 1;
+  } else {
+    newIndex = newIndex;
+  }
+  return newIndex
 }
 
 // FUNCTION, find Win that currently has shell focus
@@ -89,37 +113,54 @@ function reorderWS() {
 }
 
 class Extension {
-    constructor(uuid,settings_schema) {
-        this._uuid = uuid;
-        this._settings_schema = settings_schema;
-        ExtensionUtils.initTranslations(GETTEXT_DOMAIN);
-    }
+  constructor(uuid,settings_schema) {
+    this._uuid = uuid;
+    this._settings_schema = settings_schema;
+    ExtensionUtils.initTranslations(GETTEXT_DOMAIN);
+  }
 
-    enable() {
-        this.rWS = new reorderWS();
-        let mode = Shell.ActionMode.ALL;
-        let flag = Meta.KeyBindingFlags.NONE;
-        let settings = ExtensionUtils.getSettings(this._settings_schema);
-      
-        Main.wm.addKeybinding("nwshortcut", settings, flag, mode, () => {
-          moveWindow();
-        });
+  enable() {
+    this.rWS = new reorderWS();
+    let mode = Shell.ActionMode.ALL;
+    let flag = Meta.KeyBindingFlags.NONE;
+    let settings = ExtensionUtils.getSettings(this._settings_schema);
+    var m;
+    
+    // Shortcuts for moving a window
+    Main.wm.addKeybinding("nwshortcut", settings, flag, mode, () => {
+      moveWindow(m='n');
+    });
+    Main.wm.addKeybinding("bwshortcut", settings, flag, mode, () => {
+      moveWindow(m='b');
+    });
+    
+    // Shortcuts for creating an empty workspace
+    Main.wm.addKeybinding("enwshortcut", settings, flag, mode, () => {
+      emptyWS(m='en');
+    });
+    Main.wm.addKeybinding("ebwshortcut", settings, flag, mode, () => {
+      emptyWS(m='eb');
+    });
 
-        Main.wm.addKeybinding("workspaceleft", settings, flag, mode, () => {
-          this.rWS.left();
-        });
-        Main.wm.addKeybinding("workspaceright", settings, flag, mode, () => {
-          this.rWS.right();
-        });
-    }
+    // Shortcuts for moving a workspace
+    Main.wm.addKeybinding("workspaceleft", settings, flag, mode, () => {
+      this.rWS.left();
+    });
+    Main.wm.addKeybinding("workspaceright", settings, flag, mode, () => {
+      this.rWS.right();
+    });
+  }
 
-    disable() {
-        Main.wm.removeKeybinding("nwshortcut");
-        Main.wm.removeKeybinding("workspaceleft");
-        Main.wm.removeKeybinding("workspaceright");
-    }
+  disable() {
+    Main.wm.removeKeybinding("nwshortcut");
+    Main.wm.removeKeybinding("bwshortcut");
+    Main.wm.removeKeybinding("enwshortcut");
+    Main.wm.removeKeybinding("ebwshortcut");
+    Main.wm.removeKeybinding("workspaceleft");
+    Main.wm.removeKeybinding("workspaceright");
+  }
 }
 
 function init(meta) {
-    return new Extension(meta.uuid,meta.settings_schema);
+  return new Extension(meta.uuid,meta.settings_schema);
 }
