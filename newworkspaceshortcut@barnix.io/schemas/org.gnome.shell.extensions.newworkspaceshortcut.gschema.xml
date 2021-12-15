@@ -7,14 +7,38 @@
 
     <key type="as" name="nwshortcut">
       <default><![CDATA[['<Super><Alt><Shift>n']]]></default>
-      <summary>New Workspace Shortcut</summary>
+      <summary>New Workspace Shortcut Right</summary>
       <description>
-        New Workspace Shortcut key binding
+        New Workspace Shortcut Right key binding
+      </description>
+    </key>
+
+    <key type="as" name="bwshortcut">
+      <default><![CDATA[['<Super><Alt><Shift>b']]]></default>
+      <summary>New Workspace Shortcut Left</summary>
+      <description>
+        New Workspace Shortcut Left key binding
+      </description>
+    </key>
+
+    <key type="as" name="enwshortcut">
+      <default><![CDATA[['<Super><Alt>n']]]></default>
+      <summary>Empty Workspace Shortcut Right</summary>
+      <description>
+        Empty Workspace Shortcut key binding
+      </description>
+    </key>
+
+    <key type="as" name="ebwshortcut">
+      <default><![CDATA[['<Super><Alt>b']]]></default>
+      <summary>Empty Workspace Shortcut Left</summary>
+      <description>
+        Empty Workspace Shortcut key binding
       </description>
     </key>
 
     <key type="as" name="workspaceleft">
-      <default><![CDATA[['<Alt>Left']]]></default>
+      <default><![CDATA[['<Ctl><Super>Left']]]></default>
       <summary>Move Workspace Left</summary>
       <description>
         Move Workspace Left Shortcut key binding
@@ -22,7 +46,7 @@
     </key>
 
     <key type="as" name="workspaceright">
-      <default><![CDATA[['<Alt>Right']]]></default>
+      <default><![CDATA[['<Ctl><Super>Right']]]></default>
       <summary>Move Workspace Right</summary>
       <description>
         Move Workspace Right Shortcut key binding
