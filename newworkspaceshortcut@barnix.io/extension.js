@@ -64,7 +64,7 @@ function emptyWS(m) {
 function getNewIndex(m){
   let myIndex = workspaceManager.get_active_workspace_index();
   let newIndex = myIndex;
-  if (m == 'n' || m == 'en'){
+  if (m == 1){
     newIndex = newIndex + 1;
   } else {
     newIndex = newIndex;
@@ -128,18 +128,18 @@ class Extension {
     
     // Shortcuts for moving a window
     Main.wm.addKeybinding("nwshortcut", settings, flag, mode, () => {
-      moveWindow(m='n');
+      moveWindow(m=1);
     });
     Main.wm.addKeybinding("bwshortcut", settings, flag, mode, () => {
-      moveWindow(m='b');
+      moveWindow(m=0);
     });
     
     // Shortcuts for creating an empty workspace
     Main.wm.addKeybinding("enwshortcut", settings, flag, mode, () => {
-      emptyWS(m='en');
+      emptyWS(m=1);
     });
     Main.wm.addKeybinding("ebwshortcut", settings, flag, mode, () => {
-      emptyWS(m='eb');
+      emptyWS(m=0);
     });
 
     // Shortcuts for moving a workspace
