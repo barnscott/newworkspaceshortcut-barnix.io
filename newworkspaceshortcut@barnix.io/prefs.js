@@ -34,7 +34,7 @@ function buildPrefsWidget() {
         use_markup: true,
         visible: true
     });
-    gridWidget.attach(titlespace, 0, 0, 1, 1);
+    gridWidget.attach(titlespace, 0, 0, 2, 1);
 
     let project = new Gtk.Label({
         label: `<a href="https://github.com/barnscott/newworkspaceshortcut-barnix.io#tldr">How to use this extension</a>`,
@@ -42,7 +42,7 @@ function buildPrefsWidget() {
         use_markup: true,
         visible: true
     });
-    gridWidget.attach(project, 0, 1, 1, 1);
+    gridWidget.attach(project, 0, 1, 2, 1);
 
     let report = new Gtk.Label({
         label: `<a href="https://github.com/barnscott/newworkspaceshortcut-barnix.io/issues">Report a bug</a>`,
@@ -50,7 +50,30 @@ function buildPrefsWidget() {
         use_markup: true,
         visible: true
     });
-    gridWidget.attach(report, 0, 2, 1, 1);
+    gridWidget.attach(report, 0, 2, 2, 1);
+
+    // Add toggle to override default
+    let toggleLabel = new Gtk.Label({
+        label: 'Reorder-workspace shortcut will trigger Overview:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    gridWidget.attach(toggleLabel, 0, 3, 1, 1);
+
+    let toggle = new Gtk.Switch({
+        active: this.settings.get_boolean ('move-ws-triggers-overview'),
+        halign: Gtk.Align.END,
+        visible: true
+    });
+    gridWidget.attach(toggle, 1, 3, 1, 1);
+
+    // Bind toggle to `moveWSTriggersOverview`
+    this.settings.bind(
+        'move-ws-triggers-overview',
+        toggle,
+        'active',
+        Gio.SettingsBindFlags.DEFAULT
+    );
 
     return prefsWidget;
 }

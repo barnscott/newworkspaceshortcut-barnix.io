@@ -53,7 +53,7 @@
       </description>
     </key>
 
-    <key name="moveWSTriggersOverview" type="b">
+    <key name="move-ws-triggers-overview" type="b">
       <default>true</default>
       <summary>Move WS Triggers Overview</summary>
       <description>
