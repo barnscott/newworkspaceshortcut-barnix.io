@@ -3,15 +3,21 @@
 ## TLDR
 This extension will enable the following:
 
-- Use a shortcut to move the in-focus window to a *new* workspace on the right of your current workspace: `Super + Alt + Shift + n`. Or to the left / *backward*: `Super + Alt + Shift + b`.
-- Use a shortcut to create an *empty* workspace on the right: `Super + Alt + n`. Or to the left / *backward*: `Super + Alt + b`
-- Use a shortcut to move an entire workspace left or right of the current workspace: `Ctl + Super + Left` or `Ctl + Super + Right`. As there is not any UI feedback for this event, you will want to be in the Overview so you can see your Workspace-Thumbnail moving left and right. 
+- Move-window-to-new-workspace Shortcut: 
+  - Use a shortcut to move the in-focus window to a *new* workspace on the right of your current workspace: `Super + Alt + Shift + n`
+  - Or to the left / *backward*: `Super + Alt + Shift + b`
+- New-empty-workspace Shortcut:
+  - Use a shortcut to create an *empty* workspace on the right: `Super + Alt + n`
+  - Or to the left / *backward*: `Super + Alt + b`
+- Reorder-workspace Shortcut:
+  - Use a shortcut to move an entire workspace left or right of the current workspace: `Ctl + Super + Left` or `Ctl + Super + Right`
+  - By default, this shorcut with automatically trigger the Overview to provide a limited form of visual feedback. However, this preference can be changed via the extension's Settings panel.
 
 These shortcuts are created to work logically with the vanilla gnome shortcuts including change-workspace (`Super + ALT + Left/Right`) and move-window-to-next-workspace (`Shift + Super + ALT + Left/Right`).
 
 ## Purpose
 
-This extension provides a shortcut that will move the active window to a new workspace that is to the right of the current workspace.
+This extension provides a shortcut that will move the active window to a new workspace that is to the right/left of the current workspace. Alternativly, you can also create an empty workspaces.
 
 This is useful, for example, if you have 3 populated workspaces, but you want to move a window that is on workspace-1 to a new and empty workspace to the right of workspace-1.
 
@@ -39,7 +45,7 @@ This extension is available on [GNOME Extensions Website](https://extensions.gno
 
 [![Available on extensions.gnome.org](img/gnome.svg)](https://extensions.gnome.org/extension/4597/new-workspace-shortcut/)
 
-### Manually
+### Manual Installation
 
 Use the following commands to install this extension:
 

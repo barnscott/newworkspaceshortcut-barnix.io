@@ -53,6 +53,14 @@
       </description>
     </key>
 
+    <key name="move-ws-triggers-overview" type="b">
+      <default>true</default>
+      <summary>Move WS Triggers Overview</summary>
+      <description>
+        Define if using the move-workspace shortcut should auto-trigger the Overview mode.
+      </description>
+    </key>
+
   </schema>
 
 </schemalist>

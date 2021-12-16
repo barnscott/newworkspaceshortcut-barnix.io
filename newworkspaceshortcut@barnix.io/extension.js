@@ -30,6 +30,7 @@ const workspaceManager = global.workspace_manager;
 
 // FUNCTION, move the window to the new workspace
 function moveWindow(m) {
+  //0. Define the WS index I want to move to
   let newIndex = getNewIndex(m);
 
   //1. get the Focused / active  window
@@ -49,6 +50,7 @@ function moveWindow(m) {
 
 // FUNCTION, create an empty workspace
 function emptyWS(m) {
+  //0. Define the WS index I want to move to
   let newIndex = getNewIndex(m);
 
   //1. create  new  workspace
@@ -63,12 +65,7 @@ function emptyWS(m) {
 // FUNCTION, define the workspace # we are moving to
 function getNewIndex(m){
   let myIndex = workspaceManager.get_active_workspace_index();
-  let newIndex = myIndex;
-  if (m == 1){
-    newIndex = newIndex + 1;
-  } else {
-    newIndex = newIndex;
-  }
+  let newIndex = myIndex + m;
   return newIndex
 }
 
@@ -89,25 +86,28 @@ function getFocusWin(){
 
 function reorderWS() {
 
-  this.left = function () {
+  this.left = function (moveWSTriggersOverview) {
     let ws = workspaceManager.get_active_workspace();
     let myIndex = workspaceManager.get_active_workspace_index();
     let newIndex = myIndex;
     if ( (myIndex-1) >= 0){
       newIndex = myIndex-1;
-      this.moveWS(ws,newIndex);
+      this.moveWS(ws,newIndex,moveWSTriggersOverview);
     }
   }
-  this.right = function () {
+  this.right = function (moveWSTriggersOverview) {
     let ws = workspaceManager.get_active_workspace();
     let myIndex = workspaceManager.get_active_workspace_index();
     let newIndex = myIndex;
     if ( (myIndex+1) <= (workspaceManager.n_workspaces-1)){
       newIndex = myIndex+1;
-      this.moveWS(ws,newIndex);
+      this.moveWS(ws,newIndex,moveWSTriggersOverview);
     }
   }
-  this.moveWS = function(ws,newIndex){
+  this.moveWS = function(ws,newIndex,moveWSTriggersOverview){
+    if ( !Main.overview.visible && moveWSTriggersOverview ){
+      Main.overview.toggle();
+    }
     workspaceManager.reorder_workspace(ws, newIndex);
   }
 }
@@ -124,7 +124,7 @@ class Extension {
     let mode = Shell.ActionMode.ALL;
     let flag = Meta.KeyBindingFlags.NONE;
     let settings = ExtensionUtils.getSettings(this._settings_schema);
-    var m;
+    let m,moveWSTriggersOverview;
     
     // Shortcuts for moving a window
     Main.wm.addKeybinding("nwshortcut", settings, flag, mode, () => {
@@ -144,10 +144,12 @@ class Extension {
 
     // Shortcuts for moving a workspace
     Main.wm.addKeybinding("workspaceleft", settings, flag, mode, () => {
-      this.rWS.left();
+      moveWSTriggersOverview = settings.get_boolean('move-ws-triggers-overview');
+      this.rWS.left(moveWSTriggersOverview);
     });
     Main.wm.addKeybinding("workspaceright", settings, flag, mode, () => {
-      this.rWS.right();
+      moveWSTriggersOverview = settings.get_boolean('move-ws-triggers-overview');
+      this.rWS.right(moveWSTriggersOverview);
     });
   }
 
