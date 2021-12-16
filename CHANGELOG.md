@@ -1,3 +1,16 @@
+# 0.2.3
+
+- Minor code cleanup
+
+# 0.2.2
+
+## NEW FEATURES
+
+- Add a simple Settings Panel with a links to the Github page
+
+# 0.2.1
+
+- Minor code cleanup
 
 # 0.2
 

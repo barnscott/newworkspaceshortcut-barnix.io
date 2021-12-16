@@ -30,6 +30,7 @@ const workspaceManager = global.workspace_manager;
 
 // FUNCTION, move the window to the new workspace
 function moveWindow(m) {
+  //0. Define the WS index I want to move to
   let newIndex = getNewIndex(m);
 
   //1. get the Focused / active  window
@@ -49,6 +50,7 @@ function moveWindow(m) {
 
 // FUNCTION, create an empty workspace
 function emptyWS(m) {
+  //0. Define the WS index I want to move to
   let newIndex = getNewIndex(m);
 
   //1. create  new  workspace
@@ -63,12 +65,7 @@ function emptyWS(m) {
 // FUNCTION, define the workspace # we are moving to
 function getNewIndex(m){
   let myIndex = workspaceManager.get_active_workspace_index();
-  let newIndex = myIndex;
-  if (m == 1){
-    newIndex = newIndex + 1;
-  } else {
-    newIndex = newIndex;
-  }
+  let newIndex = myIndex + m;
   return newIndex
 }
 
@@ -108,6 +105,9 @@ function reorderWS() {
     }
   }
   this.moveWS = function(ws,newIndex){
+    if ( !Main.overview.visible && moveWSTriggersOverview ){
+      Main.overview.toggle();
+    }
     workspaceManager.reorder_workspace(ws, newIndex);
   }
 }
