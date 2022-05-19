@@ -70,7 +70,7 @@ function buildPrefsWidget() {
     });
     gridWidget.attach(mwr, 0, 4, 1, 1);
     let mwrs = new Gtk.Label({
-        label: 'Super + Alt + Shift + n',
+        label: 'Ctl + Super + Shift + Right',
         halign: Gtk.Align.START,
         visible: true
     });
@@ -83,7 +83,7 @@ function buildPrefsWidget() {
     });
     gridWidget.attach(mwl, 0, 5, 1, 1);
     let mwls = new Gtk.Label({
-        label: 'Super + Alt + Shift + b',
+        label: 'Ctl + Super + Shift + Left',
         halign: Gtk.Align.START,
         visible: true
     });
@@ -106,7 +106,7 @@ function buildPrefsWidget() {
     });
     gridWidget.attach(ewr, 0, 7, 1, 1);
     let ewrs = new Gtk.Label({
-        label: 'Super + Alt + n',
+        label: 'Ctl + Super + Alt + Right',
         halign: Gtk.Align.START,
         visible: true
     });
@@ -120,7 +120,7 @@ function buildPrefsWidget() {
     });
     gridWidget.attach(ewl, 0, 8, 1, 1);
     let ewls = new Gtk.Label({
-        label: 'Super + Alt + b',
+        label: 'Ctl + Super + Alt + Left',
         halign: Gtk.Align.START,
         visible: true
     });
