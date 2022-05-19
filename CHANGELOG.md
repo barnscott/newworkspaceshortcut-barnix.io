@@ -1,6 +1,7 @@
 # 0.4
 ## CHANGES
 - Changed shortcut mapping for "New Workspace Shortcut" and "New Empty Workspace Shortcut"
+- Added shortcut listings to Settings panel
 
 # 0.3
 ## CHANGES

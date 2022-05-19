@@ -4,11 +4,11 @@
 This extension will enable the following:
 
 - Move-window-to-new-workspace Shortcut: 
-  - Use a shortcut to move the in-focus window to a *new* workspace on the right of your current workspace: `Super + Alt + Shift + n`
-  - Or to the left / *backward*: `Super + Alt + Shift + b`
+  - Use a shortcut to move the in-focus window to a *new* workspace on the right of your current workspace: `Ctl + Super + Shift + Right`
+  - Or to the left / *backward*: `Ctl + Super + Shift + Left`
 - New-empty-workspace Shortcut:
-  - Use a shortcut to create an *empty* workspace on the right: `Super + Alt + n`
-  - Or to the left / *backward*: `Super + Alt + b`
+  - Use a shortcut to create an *empty* workspace on the right: `Ctl + Super + Alt + Right`
+  - Or to the left / *backward*: `Ctl + Super + Alt + Left`
 - Reorder-workspace Shortcut:
   - Use a shortcut to move an entire workspace left or right of the current workspace: `Ctl + Super + Left` or `Ctl + Super + Right`
   - By default, this shorcut with automatically trigger the Overview to provide a limited form of visual feedback. However, this preference can be changed via the extension's Settings panel.
