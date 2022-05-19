@@ -3,7 +3,8 @@
   "description": "Use a shortcut to insert a new workspace to the right of your current workspace. Use a second shortcut to change the order of the existing workspaces.",
   "uuid": "newworkspaceshortcut@barnix.io",
   "shell-version": [
-    "41"
+    "41",
+    "42"
   ],
   "version": 0.3,
   "url": "https://github.com/barnscott/newworkspaceshortcut-barnix.io",
