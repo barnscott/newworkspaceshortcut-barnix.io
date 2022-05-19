@@ -6,7 +6,7 @@
     path="/org/gnome/shell/extensions/newworkspaceshortcut/">
 
     <key type="as" name="nwshortcut">
-      <default><![CDATA[['<Super><Alt><Shift>n']]]></default>
+      <default><![CDATA[['<Super><Ctl><Shift>Right']]]></default>
       <summary>New Workspace Shortcut Right</summary>
       <description>
         New Workspace Shortcut Right key binding
@@ -14,7 +14,7 @@
     </key>
 
     <key type="as" name="bwshortcut">
-      <default><![CDATA[['<Super><Alt><Shift>b']]]></default>
+      <default><![CDATA[['<Super><Ctl><Shift>Left']]]></default>
       <summary>New Workspace Shortcut Left</summary>
       <description>
         New Workspace Shortcut Left key binding
@@ -22,7 +22,7 @@
     </key>
 
     <key type="as" name="enwshortcut">
-      <default><![CDATA[['<Super><Alt>n']]]></default>
+      <default><![CDATA[['<Ctl><Super><Alt>Right']]]></default>
       <summary>Empty Workspace Shortcut Right</summary>
       <description>
         Empty Workspace Shortcut key binding
@@ -30,7 +30,7 @@
     </key>
 
     <key type="as" name="ebwshortcut">
-      <default><![CDATA[['<Super><Alt>b']]]></default>
+      <default><![CDATA[['<Ctl><Super><Alt>Left']]]></default>
       <summary>Empty Workspace Shortcut Left</summary>
       <description>
         Empty Workspace Shortcut key binding
