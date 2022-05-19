@@ -29,9 +29,10 @@ Additionally, this extension provides shortcuts to move your active Workspace le
 
 ## Prereqs
 
-Currenlty, this extention is only tested on the following releases
+Currenlty, this extention is only tested on the following Gnome releases
 
-- Gnome 41
+- 41
+- 42
 
 ## How to use
 
