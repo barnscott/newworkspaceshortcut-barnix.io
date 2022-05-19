@@ -1,3 +1,8 @@
+# 0.4
+## CHANGES
+- Changed shortcut mapping for "New Workspace Shortcut" and "New Empty Workspace Shortcut"
+- Added shortcut listings to Settings panel
+
 # 0.3
 ## CHANGES
 - By default, using the shortcut to rearrage the workspaces will automatically trigger the Overview view
