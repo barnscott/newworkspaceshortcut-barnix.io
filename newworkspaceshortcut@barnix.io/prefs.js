@@ -172,12 +172,12 @@ function buildPrefsWidget() {
     });
     gridWidget.attach(toggleLabel, 0, 12, 1, 1);
     let toggle = new Gtk.Switch({
-        active: this.settings.get_boolean ('move-ws-triggers-overview'),
+        active: settings.get_boolean ('move-ws-triggers-overview'),
         halign: Gtk.Align.START,
         visible: true
     });
     // Bind toggle to `moveWSTriggersOverview`
-    this.settings.bind(
+    settings.bind(
         'move-ws-triggers-overview',
         toggle,
         'active',
