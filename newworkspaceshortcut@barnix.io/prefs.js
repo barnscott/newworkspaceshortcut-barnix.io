@@ -12,7 +12,7 @@ function init() {
 
 function buildPrefsWidget() {
 
-    this.settings = ExtensionUtils.getSettings(
+    let settings = ExtensionUtils.getSettings(
         'org.gnome.shell.extensions.newworkspaceshortcut');
 
     // Create a parent container widget that is auto-centered
