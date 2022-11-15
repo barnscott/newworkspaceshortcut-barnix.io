@@ -1,3 +1,7 @@
+# 0.5.0 (Sept 2022)
+## CHANGES
+- Support for Gnome43
+
 # 0.4
 ## CHANGES
 - Changed shortcut mapping for "New Workspace Shortcut" and "New Empty Workspace Shortcut"

@@ -33,6 +33,7 @@ Currenlty, this extention is only tested on the following Gnome releases
 
 - 41
 - 42
+- 43
 
 ## How to use
 
