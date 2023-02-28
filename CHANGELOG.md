@@ -1,3 +1,8 @@
+# 0.6.0 (Feb 2023)
+## CHANGES
+- This version only supports Gnome44
+- Older versions of Gnome are not supported in this version
+
 # 0.5.0 (Sept 2022)
 ## CHANGES
 - Support for Gnome43
