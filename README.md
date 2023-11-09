@@ -29,11 +29,7 @@ Additionally, this extension provides shortcuts to move your active Workspace le
 
 # Supported Gnome versions
 
-This extension is tested on the following Gnome releases:
-
-- 44
-
-For Gnome 41-43, please see version 0.5.0 of this extension.
+See `CHANGELOG.md` to identify which versions of this extension support which versions of Gnome.
 
 # How to use
 
@@ -51,18 +47,25 @@ This extension is available on [GNOME Extensions Website](https://extensions.gno
 
 Use the following commands to install this extension:
 
-```
-# change-directory to your home, or your preferred directory
+Change-directory to your preferred working directory
+```bash
 cd ~ 
-
-# copy down the source code repository
+```
+Copy down the source code repository
+```bash
 git clone git@github.com:barnscott/newworkspaceshortcut-barnix.io.git
-
-# symbolic-link the extension-code to the extension directory
+```
+Symbolic-link the extension-code to the extension directory
+```bash
 ln -s $PWD/newworkspaceshortcut-barnix.io/newworkspaceshortcut@barnix.io ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io
+```
+```bash
+glib-compile-schemas newworkspaceshortcut-barnix.io/newworkspaceshortcut@barnix.io/schemas/
+```
 
-# if on X11, reset shell with ALT-F2 and enter "r". On Wayland, see note below.
-# then, enable the extension. 
+If on X11, reset shell with ALT-F2 and enter "r". On Wayland, see note below.
+Then, enable the extension. 
+```bash
 gnome-extensions enable newworkspaceshortcut@barnix.io
 ```
 If you are on Wayland, after you complete the  installation, you may need to log-out and log-in for the shell to register the key-bindings.
@@ -73,6 +76,23 @@ When creating a PR, review the following files and make changes as necessary:
 
 - Update the "Supported Gnome versions" section on this `README.md`
 - Update `CHANGELOG.md` with a summary of the changes
+
+## Build testing/debugging
+
+Eliminate any errors caused by the extension before submitting PR. Debugging workflow may include:
+
+```bash
+dbus-run-session -- gnome-shell --nested --wayland
+```
+Open a terminal within the nested session:
+```bash
+journalctl -f -o cat /usr/bin/gnome-shell
+```
+In a second terminal of the nested session:
+```bash
+gnome-extensions disable newworkspaceshortcut@barnix.io
+gnome-extensions enable newworkspaceshortcut@barnix.io
+```
 
 # To do
 

@@ -1,5 +1,4 @@
-/* extension.js
- *
+/* 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -16,17 +15,13 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-/* exported init */
+import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+import Shell from 'gi://Shell';
+import Meta from 'gi://Meta';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+Promise.reject().catch(logError);
 
-const GETTEXT_DOMAIN = 'new-workspace-shortcut';
-const ExtensionUtils = imports.misc.extensionUtils;
-
-const {Gio, Shell, Meta} = imports.gi;
-const Main = imports.ui.main;
-
-const Me = ExtensionUtils.getCurrentExtension();
-const _ = ExtensionUtils.gettext;
-const workspaceManager = global.workspace_manager;
+const workspaceManager = Meta.workspaceManager;
 
 // FUNCTION, move the window to the new workspace
 function moveWindow(m) {
@@ -112,43 +107,38 @@ function reorderWS() {
   }
 }
 
-class Extension {
-  constructor(uuid,settings_schema) {
-    this._uuid = uuid;
-    this._settings_schema = settings_schema;
-    ExtensionUtils.initTranslations(GETTEXT_DOMAIN);
-  }
+export default class myExtension extends Extension {
 
   enable() {
     this.rWS = new reorderWS();
     let mode = Shell.ActionMode.ALL;
     let flag = Meta.KeyBindingFlags.NONE;
-    let settings = ExtensionUtils.getSettings(this._settings_schema);
+    this._settings = this.getSettings();
     let m,moveWSTriggersOverview;
     
     // Shortcuts for moving a window
-    Main.wm.addKeybinding("nwshortcut", settings, flag, mode, () => {
+    Main.wm.addKeybinding("nwshortcut", this._settings, flag, mode, () => {
       moveWindow(m=1);
     });
-    Main.wm.addKeybinding("bwshortcut", settings, flag, mode, () => {
+    Main.wm.addKeybinding("bwshortcut", this._settings, flag, mode, () => {
       moveWindow(m=0);
     });
     
     // Shortcuts for creating an empty workspace
-    Main.wm.addKeybinding("enwshortcut", settings, flag, mode, () => {
+    Main.wm.addKeybinding("enwshortcut", this._settings, flag, mode, () => {
       emptyWS(m=1);
     });
-    Main.wm.addKeybinding("ebwshortcut", settings, flag, mode, () => {
+    Main.wm.addKeybinding("ebwshortcut", this._settings, flag, mode, () => {
       emptyWS(m=0);
     });
 
     // Shortcuts for moving a workspace
-    Main.wm.addKeybinding("workspaceleft", settings, flag, mode, () => {
-      moveWSTriggersOverview = settings.get_boolean('move-ws-triggers-overview');
+    Main.wm.addKeybinding("workspaceleft", this._settings, flag, mode, () => {
+      moveWSTriggersOverview = this._settings.get_boolean('move-ws-triggers-overview');
       this.rWS.left(moveWSTriggersOverview);
     });
-    Main.wm.addKeybinding("workspaceright", settings, flag, mode, () => {
-      moveWSTriggersOverview = settings.get_boolean('move-ws-triggers-overview');
+    Main.wm.addKeybinding("workspaceright", this._settings, flag, mode, () => {
+      moveWSTriggersOverview = this._settings.get_boolean('move-ws-triggers-overview');
       this.rWS.right(moveWSTriggersOverview);
     });
   }
@@ -161,8 +151,4 @@ class Extension {
     Main.wm.removeKeybinding("workspaceleft");
     Main.wm.removeKeybinding("workspaceright");
   }
-}
-
-function init(meta) {
-  return new Extension(meta.uuid,meta.settings_schema);
 }
