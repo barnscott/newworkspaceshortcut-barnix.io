@@ -29,11 +29,15 @@ Additionally, this extension provides shortcuts to move your active Workspace le
 
 # Supported Gnome versions
 
+This version of this extension is tested on the following Gnome releases:
+
+- 45
+
 See `CHANGELOG.md` to identify which versions of this extension support which versions of Gnome.
 
 # How to use
 
-After installing the extension, simply use the shortcuts. There are not currently any UI elements available.
+After installing the extension, simply use the shortcuts.
 
 # How to install
 
@@ -51,14 +55,18 @@ Change-directory to your preferred working directory
 ```bash
 cd ~ 
 ```
+
 Copy down the source code repository
 ```bash
 git clone git@github.com:barnscott/newworkspaceshortcut-barnix.io.git
 ```
+
 Symbolic-link the extension-code to the extension directory
 ```bash
 ln -s $PWD/newworkspaceshortcut-barnix.io/newworkspaceshortcut@barnix.io ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io
 ```
+
+Compile the schema
 ```bash
 glib-compile-schemas newworkspaceshortcut-barnix.io/newworkspaceshortcut@barnix.io/schemas/
 ```

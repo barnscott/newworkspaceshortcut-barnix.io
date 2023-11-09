@@ -15,10 +15,10 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 import Shell from 'gi://Shell';
 import Meta from 'gi://Meta';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 Promise.reject().catch(logError);
 
 const workspaceManager = Meta.workspaceManager;

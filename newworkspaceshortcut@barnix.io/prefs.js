@@ -18,7 +18,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
 
         window.add(page);
 
-        // Preferences Section
+        // About Section
         const about = new Adw.PreferencesGroup();
         about.set_title('About')
         page.add(about);
@@ -31,55 +31,61 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         about.add(githubLink);
 
 
-        // Preferences Section
-        const shortcutPrefs = new Adw.PreferencesGroup();
-        shortcutPrefs.set_title('Shortcut Preferences')
-        page.add(shortcutPrefs);
-
-
 
         // Move window to New Workspace
+        const mwGroup = new Adw.PreferencesGroup();
+        mwGroup.set_title('Move window to New Workspace')
+        page.add(mwGroup);
+        
         const mwr = new Adw.ActionRow({
         title: 'Move window to New Workspace - Right',
         subtitle: 'Ctl + Super + Shift + Right'
         });
-        shortcutPrefs.add(mwr);
+        mwGroup.add(mwr);
 
         const mwl = new Adw.ActionRow({
         title: 'Move window to New Workspace - Left',
         subtitle: 'Ctl + Super + Shift + Left'
         });
-        shortcutPrefs.add(mwl);
+        mwGroup.add(mwl);
         
 
 
         // New Empty Workspace
+        const ewGroup = new Adw.PreferencesGroup();
+        ewGroup.set_title('New Empty Workspace')
+        page.add(ewGroup);
+        
         const ewr = new Adw.ActionRow({
         title: 'New Empty Workspace - Right',
         subtitle: 'Ctl + Super + Alt + Right'
         });
-        shortcutPrefs.add(ewr);
+        ewGroup.add(ewr);
 
         const ewl = new Adw.ActionRow({
         title: 'New Empty Workspace - Left',
         subtitle: 'Ctl + Super + Alt + Left'
         });
-        shortcutPrefs.add(ewl);
+        ewGroup.add(ewl);
 
 
 
         // Reorder-workspace
+        const rwsGroup = new Adw.PreferencesGroup();
+        rwsGroup.set_title('Reorder-workspace')
+        page.add(rwsGroup);
+        
         const rwsr = new Adw.ActionRow({
         title: 'Reorder-workspace - Right',
         subtitle: 'Ctl + Super + Right'
         });
-        shortcutPrefs.add(rwsr);
+        rwsGroup.add(rwsr);
 
         const rwsl = new Adw.ActionRow({
         title: 'Reorder-workspace - Left',
         subtitle: 'Ctl + Super + Left'
         });
-        shortcutPrefs.add(rwsl);
+        rwsGroup.add(rwsl);
 
 
 
