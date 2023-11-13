@@ -89,14 +89,18 @@ When creating a PR, review the following files and make changes as necessary:
 
 Eliminate any errors caused by the extension before submitting PR. Debugging workflow may include:
 
+This command will open a nested Gnome shell. On the console where this command is executed, you can read real-time errors of the nested shell.
 ```bash
 dbus-run-session -- gnome-shell --nested --wayland
 ```
-Open a terminal within the nested session:
+
+Additional commands:
+
+CLI reference for reading shell logs:
 ```bash
 journalctl -f -o cat /usr/bin/gnome-shell
 ```
-In a second terminal of the nested session:
+CLI reference for disabling/enabling extension:
 ```bash
 gnome-extensions disable newworkspaceshortcut@barnix.io
 gnome-extensions enable newworkspaceshortcut@barnix.io

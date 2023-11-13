@@ -10,7 +10,8 @@
 
 # 0.5.0 (Sept 2022)
 ## CHANGES
-- Support for Gnome43
+- Support for Gnome43 added
+- Gnome 41-43 supported
 
 # 0.4
 ## CHANGES
