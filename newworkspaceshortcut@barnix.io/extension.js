@@ -21,7 +21,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 Promise.reject().catch(logError);
 
-const workspaceManager = Meta.workspaceManager;
+const workspaceManager = Meta.WorkspaceManager;
 
 // FUNCTION, move the window to the new workspace
 function moveWindow(m) {
