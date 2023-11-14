@@ -57,9 +57,7 @@ function emptyWS(m) {
 // FUNCTION, define the workspace # we are moving to
 function getNewIndex(m){
   let myIndex = global.workspaceManager.get_active_workspace_index();
-  console.log(`myindex - ${myIndex}`);
   let newIndex = myIndex + m;
-  console.log(`newIndex - ${newIndex}`);
   return newIndex
 }
 
