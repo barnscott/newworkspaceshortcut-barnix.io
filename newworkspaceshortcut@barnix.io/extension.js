@@ -19,7 +19,6 @@ import Shell from 'gi://Shell';
 import Meta from 'gi://Meta';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
-Promise.reject().catch(logError);
 
 // FUNCTION, move the window to the new workspace
 function moveWindow(m) {
@@ -107,7 +106,7 @@ function reorderWS() {
   }
 }
 
-export default class myExtension extends Extension {
+export default class newWorkspaceShortcuts extends Extension {
 
   enable() {
     this.rWS = new reorderWS();
@@ -133,22 +132,24 @@ export default class myExtension extends Extension {
     });
 
     // Shortcuts for moving a workspace
-    Main.wm.addKeybinding("wsleft", this._settings, flag, mode, () => {
-      moveWSTriggersOverview = this._settings.get_boolean('move-ws-triggers-overview');
-      this.rWS.left(moveWSTriggersOverview);
-    });
     Main.wm.addKeybinding("wsright", this._settings, flag, mode, () => {
       moveWSTriggersOverview = this._settings.get_boolean('move-ws-triggers-overview');
       this.rWS.right(moveWSTriggersOverview);
     });
+    Main.wm.addKeybinding("wsleft", this._settings, flag, mode, () => {
+      moveWSTriggersOverview = this._settings.get_boolean('move-ws-triggers-overview');
+      this.rWS.left(moveWSTriggersOverview);
+    });
   }
 
   disable() {
-    Main.wm.removeKeybinding("nwshortcut");
-    Main.wm.removeKeybinding("bwshortcut");
-    Main.wm.removeKeybinding("enwshortcut");
-    Main.wm.removeKeybinding("ebwshortcut");
-    Main.wm.removeKeybinding("workspaceleft");
-    Main.wm.removeKeybinding("workspaceright");
+    Main.wm.removeKeybinding("movewinright");
+    Main.wm.removeKeybinding("movewinleft");
+    Main.wm.removeKeybinding("emptywsright");
+    Main.wm.removeKeybinding("emptywsleft");
+    Main.wm.removeKeybinding("wsright");
+    Main.wm.removeKeybinding("wsleft");
+    this.rWS = null;
+    this._settings = null;
   }
 }
