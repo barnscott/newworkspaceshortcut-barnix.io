@@ -1,3 +1,8 @@
+# 46.0 (Mar 2024)
+## CHANGES
+- Change versioning schema to better match Gnome release
+- Add Gnome46 support to previous release
+
 # 0.7.0 (Nov 2023)
 ## CHANGES
 - This version only supports Gnome45

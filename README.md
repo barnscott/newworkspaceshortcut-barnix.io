@@ -31,6 +31,7 @@ Additionally, this extension provides shortcuts to move your active Workspace le
 
 This version of this extension is tested on the following Gnome releases:
 
+- 46
 - 45
 
 See `CHANGELOG.md` to identify which versions of this extension support which versions of Gnome.
