@@ -104,6 +104,76 @@ function reorderWS() {
   }
 }
 
+// - Super space :: resize window’s height and width to 40% of Display height
+function resizeWindow() {
+  //1. get the Focused / active  window
+  let myWin = getFocusWin();
+
+  //2. modify window size
+  
+}
+
+// - Ctl super down :: move window to Bottom of Vertical Center, with 2% buffer
+// - Ctl super right :: move window to Right of Horizontal Center, with 2% buffer
+function tiler(position){
+
+  // Display constructor
+  this.get_display_info = function (){
+      win = window.get_display() 
+      // display.get_current_monitor() 
+      display.get_size()
+      return height,width
+  }
+  this.get_vertical_center = function (){
+      center = (this.get_display_info[0] / 2)
+      buffer = x
+      return center,buffer
+  }
+  this.get_horizontal_center = function (){
+      center = (this.get_display_info[1] / 2)
+      buffer = x
+      return center,buffer
+  }
+
+  // Window constructor
+  this.window_size = function () {
+      //get window size
+      // get window x and y
+      return height,width,x,y
+  }
+
+  // Window Relocation functions
+  this.left = function () {
+      horizontal_spec = this.get_horizontal_center
+      window_spec = this.window_size
+      x_axis = (horizontal_spec[0] + horizontal_spec[1]) - window_spec[1]
+      this.move_window(x_axis,window_spec[3])
+  }
+  this.right = function () {
+      horizontal_spec = this.get_horizontal_center
+      window_spec = this.window_size
+      x_axis = horizontal_spec[0] - horizontal_spec[1]
+      this.move_window(x_axis,window_spec[3]))
+  }
+  this.up = function () {
+      vertical_spec = this.get_vertical_center
+      window_spec = this.window_size
+      y_axis = (vertical_spec[0] - vertical_spec[1]) - window_spec[0]
+      this.move_window(window_spec[2],y_axis)
+  }
+  this.down = function () {
+      vertical_spec = this.get_vertical_center
+      window_spec = this.window_size
+      y_axis = vertical_spec[0] + vertical_spec[1]
+      this.move_window(window_spec[2],y_axis)
+  }
+
+  this.move_window = function (x,y) {
+      window.move_frame(true, x, y) 
+  }
+}
+// END ///////////////////////////////////////
+
 export default class newWorkspaceShortcuts extends Extension {
 
   enable() {
