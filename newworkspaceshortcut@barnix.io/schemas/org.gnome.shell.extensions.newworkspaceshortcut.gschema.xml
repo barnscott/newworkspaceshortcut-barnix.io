@@ -61,6 +61,46 @@
       </description>
     </key>
 
+    <key type="as" name="resizewin">
+      <default><![CDATA[['<Super>Space']]]></default>
+      <summary>Resize Window</summary>
+      <description>
+        Resize Window to tiling size
+      </description>
+    </key>
+
+    <key type="as" name="winright">
+      <default><![CDATA[['<Ctl><Alt>Right']]]></default>
+      <summary>Slide window right</summary>
+      <description>
+        Slide window right
+      </description>
+    </key>
+
+    <key type="as" name="winleft">
+      <default><![CDATA[['<Ctl><Alt>Left']]]></default>
+      <summary>Slide window left</summary>
+      <description>
+        Slide window left
+      </description>
+    </key>
+
+    <key type="as" name="winup">
+      <default><![CDATA[['<Ctl><Alt>Up']]]></default>
+      <summary>Slide window up</summary>
+      <description>
+        Slide window up
+      </description>
+    </key>
+    
+    <key type="as" name="windown">
+      <default><![CDATA[['<Ctl><Alt>Down']]]></default>
+      <summary>Slide window down</summary>
+      <description>
+        Slide window down
+      </description>
+    </key>
+
   </schema>
 
 </schemalist>

@@ -208,6 +208,25 @@ export default class newWorkspaceShortcuts extends Extension {
       moveWSTriggersOverview = this._settings.get_boolean('move-ws-triggers-overview');
       this.rWS.left(moveWSTriggersOverview);
     });
+
+    // Shortcuts for resizing window
+    Main.wm.addKeybinding("resizewin", this._settings, flag, mode, () => {
+      resizeWindow();
+    });
+
+    // Shortcuts for sliding window
+    Main.wm.addKeybinding("winright", this._settings, flag, mode, () => {
+      tiler(m=right);
+    });
+    Main.wm.addKeybinding("winleft", this._settings, flag, mode, () => {
+      tiler(m=left);
+    });
+    Main.wm.addKeybinding("winup", this._settings, flag, mode, () => {
+      tiler(m=up);
+    });
+    Main.wm.addKeybinding("windown", this._settings, flag, mode, () => {
+      tiler(m=down);
+    });
   }
 
   disable() {
@@ -217,6 +236,11 @@ export default class newWorkspaceShortcuts extends Extension {
     Main.wm.removeKeybinding("emptywsleft");
     Main.wm.removeKeybinding("wsright");
     Main.wm.removeKeybinding("wsleft");
+    Main.wm.removeKeybinding("resizewin");
+    Main.wm.removeKeybinding("winright");
+    Main.wm.removeKeybinding("winleft");
+    Main.wm.removeKeybinding("winup");
+    Main.wm.removeKeybinding("windown");
     this.rWS = null;
     this._settings = null;
   }
