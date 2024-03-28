@@ -140,6 +140,9 @@ function tiler(){
   this.resize_window = function () {
     // get the Focused / active  window
     let myWin = getFocusWin();
+
+
+    let window_rect = this.window_rect(myWin);
   
     // determine 40% of display height
     let displayreponse = this.get_display_info(myWin);
@@ -147,7 +150,7 @@ function tiler(){
     console.log("newwindowsize--",newWindowSize);
   
     // modify window size
-    myWin.move_resize_frame(true, 0, 0, newWindowSize, newWindowSize);
+    myWin.move_resize_frame(true, window_rect.x, window_rect.y, newWindowSize, newWindowSize);
   }
 
   // // Window Relocation functions
@@ -172,9 +175,9 @@ function tiler(){
     let window_rect = this.window_rect(myWin);
     let y_axis = (vertical_spec[0] - vertical_spec[1]) - window_rect['height'];
     console.log("y_axis--",y_axis);
-    // If window is moved off display, then reset to the buffer distance
+    // If window is moved off display, then reset to the 2x buffer distance
     if (y_axis < 0) {
-      y_axis = vertical_spec[1];
+      y_axis = vertical_spec[1]*2;
       console.log("fix y_axis--",y_axis);
     }
     myWin.move_frame(true,window_rect['x'],y_axis);
