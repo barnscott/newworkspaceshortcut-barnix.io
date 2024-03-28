@@ -120,7 +120,7 @@ function tiler(){
     let display_vertical = this.get_display_info(myWin)[1]
     let center = (display_vertical / 2)
     let buffer = display_vertical * 0.02
-    return [center,buffer]
+    return [center,buffer,display_vertical]
   }
   this.get_horizontal_center = function (myWin){
     let display_hor = this.get_display_info(myWin)[0]
@@ -130,24 +130,11 @@ function tiler(){
   }
 
   // Window constructor
-  this.window_size = function () {
-      
-    // get the Focused / active  window
-    let myWin = getFocusWin();
-
-    //get window size
-    // what does mtk.rect include?? need to debug
+  this.window_rect = function (myWin) {
     let rect = myWin.get_frame_rect();
 
-    console.log(String(Object.keys(rect)[0]));
-    console.log(String(Object.keys(rect)[1]));
-    console.log(String(Object.keys(rect)[2]));
-    console.log(String(Object.keys(rect)[3]));
-
-    let width = 240
-    let height = 240
-
-    return [width,height]
+    // rect is an object that contains: x,y,width,height
+    return rect
   }
 
   this.resize_window = function () {
@@ -168,34 +155,43 @@ function tiler(){
     let myWin = getFocusWin();
     console.log("this.left--");
     let horizontal_spec = this.get_horizontal_center(myWin);
-    console.log("horizontal_spec[0]--",horizontal_spec[0]);
-    console.log("horizontal_spec[1]--",horizontal_spec[1]);
-    let window_spec = this.window_size();
-    console.log("window_spec[0]--",window_spec[0]);
-    let x_axis = (horizontal_spec[0] - horizontal_spec[1]) - window_spec[0];
-    myWin.move_frame(true, x_axis, 50);
+    let window_rect = this.window_rect(myWin);
+    let x_axis = (horizontal_spec[0] - horizontal_spec[1]) - window_rect['width'];
+    myWin.move_frame(true, x_axis, window_rect['y']);
   }
   this.right = function () {
     let myWin = getFocusWin();
     let horizontal_spec = this.get_horizontal_center(myWin);
-    // let window_spec = this.window_size();
-    let x_axis = (horizontal_spec[0] - horizontal_spec[1]);
-    myWin.move_frame(true, x_axis, 0);
+    let window_rect = this.window_rect(myWin);
+    let x_axis = (horizontal_spec[0] + horizontal_spec[1]);
+    myWin.move_frame(true, x_axis, window_rect['y']);
   }
-  // this.up = function () {
-    // let myWin = getFocusWin();
-  //   let vertical_spec = this.get_vertical_center(myWin)
-  //   let window_spec = this.window_size
-  //   let y_axis = (vertical_spec[0] - vertical_spec[1]) - window_spec[0]
-  //   this.move_window(window_spec[2],y_axis)
-  // }
-  // this.down = function () {
-    // let myWin = getFocusWin();
-  //   let vertical_spec = this.get_vertical_center(myWin)
-  //   let window_spec = this.window_size
-  //   let y_axis = vertical_spec[0] + vertical_spec[1]
-  //   this.move_window(window_spec[2],y_axis)
-  // }
+  this.up = function () {
+    let myWin = getFocusWin();
+    let vertical_spec = this.get_vertical_center(myWin);
+    let window_rect = this.window_rect(myWin);
+    let y_axis = (vertical_spec[0] - vertical_spec[1]) - window_rect['height'];
+    console.log("y_axis--",y_axis);
+    // If window is moved off display, then reset to the buffer distance
+    if (y_axis < 0) {
+      y_axis = vertical_spec[1];
+      console.log("fix y_axis--",y_axis);
+    }
+    myWin.move_frame(true,window_rect['x'],y_axis);
+  }
+  this.down = function () {
+    let myWin = getFocusWin();
+    let vertical_spec = this.get_vertical_center(myWin);
+    let window_rect = this.window_rect(myWin);
+    let y_axis = vertical_spec[0] + vertical_spec[1];
+    console.log("y_axis--",y_axis);
+    // if bottom of window is off display, reset window back into display
+    if (y_axis+window_rect['height'] > vertical_spec[2]) {
+      y_axis = y_axis-((y_axis+window_rect['height'])-vertical_spec[2])
+      console.log("fix y_axis--",y_axis);
+    }
+    myWin.move_frame(true,window_rect['x'],y_axis);
+  }
 }
 // END ///////////////////////////////////////
 
@@ -241,18 +237,18 @@ export default class newWorkspaceShortcuts extends Extension {
     });
 
     // Shortcuts for sliding window
-    // Main.wm.addKeybinding("winright", this._settings, flag, mode, () => {
-    //   this.wTiler.right();
-    // });
+    Main.wm.addKeybinding("winright", this._settings, flag, mode, () => {
+      this.wTiler.right();
+    });
     Main.wm.addKeybinding("winleft", this._settings, flag, mode, () => {
       this.wTiler.left();
     });
-    // Main.wm.addKeybinding("winup", this._settings, flag, mode, () => {
-    //   this.wTiler.up();
-    // });
-    // Main.wm.addKeybinding("windown", this._settings, flag, mode, () => {
-    //   this.wTiler.down();
-    // });
+    Main.wm.addKeybinding("winup", this._settings, flag, mode, () => {
+      this.wTiler.up();
+    });
+    Main.wm.addKeybinding("windown", this._settings, flag, mode, () => {
+      this.wTiler.down();
+    });
   }
 
   disable() {
@@ -263,10 +259,10 @@ export default class newWorkspaceShortcuts extends Extension {
     Main.wm.removeKeybinding("wsright");
     Main.wm.removeKeybinding("wsleft");
     Main.wm.removeKeybinding("resizewin");
-    // Main.wm.removeKeybinding("winright");
+    Main.wm.removeKeybinding("winright");
     Main.wm.removeKeybinding("winleft");
-    // Main.wm.removeKeybinding("winup");
-    // Main.wm.removeKeybinding("windown");
+    Main.wm.removeKeybinding("winup");
+    Main.wm.removeKeybinding("windown");
     this.rWS = null;
     this.wTiler = null;
     this._settings = null;

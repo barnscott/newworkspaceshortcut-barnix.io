@@ -70,7 +70,8 @@
     </key>
 
     <key type="as" name="winright">
-      <default><![CDATA[['<Ctl><Alt>Right']]]></default>
+      <!-- <default><![CDATA[['<Ctl><Alt>Right']]]></default> -->
+      <default><![CDATA[['<Shift><Super><Ctl><Alt>Right']]]></default>
       <summary>Slide window right</summary>
       <description>
         Slide window right
@@ -78,6 +79,7 @@
     </key>
 
     <key type="as" name="winleft">
+      <!-- <default><![CDATA[['<Ctl><Alt>Left']]]></default> -->
       <default><![CDATA[['<Shift><Super><Ctl><Alt>Left']]]></default>
       <summary>Slide window left</summary>
       <description>
@@ -86,7 +88,8 @@
     </key>
 
     <key type="as" name="winup">
-      <default><![CDATA[['<Ctl><Alt>Up']]]></default>
+      <!-- <default><![CDATA[['<Ctl><Alt>Up']]]></default> -->
+      <default><![CDATA[['<Shift><Super><Ctl><Alt>Up']]]></default>
       <summary>Slide window up</summary>
       <description>
         Slide window up
@@ -94,7 +97,8 @@
     </key>
     
     <key type="as" name="windown">
-      <default><![CDATA[['<Ctl><Alt>Down']]]></default>
+      <!-- <default><![CDATA[['<Ctl><Alt>Down']]]></default> -->
+      <default><![CDATA[['<Shift><Super><Ctl><Alt>Down']]]></default>
       <summary>Slide window down</summary>
       <description>
         Slide window down
