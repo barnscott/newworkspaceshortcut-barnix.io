@@ -104,73 +104,98 @@ function reorderWS() {
   }
 }
 
-// - Super space :: resize window’s height and width to 40% of Display height
-function resizeWindow() {
-  //1. get the Focused / active  window
-  let myWin = getFocusWin();
-
-  //2. modify window size
-  
-}
-
-// - Ctl super down :: move window to Bottom of Vertical Center, with 2% buffer
-// - Ctl super right :: move window to Right of Horizontal Center, with 2% buffer
-function tiler(position){
+// Super space :: resize window’s height and width to 40% of Display height
+// Ctl super down :: move window to Bottom of Vertical Center, with 2% buffer
+// Ctl super right :: move window to Right of Horizontal Center, with 2% buffer
+function tiler(){
 
   // Display constructor
-  this.get_display_info = function (){
-      win = window.get_display() 
-      // display.get_current_monitor() 
-      display.get_size()
-      return height,width
+  this.get_display_info = function (myWin){
+    let mydisplay = myWin.get_display();
+    let mydisplaysize = mydisplay.get_size();
+    // returns width,height
+    return mydisplaysize
   }
-  this.get_vertical_center = function (){
-      center = (this.get_display_info[0] / 2)
-      buffer = x
-      return center,buffer
+  this.get_vertical_center = function (myWin){
+    let display_vertical = this.get_display_info(myWin)[1]
+    let center = (display_vertical / 2)
+    let buffer = display_vertical * 0.02
+    return [center,buffer]
   }
-  this.get_horizontal_center = function (){
-      center = (this.get_display_info[1] / 2)
-      buffer = x
-      return center,buffer
+  this.get_horizontal_center = function (myWin){
+    let display_hor = this.get_display_info(myWin)[0]
+    let center = (display_hor / 2)
+    let buffer = display_hor * 0.02
+    return [center,buffer]
   }
 
   // Window constructor
   this.window_size = function () {
-      //get window size
-      // get window x and y
-      return height,width,x,y
+      
+    // get the Focused / active  window
+    let myWin = getFocusWin();
+
+    //get window size
+    // what does mtk.rect include?? need to debug
+    let rect = myWin.get_frame_rect();
+
+    console.log(String(Object.keys(rect)[0]));
+    console.log(String(Object.keys(rect)[1]));
+    console.log(String(Object.keys(rect)[2]));
+    console.log(String(Object.keys(rect)[3]));
+
+    let width = 240
+    let height = 240
+
+    return [width,height]
   }
 
-  // Window Relocation functions
+  this.resize_window = function () {
+    // get the Focused / active  window
+    let myWin = getFocusWin();
+  
+    // determine 40% of display height
+    let displayreponse = this.get_display_info(myWin);
+    let newWindowSize = displayreponse[1] * 0.4;
+    console.log("newwindowsize--",newWindowSize);
+  
+    // modify window size
+    myWin.move_resize_frame(true, 0, 0, newWindowSize, newWindowSize);
+  }
+
+  // // Window Relocation functions
   this.left = function () {
-      horizontal_spec = this.get_horizontal_center
-      window_spec = this.window_size
-      x_axis = (horizontal_spec[0] + horizontal_spec[1]) - window_spec[1]
-      this.move_window(x_axis,window_spec[3])
+    let myWin = getFocusWin();
+    console.log("this.left--");
+    let horizontal_spec = this.get_horizontal_center(myWin);
+    console.log("horizontal_spec[0]--",horizontal_spec[0]);
+    console.log("horizontal_spec[1]--",horizontal_spec[1]);
+    let window_spec = this.window_size();
+    console.log("window_spec[0]--",window_spec[0]);
+    let x_axis = (horizontal_spec[0] - horizontal_spec[1]) - window_spec[0];
+    myWin.move_frame(true, x_axis, 50);
   }
   this.right = function () {
-      horizontal_spec = this.get_horizontal_center
-      window_spec = this.window_size
-      x_axis = horizontal_spec[0] - horizontal_spec[1]
-      this.move_window(x_axis,window_spec[3]))
+    let myWin = getFocusWin();
+    let horizontal_spec = this.get_horizontal_center(myWin);
+    // let window_spec = this.window_size();
+    let x_axis = (horizontal_spec[0] - horizontal_spec[1]);
+    myWin.move_frame(true, x_axis, 0);
   }
-  this.up = function () {
-      vertical_spec = this.get_vertical_center
-      window_spec = this.window_size
-      y_axis = (vertical_spec[0] - vertical_spec[1]) - window_spec[0]
-      this.move_window(window_spec[2],y_axis)
-  }
-  this.down = function () {
-      vertical_spec = this.get_vertical_center
-      window_spec = this.window_size
-      y_axis = vertical_spec[0] + vertical_spec[1]
-      this.move_window(window_spec[2],y_axis)
-  }
-
-  this.move_window = function (x,y) {
-      window.move_frame(true, x, y) 
-  }
+  // this.up = function () {
+    // let myWin = getFocusWin();
+  //   let vertical_spec = this.get_vertical_center(myWin)
+  //   let window_spec = this.window_size
+  //   let y_axis = (vertical_spec[0] - vertical_spec[1]) - window_spec[0]
+  //   this.move_window(window_spec[2],y_axis)
+  // }
+  // this.down = function () {
+    // let myWin = getFocusWin();
+  //   let vertical_spec = this.get_vertical_center(myWin)
+  //   let window_spec = this.window_size
+  //   let y_axis = vertical_spec[0] + vertical_spec[1]
+  //   this.move_window(window_spec[2],y_axis)
+  // }
 }
 // END ///////////////////////////////////////
 
@@ -178,6 +203,7 @@ export default class newWorkspaceShortcuts extends Extension {
 
   enable() {
     this.rWS = new reorderWS();
+    this.wTiler = new tiler();
     let mode = Shell.ActionMode.ALL;
     let flag = Meta.KeyBindingFlags.NONE;
     this._settings = this.getSettings();
@@ -211,22 +237,22 @@ export default class newWorkspaceShortcuts extends Extension {
 
     // Shortcuts for resizing window
     Main.wm.addKeybinding("resizewin", this._settings, flag, mode, () => {
-      resizeWindow();
+      this.wTiler.resize_window();
     });
 
     // Shortcuts for sliding window
-    Main.wm.addKeybinding("winright", this._settings, flag, mode, () => {
-      tiler(m=right);
-    });
+    // Main.wm.addKeybinding("winright", this._settings, flag, mode, () => {
+    //   this.wTiler.right();
+    // });
     Main.wm.addKeybinding("winleft", this._settings, flag, mode, () => {
-      tiler(m=left);
+      this.wTiler.left();
     });
-    Main.wm.addKeybinding("winup", this._settings, flag, mode, () => {
-      tiler(m=up);
-    });
-    Main.wm.addKeybinding("windown", this._settings, flag, mode, () => {
-      tiler(m=down);
-    });
+    // Main.wm.addKeybinding("winup", this._settings, flag, mode, () => {
+    //   this.wTiler.up();
+    // });
+    // Main.wm.addKeybinding("windown", this._settings, flag, mode, () => {
+    //   this.wTiler.down();
+    // });
   }
 
   disable() {
@@ -237,11 +263,12 @@ export default class newWorkspaceShortcuts extends Extension {
     Main.wm.removeKeybinding("wsright");
     Main.wm.removeKeybinding("wsleft");
     Main.wm.removeKeybinding("resizewin");
-    Main.wm.removeKeybinding("winright");
+    // Main.wm.removeKeybinding("winright");
     Main.wm.removeKeybinding("winleft");
-    Main.wm.removeKeybinding("winup");
-    Main.wm.removeKeybinding("windown");
+    // Main.wm.removeKeybinding("winup");
+    // Main.wm.removeKeybinding("windown");
     this.rWS = null;
+    this.wTiler = null;
     this._settings = null;
   }
 }

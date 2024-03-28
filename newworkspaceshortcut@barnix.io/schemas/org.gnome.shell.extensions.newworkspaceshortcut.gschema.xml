@@ -78,7 +78,7 @@
     </key>
 
     <key type="as" name="winleft">
-      <default><![CDATA[['<Ctl><Alt>Left']]]></default>
+      <default><![CDATA[['<Shift><Super><Ctl><Alt>Left']]]></default>
       <summary>Slide window left</summary>
       <description>
         Slide window left
