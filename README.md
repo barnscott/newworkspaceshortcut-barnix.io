@@ -3,6 +3,8 @@
 # TLDR
 This extension will enable the following:
 
+## Core features
+
 - Move-window-to-new-workspace Shortcut: 
   - Use a shortcut to move the in-focus window to a *new* workspace on the right of your current workspace: `Ctl + Super + Shift + Right`
   - Or to the left / *backward*: `Ctl + Super + Shift + Left`
@@ -14,6 +16,15 @@ This extension will enable the following:
   - By default, this shortcut with automatically trigger the Overview to provide a limited form of visual feedback. However, this preference can be changed via the extension's Settings panel.
 
 These shortcuts are created to work logically with the vanilla gnome shortcuts including change-workspace (`Super + ALT + Left/Right`) and move-window-to-next-workspace (`Shift + Super + ALT + Left/Right`).
+
+## Minimal Tiler
+
+- `Super + Space` will resize window to 40% width by 45% height
+- `Ctl + Shift` and `arrow` key will relocate the window to the applicable half of the display
+  - Using `right` and `left` arror will move window along X axis
+  - Using `up` and `down` arror will move window along Y axis
+
+Using these keys together, the user can quickly slide windows around the existing workspace
 
 # Purpose
 

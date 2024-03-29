@@ -119,20 +119,18 @@ function tiler(){
   this.get_vertical_center = function (myWin){
     let display_vertical = this.get_display_info(myWin)[1]
     let center = (display_vertical / 2)
-    let buffer = display_vertical * 0.02
+    let buffer = display_vertical * 0.01
     return [center,buffer,display_vertical]
   }
   this.get_horizontal_center = function (myWin){
     let display_hor = this.get_display_info(myWin)[0]
     let center = (display_hor / 2)
-    let buffer = display_hor * 0.02
+    let buffer = display_hor * 0.01
     return [center,buffer]
   }
 
-  // Window constructor
   this.window_rect = function (myWin) {
     let rect = myWin.get_frame_rect();
-
     // rect is an object that contains: x,y,width,height
     return rect
   }
@@ -140,23 +138,20 @@ function tiler(){
   this.resize_window = function () {
     // get the Focused / active  window
     let myWin = getFocusWin();
-
-
     let window_rect = this.window_rect(myWin);
   
-    // determine 40% of display height
+    // determine 45% of display height
     let displayreponse = this.get_display_info(myWin);
-    let newWindowSize = displayreponse[1] * 0.4;
-    console.log("newwindowsize--",newWindowSize);
+    let newWidth = displayreponse[0] * 0.40;
+    let newHeight = displayreponse[1] * 0.45;
   
     // modify window size
-    myWin.move_resize_frame(true, window_rect.x, window_rect.y, newWindowSize, newWindowSize);
+    myWin.move_resize_frame(true, window_rect.x, window_rect.y, newWidth, newHeight);
   }
 
   // // Window Relocation functions
   this.left = function () {
     let myWin = getFocusWin();
-    console.log("this.left--");
     let horizontal_spec = this.get_horizontal_center(myWin);
     let window_rect = this.window_rect(myWin);
     let x_axis = (horizontal_spec[0] - horizontal_spec[1]) - window_rect['width'];
@@ -174,11 +169,11 @@ function tiler(){
     let vertical_spec = this.get_vertical_center(myWin);
     let window_rect = this.window_rect(myWin);
     let y_axis = (vertical_spec[0] - vertical_spec[1]) - window_rect['height'];
-    console.log("y_axis--",y_axis);
     // If window is moved off display, then reset to the 2x buffer distance
+    console.log("y_axis",y_axis)
     if (y_axis < 0) {
       y_axis = vertical_spec[1]*2;
-      console.log("fix y_axis--",y_axis);
+      console.log("FIXED-y_axis",y_axis)
     }
     myWin.move_frame(true,window_rect['x'],y_axis);
   }
@@ -187,16 +182,15 @@ function tiler(){
     let vertical_spec = this.get_vertical_center(myWin);
     let window_rect = this.window_rect(myWin);
     let y_axis = vertical_spec[0] + vertical_spec[1];
-    console.log("y_axis--",y_axis);
     // if bottom of window is off display, reset window back into display
+    console.log("y_axis",y_axis)
     if (y_axis+window_rect['height'] > vertical_spec[2]) {
       y_axis = y_axis-((y_axis+window_rect['height'])-vertical_spec[2])
-      console.log("fix y_axis--",y_axis);
+      console.log("FIXED-y_axis",y_axis)
     }
     myWin.move_frame(true,window_rect['x'],y_axis);
   }
 }
-// END ///////////////////////////////////////
 
 export default class newWorkspaceShortcuts extends Extension {
 

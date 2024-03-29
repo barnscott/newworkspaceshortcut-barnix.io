@@ -1,3 +1,7 @@
+# 46.1 (Mar 2024)
+## CHANGES
+- Added minimal tiling features to v46.0 release
+
 # 46.0 (Mar 2024)
 ## CHANGES
 - Change versioning schema to better match Gnome release
