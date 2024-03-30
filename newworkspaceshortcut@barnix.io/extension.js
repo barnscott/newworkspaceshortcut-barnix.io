@@ -104,29 +104,31 @@ function reorderWS() {
   }
 }
 
-// Super space :: resize window’s height and width to 40% of Display height
-// Ctl super down :: move window to Bottom of Vertical Center, with 2% buffer
-// Ctl super right :: move window to Right of Horizontal Center, with 2% buffer
+
 function tiler(){
 
   // Display constructor
   this.get_display_info = function (myWin){
     let mydisplay = myWin.get_display();
-    let mydisplaysize = mydisplay.get_size();
-    // returns width,height
-    return mydisplaysize
+    let monitor_geo = mydisplay.get_monitor_geometry(mydisplay.get_current_monitor());
+    let buffer = monitor_geo.height * 0.005
+    return [monitor_geo.width,monitor_geo.height,buffer,monitor_geo.x,monitor_geo.y]
   }
-  this.get_vertical_center = function (myWin){
-    let display_vertical = this.get_display_info(myWin)[1]
-    let center = (display_vertical / 2)
-    let buffer = display_vertical * 0.01
-    return [center,buffer,display_vertical]
+  this.get_height_center = function (myWin){
+    let display_spec = this.get_display_info(myWin)
+    let height = display_spec[1];
+    let center = height * 0.5;
+    let buffer = display_spec[2];
+    let multimonitor_y_offset = display_spec[4];
+    return [center,buffer,height,multimonitor_y_offset]
   }
-  this.get_horizontal_center = function (myWin){
-    let display_hor = this.get_display_info(myWin)[0]
-    let center = (display_hor / 2)
-    let buffer = display_hor * 0.01
-    return [center,buffer]
+  this.get_width_center = function (myWin){
+    let display_spec = this.get_display_info(myWin)
+    let width = display_spec[0];
+    let center = width * 0.5;
+    let buffer = display_spec[2];
+    let multimonitor_x_offset = display_spec[3];
+    return [center,buffer,width,multimonitor_x_offset]
   }
 
   this.window_rect = function (myWin) {
@@ -149,44 +151,43 @@ function tiler(){
     myWin.move_resize_frame(true, window_rect.x, window_rect.y, newWidth, newHeight);
   }
 
-  // // Window Relocation functions
+  // Window Relocation functions
   this.left = function () {
     let myWin = getFocusWin();
-    let horizontal_spec = this.get_horizontal_center(myWin);
+    let [width_center,buffer,width,multimonitor_x_offset] = this.get_width_center(myWin);
     let window_rect = this.window_rect(myWin);
-    let x_axis = (horizontal_spec[0] - horizontal_spec[1]) - window_rect['width'];
+    let x_axis = (width_center - buffer) - window_rect['width'] + multimonitor_x_offset;
     myWin.move_frame(true, x_axis, window_rect['y']);
   }
   this.right = function () {
     let myWin = getFocusWin();
-    let horizontal_spec = this.get_horizontal_center(myWin);
+    let [width_center,buffer,width,multimonitor_x_offset] = this.get_width_center(myWin);
     let window_rect = this.window_rect(myWin);
-    let x_axis = (horizontal_spec[0] + horizontal_spec[1]);
+    let x_axis = (width_center + buffer) + multimonitor_x_offset;
     myWin.move_frame(true, x_axis, window_rect['y']);
   }
   this.up = function () {
     let myWin = getFocusWin();
-    let vertical_spec = this.get_vertical_center(myWin);
+    let [height_center,buffer,height,multimonitor_y_offset] = this.get_height_center(myWin);
     let window_rect = this.window_rect(myWin);
-    let y_axis = (vertical_spec[0] - vertical_spec[1]) - window_rect['height'];
-    // If window is moved off display, then reset to the 2x buffer distance
-    console.log("y_axis",y_axis)
+    let y_axis = (height_center - buffer) - window_rect['height'] + multimonitor_y_offset;
+    // if new window is above the top of the monitor-display, then
+    //    ...reset y_axis inside display-monitor
     if (y_axis < 0) {
-      y_axis = vertical_spec[1]*2;
-      console.log("FIXED-y_axis",y_axis)
+      y_axis = (buffer*2) + multimonitor_y_offset;
     }
     myWin.move_frame(true,window_rect['x'],y_axis);
   }
   this.down = function () {
     let myWin = getFocusWin();
-    let vertical_spec = this.get_vertical_center(myWin);
+    let [height_center,buffer,height,multimonitor_y_offset] = this.get_height_center(myWin);
     let window_rect = this.window_rect(myWin);
-    let y_axis = vertical_spec[0] + vertical_spec[1];
-    // if bottom of window is off display, reset window back into display
-    console.log("y_axis",y_axis)
-    if (y_axis+window_rect['height'] > vertical_spec[2]) {
-      y_axis = y_axis-((y_axis+window_rect['height'])-vertical_spec[2])
-      console.log("FIXED-y_axis",y_axis)
+    let y_axis = height_center + buffer + multimonitor_y_offset;
+
+    // if bottom of window falls off the bottom of display-monitor, then
+    //    ...reset y_axis so that it is inside display-monitor bourdary
+    if ((y_axis+window_rect['height']) > (height+multimonitor_y_offset-buffer)) {
+      y_axis = y_axis-((y_axis+window_rect['height'])-height)+multimonitor_y_offset-buffer;
     }
     myWin.move_frame(true,window_rect['x'],y_axis);
   }
