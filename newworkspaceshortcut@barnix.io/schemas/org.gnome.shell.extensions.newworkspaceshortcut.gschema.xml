@@ -6,7 +6,7 @@
     path="/org/gnome/shell/extensions/newworkspaceshortcut/">
 
     <key type="as" name="movewinright">
-      <default><![CDATA[['<Super><Ctl><Shift>Right']]]></default>
+      <default><![CDATA[['<Super><Control><Shift>Right']]]></default>
       <summary>New Workspace Shortcut Right</summary>
       <description>
         New Workspace Shortcut Right key binding
@@ -14,7 +14,7 @@
     </key>
 
     <key type="as" name="movewinleft">
-      <default><![CDATA[['<Super><Ctl><Shift>Left']]]></default>
+      <default><![CDATA[['<Super><Control><Shift>Left']]]></default>
       <summary>New Workspace Shortcut Left</summary>
       <description>
         New Workspace Shortcut Left key binding
@@ -22,7 +22,7 @@
     </key>
 
     <key type="as" name="emptywsright">
-      <default><![CDATA[['<Ctl><Super><Alt>Right']]]></default>
+      <default><![CDATA[['<Control><Super><Alt>Right']]]></default>
       <summary>Empty Workspace Shortcut Right</summary>
       <description>
         Empty Workspace Shortcut key binding
@@ -30,7 +30,7 @@
     </key>
 
     <key type="as" name="emptywsleft">
-      <default><![CDATA[['<Ctl><Super><Alt>Left']]]></default>
+      <default><![CDATA[['<Control><Super><Alt>Left']]]></default>
       <summary>Empty Workspace Shortcut Left</summary>
       <description>
         Empty Workspace Shortcut key binding
@@ -38,7 +38,7 @@
     </key>
 
     <key type="as" name="wsright">
-      <default><![CDATA[['<Ctl><Super>Right']]]></default>
+      <default><![CDATA[['<Control><Super>Right']]]></default>
       <summary>Move Workspace Right</summary>
       <description>
         Move Workspace Right Shortcut key binding
@@ -46,7 +46,7 @@
     </key>
 
     <key type="as" name="wsleft">
-      <default><![CDATA[['<Ctl><Super>Left']]]></default>
+      <default><![CDATA[['<Control><Super>Left']]]></default>
       <summary>Move Workspace Left</summary>
       <description>
         Move Workspace Left Shortcut key binding
@@ -58,6 +58,46 @@
       <summary>Move WS Triggers Overview</summary>
       <description>
         Define if using the move-workspace shortcut should auto-trigger the Overview mode.
+      </description>
+    </key>
+
+    <key type="as" name="resizewin">
+      <default><![CDATA[['<Super>Space']]]></default>
+      <summary>Resize Window</summary>
+      <description>
+        Resize Window to tiling size
+      </description>
+    </key>
+
+    <key type="as" name="winright">
+      <default><![CDATA[['<Control><Shift>Right']]]></default>
+      <summary>Slide window right</summary>
+      <description>
+        Slide window right
+      </description>
+    </key>
+
+    <key type="as" name="winleft">
+      <default><![CDATA[['<Control><Shift>Left']]]></default>
+      <summary>Slide window left</summary>
+      <description>
+        Slide window left
+      </description>
+    </key>
+
+    <key type="as" name="winup">
+      <default><![CDATA[['<Control><Shift>Up']]]></default>
+      <summary>Slide window up</summary>
+      <description>
+        Slide window up
+      </description>
+    </key>
+    
+    <key type="as" name="windown">
+      <default><![CDATA[['<Control><Shift>Down']]]></default>
+      <summary>Slide window down</summary>
+      <description>
+        Slide window down
       </description>
     </key>
 

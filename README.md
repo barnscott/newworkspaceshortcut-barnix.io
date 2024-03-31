@@ -3,6 +3,8 @@
 # TLDR
 This extension will enable the following:
 
+## Core features
+
 - Move-window-to-new-workspace Shortcut: 
   - Use a shortcut to move the in-focus window to a *new* workspace on the right of your current workspace: `Ctl + Super + Shift + Right`
   - Or to the left / *backward*: `Ctl + Super + Shift + Left`
@@ -15,17 +17,16 @@ This extension will enable the following:
 
 These shortcuts are created to work logically with the vanilla gnome shortcuts including change-workspace (`Super + ALT + Left/Right`) and move-window-to-next-workspace (`Shift + Super + ALT + Left/Right`).
 
-# Purpose
+## Minimal floating-window quadrant tiler
 
-This extension provides a shortcut that will move the active window to a new workspace that is to the right/left of the current workspace. Alternatively, you can also create an empty workspaces.
+- `Super + Space` will resize window to 40% width by 45% height. This is preferable for 16:9 displays.
+- `Ctl + Shift` and `arrow-key` key will relocate the window to the applicable half of the display. The window will be justified to the center of the applicable axis. There is also a minimal gap applied to offset the center alignment.
+  - Using `Ctl + Shift + right` will relocate window to right side of the *center of the x-axis* of the display
+  - Using `Ctl + Shift + left` will relocate window to left side of the *center of the x-axis* of the display
+  - Using `Ctl + Shift + up` will relocate window to top side of the *center of the y-axis* of the display
+  - Using `Ctl + Shift + down` will relocate window to bottom side of the *center of the y-axis* of the display
 
-This is useful, for example, if you have 3 populated workspaces, but you want to move a window that is on workspace-1 to a new and empty workspace to the right of workspace-1.
-
-Without this extension, you can create a new workspace between two existing workspaces with your mouse by (1) entering Overview, (2) with your mouse, grab/drag a window from an existing workspace, (3) and drop the window in between existing workspace-thumbnails of the Overview.
-
-However, I was looking for similar functionality with a keyboard shortcut, which does not currently exist on vanilla Gnome.
-
-Additionally, this extension provides shortcuts to move your active Workspace left and right.
+Using these keys together, the user can quickly slide windows around the existing workspace
 
 # Supported Gnome versions
 
@@ -113,4 +114,4 @@ I would like to add the following features, but don't have any priority. Feel fr
 
 - [ ] Code cleanup / optimization
 - [ ] Add ability to modify shortcut bindings on the extension's preferences window
-  
+- [ ] Add top bar offset to Tiler up/down shortcuts

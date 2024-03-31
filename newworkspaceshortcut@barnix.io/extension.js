@@ -104,10 +104,100 @@ function reorderWS() {
   }
 }
 
+
+function tiler(){
+
+  // Display constructor
+  this.get_display_info = function (myWin){
+    let mydisplay = myWin.get_display();
+    let monitor_geo = mydisplay.get_monitor_geometry(mydisplay.get_current_monitor());
+    let buffer = monitor_geo.height * 0.005
+    return [monitor_geo.width,monitor_geo.height,buffer,monitor_geo.x,monitor_geo.y]
+  }
+  this.get_height_center = function (myWin){
+    let display_spec = this.get_display_info(myWin)
+    let height = display_spec[1];
+    let center = height * 0.5;
+    let buffer = display_spec[2];
+    let multimonitor_y_offset = display_spec[4];
+    return [center,buffer,height,multimonitor_y_offset]
+  }
+  this.get_width_center = function (myWin){
+    let display_spec = this.get_display_info(myWin)
+    let width = display_spec[0];
+    let center = width * 0.5;
+    let buffer = display_spec[2];
+    let multimonitor_x_offset = display_spec[3];
+    return [center,buffer,width,multimonitor_x_offset]
+  }
+
+  this.window_rect = function (myWin) {
+    let rect = myWin.get_frame_rect();
+    // rect is an object that contains: x,y,width,height
+    return rect
+  }
+
+  this.resize_window = function () {
+    // get the Focused / active  window
+    let myWin = getFocusWin();
+    let window_rect = this.window_rect(myWin);
+  
+    // determine 45% of display height
+    let displayreponse = this.get_display_info(myWin);
+    let newWidth = displayreponse[0] * 0.40;
+    let newHeight = displayreponse[1] * 0.45;
+  
+    // modify window size
+    myWin.move_resize_frame(true, window_rect.x, window_rect.y, newWidth, newHeight);
+  }
+
+  // Window Relocation functions
+  this.left = function () {
+    let myWin = getFocusWin();
+    let [width_center,buffer,width,multimonitor_x_offset] = this.get_width_center(myWin);
+    let window_rect = this.window_rect(myWin);
+    let x_axis = (width_center - buffer) - window_rect['width'] + multimonitor_x_offset;
+    myWin.move_frame(true, x_axis, window_rect['y']);
+  }
+  this.right = function () {
+    let myWin = getFocusWin();
+    let [width_center,buffer,width,multimonitor_x_offset] = this.get_width_center(myWin);
+    let window_rect = this.window_rect(myWin);
+    let x_axis = (width_center + buffer) + multimonitor_x_offset;
+    myWin.move_frame(true, x_axis, window_rect['y']);
+  }
+  this.up = function () {
+    let myWin = getFocusWin();
+    let [height_center,buffer,height,multimonitor_y_offset] = this.get_height_center(myWin);
+    let window_rect = this.window_rect(myWin);
+    let y_axis = (height_center - buffer) - window_rect['height'] + multimonitor_y_offset;
+    // if new window is above the top of the monitor-display, then
+    //    ...reset y_axis inside display-monitor
+    if (y_axis < 0) {
+      y_axis = (buffer*2) + multimonitor_y_offset;
+    }
+    myWin.move_frame(true,window_rect['x'],y_axis);
+  }
+  this.down = function () {
+    let myWin = getFocusWin();
+    let [height_center,buffer,height,multimonitor_y_offset] = this.get_height_center(myWin);
+    let window_rect = this.window_rect(myWin);
+    let y_axis = height_center + buffer + multimonitor_y_offset;
+
+    // if bottom of window falls off the bottom of display-monitor, then
+    //    ...reset y_axis so that it is inside display-monitor bourdary
+    if ((y_axis+window_rect['height']) > (height+multimonitor_y_offset-buffer)) {
+      y_axis = y_axis-((y_axis+window_rect['height'])-height)+multimonitor_y_offset-buffer;
+    }
+    myWin.move_frame(true,window_rect['x'],y_axis);
+  }
+}
+
 export default class newWorkspaceShortcuts extends Extension {
 
   enable() {
     this.rWS = new reorderWS();
+    this.wTiler = new tiler();
     let mode = Shell.ActionMode.ALL;
     let flag = Meta.KeyBindingFlags.NONE;
     this._settings = this.getSettings();
@@ -138,6 +228,25 @@ export default class newWorkspaceShortcuts extends Extension {
       moveWSTriggersOverview = this._settings.get_boolean('move-ws-triggers-overview');
       this.rWS.left(moveWSTriggersOverview);
     });
+
+    // Shortcuts for resizing window
+    Main.wm.addKeybinding("resizewin", this._settings, flag, mode, () => {
+      this.wTiler.resize_window();
+    });
+
+    // Shortcuts for sliding window
+    Main.wm.addKeybinding("winright", this._settings, flag, mode, () => {
+      this.wTiler.right();
+    });
+    Main.wm.addKeybinding("winleft", this._settings, flag, mode, () => {
+      this.wTiler.left();
+    });
+    Main.wm.addKeybinding("winup", this._settings, flag, mode, () => {
+      this.wTiler.up();
+    });
+    Main.wm.addKeybinding("windown", this._settings, flag, mode, () => {
+      this.wTiler.down();
+    });
   }
 
   disable() {
@@ -147,7 +256,13 @@ export default class newWorkspaceShortcuts extends Extension {
     Main.wm.removeKeybinding("emptywsleft");
     Main.wm.removeKeybinding("wsright");
     Main.wm.removeKeybinding("wsleft");
+    Main.wm.removeKeybinding("resizewin");
+    Main.wm.removeKeybinding("winright");
+    Main.wm.removeKeybinding("winleft");
+    Main.wm.removeKeybinding("winup");
+    Main.wm.removeKeybinding("windown");
     this.rWS = null;
+    this.wTiler = null;
     this._settings = null;
   }
 }

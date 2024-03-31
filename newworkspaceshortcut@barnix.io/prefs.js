@@ -87,18 +87,10 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         });
         rwsGroup.add(rwsl);
 
-
-
-        // Options Section
-        const optionsPrefs = new Adw.PreferencesGroup();
-        optionsPrefs.set_title('Options')
-        page.add(optionsPrefs);
-        
-        // Trigger Overview Switch
         const triggers_overview = new Adw.ActionRow({
         title: 'Reorder-workspace shortcut will trigger Overview'
         });
-        optionsPrefs.add(triggers_overview);
+        rwsGroup.add(triggers_overview);
 
         const triggerOverviewSwitch = new Gtk.Switch({
             active: window._settings.get_boolean('move-ws-triggers-overview'),
@@ -110,6 +102,43 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
 
         window._settings.bind('move-ws-triggers-overview',
             triggerOverviewSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+
+        
+        // Tiler
+        const tilerGroup = new Adw.PreferencesGroup();
+        tilerGroup.set_title('Minimal-Tiler')
+        page.add(tilerGroup);
+        
+        const tr = new Adw.ActionRow({
+        title: 'Send window right',
+        subtitle: 'Ctl + Shift + Right'
+        });
+        tilerGroup.add(tr);
+
+        const tl = new Adw.ActionRow({
+        title: 'Send window left',
+        subtitle: 'Ctl + Shift + Left'
+        });
+        tilerGroup.add(tl);
+
+        const tu = new Adw.ActionRow({
+        title: 'Send window up',
+        subtitle: 'Ctl + Shift + Up'
+        });
+        tilerGroup.add(tu);
+
+        const td = new Adw.ActionRow({
+        title: 'Send window down',
+        subtitle: 'Ctl + Shift + Down'
+        });
+        tilerGroup.add(td);
+        
+        const resize = new Adw.ActionRow({
+        title: 'Resize window',
+        subtitle: 'Super + Space'
+        });
+        tilerGroup.add(resize);
 
     }
 }
