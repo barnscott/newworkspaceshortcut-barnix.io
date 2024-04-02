@@ -104,6 +104,56 @@ function reorderWS() {
   }
 }
 
+// const TilerToggle = GObject.registerClass(
+class TilerToggle {
+    _init() {
+      this._settings = this.getSettings();
+      tiler_status_key = this._settings.get_boolean('tiler-toggle');
+      this._settings.connect(`changed::tiler-toggle'`,() => this._toggle_event());
+    }
+
+    _toggle_event (){
+      var tiler_status_key = this._settings.get_boolean('tiler-toggle');
+      if(tiler_status_key == true ){
+          this._enable();
+      }else{
+          this._disable();
+      }
+    }
+
+    _enable () {
+
+      this.wTiler = new tiler();
+      
+      // Shortcuts for resizing window
+      Main.wm.addKeybinding("resizewin", this._settings, flag, mode, () => {
+        this.wTiler.resize_window();
+      });
+
+      // Shortcuts for sliding window
+      Main.wm.addKeybinding("winright", this._settings, flag, mode, () => {
+        this.wTiler.right();
+      });
+      Main.wm.addKeybinding("winleft", this._settings, flag, mode, () => {
+        this.wTiler.left();
+      });
+      Main.wm.addKeybinding("winup", this._settings, flag, mode, () => {
+        this.wTiler.up();
+      });
+      Main.wm.addKeybinding("windown", this._settings, flag, mode, () => {
+        this.wTiler.down();
+      });
+    }
+
+    _disable () {
+      Main.wm.removeKeybinding("resizewin");
+      Main.wm.removeKeybinding("winright");
+      Main.wm.removeKeybinding("winleft");
+      Main.wm.removeKeybinding("winup");
+      Main.wm.removeKeybinding("windown");
+    }
+  }
+// )
 
 function tiler(){
 
@@ -197,7 +247,6 @@ export default class newWorkspaceShortcuts extends Extension {
 
   enable() {
     this.rWS = new reorderWS();
-    this.wTiler = new tiler();
     let mode = Shell.ActionMode.ALL;
     let flag = Meta.KeyBindingFlags.NONE;
     this._settings = this.getSettings();
@@ -229,24 +278,8 @@ export default class newWorkspaceShortcuts extends Extension {
       this.rWS.left(moveWSTriggersOverview);
     });
 
-    // Shortcuts for resizing window
-    Main.wm.addKeybinding("resizewin", this._settings, flag, mode, () => {
-      this.wTiler.resize_window();
-    });
+    this._tilerToggle = new TilerToggle();
 
-    // Shortcuts for sliding window
-    Main.wm.addKeybinding("winright", this._settings, flag, mode, () => {
-      this.wTiler.right();
-    });
-    Main.wm.addKeybinding("winleft", this._settings, flag, mode, () => {
-      this.wTiler.left();
-    });
-    Main.wm.addKeybinding("winup", this._settings, flag, mode, () => {
-      this.wTiler.up();
-    });
-    Main.wm.addKeybinding("windown", this._settings, flag, mode, () => {
-      this.wTiler.down();
-    });
   }
 
   disable() {

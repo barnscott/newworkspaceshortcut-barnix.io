@@ -60,6 +60,14 @@
         Define if using the move-workspace shortcut should auto-trigger the Overview mode.
       </description>
     </key>
+    
+    <key name="tiler-toggle" type="b">
+      <default>false</default>
+      <summary>Enable Tiler features</summary>
+      <description>
+        Define if the minimal-tiler features should be available, or if features and their shortcuts, should be disabled.
+      </description>
+    </key>
 
     <key type="as" name="resizewin">
       <default><![CDATA[['<Super>Space']]]></default>
