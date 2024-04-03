@@ -19,13 +19,25 @@ These shortcuts are created to work logically with the vanilla gnome shortcuts i
 These shortcuts are intended to be a minimal enhancement to the default window-managment tools (ie, begin-resize, move-window, etc) in a vanilla Gnome configuration. These shortcuts are off by default, but can be enabled in the extension's settings panel.
 
 - `Super + Space` will resize window to 40% width by 45% height. This is preferable for wide-screen displays in landscape.
-- `Super + Alt` and `arrow-key` key will relocate the window to the applicable half of the display. The window will be justified to the center of the applicable axis. There is also a minimal gap applied to offset the center alignment.
-  - Using `Super + Alt + right` will relocate window to right side of the *center of the x-axis* of the display
-  - Using `Super + Alt + left` will relocate window to left side of the *center of the x-axis* of the display
-  - Using `Super + Alt + up` will relocate window to top side of the *center of the y-axis* of the display
-  - Using `Super + Alt + down` will relocate window to bottom side of the *center of the y-axis* of the display
+- `Control + Alt` and `arrow-key` key will relocate the window to the applicable half of the display. The window will be justified to the center of the applicable axis. There is also a minimal gap applied to offset the center alignment.
+  - Using `Control + Alt + right` will relocate window to right side of the *center of the x-axis* of the display
+  - Using `Control + Alt + left` will relocate window to left side of the *center of the x-axis* of the display
+  - Using `Control + Alt + up` will relocate window to top side of the *center of the y-axis* of the display
+  - Using `Control + Alt + down` will relocate window to bottom side of the *center of the y-axis* of the display
 
 Using these keys together, the user can quickly relocate windows into the center-most corner of the desktop quadrant.
+
+# How to modify defaults
+
+The extension's setting panel has a few settings exposed. However, to modify the shortcuts please use `dconf` or `gsettings`.
+
+The keys for modifying this extension's settings can be found via `dconf` app under the path:
+- /org/gnome/shell/extensions/newworkspaceshortcut
+
+Example, the following command will change the shortcut:
+```bash
+gsettings set org.gnome.shell.extensions.newworkspaceshortcut empty-workspace-right "['<Control><Super><Alt>Right']"
+```
 
 # Changes
 
@@ -117,4 +129,3 @@ I would like to add the following features, but don't have any priority. Feel fr
 
 - [ ] Code cleanup / optimization
 - [ ] Add ability to modify shortcut bindings on the extension's preferences window
-- [ ] Add top bar offset to Tiler up/down shortcuts

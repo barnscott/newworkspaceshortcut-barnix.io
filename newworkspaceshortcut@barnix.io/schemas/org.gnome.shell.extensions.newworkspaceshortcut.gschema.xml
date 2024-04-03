@@ -5,7 +5,7 @@
   <schema id="org.gnome.shell.extensions.newworkspaceshortcut"
     path="/org/gnome/shell/extensions/newworkspaceshortcut/">
 
-    <key type="as" name="movewinright">
+    <key type="as" name="move-window-to-right-workspace">
       <default><![CDATA[['<Super><Control><Shift>Right']]]></default>
       <summary>New Workspace Shortcut Right</summary>
       <description>
@@ -13,7 +13,7 @@
       </description>
     </key>
 
-    <key type="as" name="movewinleft">
+    <key type="as" name="move-window-to-left-workspace">
       <default><![CDATA[['<Super><Control><Shift>Left']]]></default>
       <summary>New Workspace Shortcut Left</summary>
       <description>
@@ -21,7 +21,7 @@
       </description>
     </key>
 
-    <key type="as" name="emptywsright">
+    <key type="as" name="empty-workspace-right">
       <default><![CDATA[['<Control><Shift><Alt>Right']]]></default>
       <summary>Empty Workspace Shortcut Right</summary>
       <description>
@@ -29,7 +29,7 @@
       </description>
     </key>
 
-    <key type="as" name="emptywsleft">
+    <key type="as" name="empty-workspace-left">
       <default><![CDATA[['<Control><Shift><Alt>Left']]]></default>
       <summary>Empty Workspace Shortcut Left</summary>
       <description>
@@ -37,7 +37,7 @@
       </description>
     </key>
 
-    <key type="as" name="wsright">
+    <key type="as" name="workspace-right">
       <default><![CDATA[['<Control><Super>Right']]]></default>
       <summary>Move Workspace Right</summary>
       <description>
@@ -45,7 +45,7 @@
       </description>
     </key>
 
-    <key type="as" name="wsleft">
+    <key type="as" name="workspace-left">
       <default><![CDATA[['<Control><Super>Left']]]></default>
       <summary>Move Workspace Left</summary>
       <description>
@@ -53,7 +53,7 @@
       </description>
     </key>
 
-    <key name="move-ws-triggers-overview" type="b">
+    <key name="move-workspace-triggers-overview" type="b">
       <default>true</default>
       <summary>Move WS Triggers Overview</summary>
       <description>
@@ -69,7 +69,7 @@
       </description>
     </key>
 
-    <key type="as" name="resizewin">
+    <key type="as" name="resize-win">
       <default><![CDATA[['<Super>Space']]]></default>
       <summary>Resize Window</summary>
       <description>
@@ -77,32 +77,32 @@
       </description>
     </key>
 
-    <key type="as" name="winright">
-      <default><![CDATA[['<Super><Alt>Right']]]></default>
+    <key type="as" name="window-right">
+      <default><![CDATA[['<Control><Alt>Right']]]></default>
       <summary>Slide window right</summary>
       <description>
         Slide window right
       </description>
     </key>
 
-    <key type="as" name="winleft">
-      <default><![CDATA[['<Super><Alt>Left']]]></default>
+    <key type="as" name="window-left">
+      <default><![CDATA[['<Control><Alt>Left']]]></default>
       <summary>Slide window left</summary>
       <description>
         Slide window left
       </description>
     </key>
 
-    <key type="as" name="winup">
-      <default><![CDATA[['<Super><Alt>Up']]]></default>
+    <key type="as" name="window-up">
+      <default><![CDATA[['<Control><Alt>Up']]]></default>
       <summary>Slide window up</summary>
       <description>
         Slide window up
       </description>
     </key>
     
-    <key type="as" name="windown">
-      <default><![CDATA[['<Super><Alt>Down']]]></default>
+    <key type="as" name="window-down">
+      <default><![CDATA[['<Control><Alt>Down']]]></default>
       <summary>Slide window down</summary>
       <description>
         Slide window down

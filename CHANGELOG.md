@@ -1,7 +1,7 @@
 # 46.2 (Mar 2024)
 ## CHANGES
 - Added functionality to disable/enable window-managment for minimal-tiling. Features are now disabled dy default and require user to enable via the extensions settings panel.
-- Modified the default of some of shortcuts to use the paradim that the Super-key/"Windows"-key is used in shortcuts that manipulate windows
+- Modified the defaults for some of shortcuts, including: (1) New-empty-workspace shortcut and (2) Window-mangement-assitant shortcuts
 ## New
 - Added ability to change shortcuts via `dconf` app and `gsettings` command
 

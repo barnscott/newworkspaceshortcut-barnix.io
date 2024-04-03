@@ -126,31 +126,31 @@ class TilerToggle {
       this.wTiler = new tiler();
 
       // Shortcuts for resizing window
-      Main.wm.addKeybinding("resizewin", this._settings, flag, mode, () => {
+      Main.wm.addKeybinding("resize-win", this._settings, flag, mode, () => {
         this.wTiler.resize_window();
       });
 
       // Shortcuts for sliding window
-      Main.wm.addKeybinding("winright", this._settings, flag, mode, () => {
+      Main.wm.addKeybinding("window-right", this._settings, flag, mode, () => {
         this.wTiler.right();
       });
-      Main.wm.addKeybinding("winleft", this._settings, flag, mode, () => {
+      Main.wm.addKeybinding("window-left", this._settings, flag, mode, () => {
         this.wTiler.left();
       });
-      Main.wm.addKeybinding("winup", this._settings, flag, mode, () => {
+      Main.wm.addKeybinding("window-up", this._settings, flag, mode, () => {
         this.wTiler.up();
       });
-      Main.wm.addKeybinding("windown", this._settings, flag, mode, () => {
+      Main.wm.addKeybinding("window-down", this._settings, flag, mode, () => {
         this.wTiler.down();
       });
     }
 
     _disable () {
-      Main.wm.removeKeybinding("resizewin");
-      Main.wm.removeKeybinding("winright");
-      Main.wm.removeKeybinding("winleft");
-      Main.wm.removeKeybinding("winup");
-      Main.wm.removeKeybinding("windown");
+      Main.wm.removeKeybinding("resize-win");
+      Main.wm.removeKeybinding("window-right");
+      Main.wm.removeKeybinding("window-left");
+      Main.wm.removeKeybinding("window-up");
+      Main.wm.removeKeybinding("window-down");
     }
   }
 // )
@@ -253,28 +253,28 @@ export default class newWorkspaceShortcuts extends Extension {
     let m,moveWSTriggersOverview;
     
     // Shortcuts for moving a window
-    Main.wm.addKeybinding("movewinright", this._settings, flag, mode, () => {
+    Main.wm.addKeybinding("move-window-to-right-workspace", this._settings, flag, mode, () => {
       moveWindow(m=1);
     });
-    Main.wm.addKeybinding("movewinleft", this._settings, flag, mode, () => {
+    Main.wm.addKeybinding("move-window-to-left-workspace", this._settings, flag, mode, () => {
       moveWindow(m=0);
     });
     
     // Shortcuts for creating an empty workspace
-    Main.wm.addKeybinding("emptywsright", this._settings, flag, mode, () => {
+    Main.wm.addKeybinding("empty-workspace-right", this._settings, flag, mode, () => {
       emptyWS(m=1);
     });
-    Main.wm.addKeybinding("emptywsleft", this._settings, flag, mode, () => {
+    Main.wm.addKeybinding("empty-workspace-left", this._settings, flag, mode, () => {
       emptyWS(m=0);
     });
 
     // Shortcuts for moving a workspace
-    Main.wm.addKeybinding("wsright", this._settings, flag, mode, () => {
-      moveWSTriggersOverview = this._settings.get_boolean('move-ws-triggers-overview');
+    Main.wm.addKeybinding("workspace-right", this._settings, flag, mode, () => {
+      moveWSTriggersOverview = this._settings.get_boolean('move-workspace-triggers-overview');
       this.rWS.right(moveWSTriggersOverview);
     });
-    Main.wm.addKeybinding("wsleft", this._settings, flag, mode, () => {
-      moveWSTriggersOverview = this._settings.get_boolean('move-ws-triggers-overview');
+    Main.wm.addKeybinding("workspace-left", this._settings, flag, mode, () => {
+      moveWSTriggersOverview = this._settings.get_boolean('move-workspace-triggers-overview');
       this.rWS.left(moveWSTriggersOverview);
     });
 
@@ -283,17 +283,17 @@ export default class newWorkspaceShortcuts extends Extension {
   }
 
   disable() {
-    Main.wm.removeKeybinding("movewinright");
-    Main.wm.removeKeybinding("movewinleft");
-    Main.wm.removeKeybinding("emptywsright");
-    Main.wm.removeKeybinding("emptywsleft");
-    Main.wm.removeKeybinding("wsright");
-    Main.wm.removeKeybinding("wsleft");
-    Main.wm.removeKeybinding("resizewin");
-    Main.wm.removeKeybinding("winright");
-    Main.wm.removeKeybinding("winleft");
-    Main.wm.removeKeybinding("winup");
-    Main.wm.removeKeybinding("windown");
+    Main.wm.removeKeybinding("move-window-to-right-workspace");
+    Main.wm.removeKeybinding("move-window-to-left-workspace");
+    Main.wm.removeKeybinding("empty-workspace-right");
+    Main.wm.removeKeybinding("empty-workspace-left");
+    Main.wm.removeKeybinding("workspace-right");
+    Main.wm.removeKeybinding("workspace-left");
+    Main.wm.removeKeybinding("resize-win");
+    Main.wm.removeKeybinding("window-right");
+    Main.wm.removeKeybinding("window-left");
+    Main.wm.removeKeybinding("window-up");
+    Main.wm.removeKeybinding("window-down");
     this.rWS = null;
     this.wTiler = null;
     this._settings = null;
