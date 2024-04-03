@@ -107,8 +107,8 @@ function reorderWS() {
 // const TilerToggle = GObject.registerClass(
 class TilerToggle {
     _init() {
-      this._settings = this.getSettings();
-      tiler_status_key = this._settings.get_boolean('tiler-toggle');
+      // this._settings = this.getSettings();
+      // tiler_status_key = this._settings.get_boolean('tiler-toggle');
       this._settings.connect(`changed::tiler-toggle'`,() => this._toggle_event());
     }
 
@@ -124,7 +124,7 @@ class TilerToggle {
     _enable () {
 
       this.wTiler = new tiler();
-      
+
       // Shortcuts for resizing window
       Main.wm.addKeybinding("resizewin", this._settings, flag, mode, () => {
         this.wTiler.resize_window();

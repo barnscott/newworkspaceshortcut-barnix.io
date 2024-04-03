@@ -1,3 +1,10 @@
+# 46.2 (Mar 2024)
+## CHANGES
+- Added functionality to disable/enable window-managment for minimal-tiling. Features are now disabled dy default and require user to enable via the extensions settings panel.
+- Modified the default of some of shortcuts to use the paradim that the Super-key/"Windows"-key is used in shortcuts that manipulate windows
+## New
+- Added ability to change shortcuts via `dconf` app and `gsettings` command
+
 # 46.1 (Mar 2024)
 ## CHANGES
 - Added minimal tiling features to v46.0 release

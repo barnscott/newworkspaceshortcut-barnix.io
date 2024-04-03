@@ -6,8 +6,8 @@
   - Use a shortcut to move the in-focus window to a *new* workspace on the right of your current workspace: `Ctl + Super + Shift + Right`
   - Or to the left / *backward*: `Ctl + Super + Shift + Left`
 - New-empty-workspace Shortcut:
-  - Use a shortcut to create an *empty* workspace on the right: `Ctl + Super + Alt + Right`
-  - Or to the left / *backward*: `Ctl + Super + Alt + Left`
+  - Use a shortcut to create an *empty* workspace on the right: `Ctl + Shift + Alt + Right` (Changed in `v46.2`, March 2024)
+  - Or to the left / *backward*: `Ctl + Shift + Alt + Left` (Changed in `v46.2`, March 2024)
 - Reorder-workspace Shortcut:
   - Use a shortcut to move an entire workspace left or right of the current workspace: `Ctl + Super + Left` or `Ctl + Super + Right`
   - By default, this shortcut with automatically trigger the Overview to provide a limited form of visual feedback. However, this preference can be changed via the extension's Settings panel.
@@ -19,13 +19,17 @@ These shortcuts are created to work logically with the vanilla gnome shortcuts i
 These shortcuts are intended to be a minimal enhancement to the default window-managment tools (ie, begin-resize, move-window, etc) in a vanilla Gnome configuration. These shortcuts are off by default, but can be enabled in the extension's settings panel.
 
 - `Super + Space` will resize window to 40% width by 45% height. This is preferable for wide-screen displays in landscape.
-- `Ctl + Shift` and `arrow-key` key will relocate the window to the applicable half of the display. The window will be justified to the center of the applicable axis. There is also a minimal gap applied to offset the center alignment.
-  - Using `Ctl + Shift + right` will relocate window to right side of the *center of the x-axis* of the display
-  - Using `Ctl + Shift + left` will relocate window to left side of the *center of the x-axis* of the display
-  - Using `Ctl + Shift + up` will relocate window to top side of the *center of the y-axis* of the display
-  - Using `Ctl + Shift + down` will relocate window to bottom side of the *center of the y-axis* of the display
+- `Super + Alt` and `arrow-key` key will relocate the window to the applicable half of the display. The window will be justified to the center of the applicable axis. There is also a minimal gap applied to offset the center alignment.
+  - Using `Super + Alt + right` will relocate window to right side of the *center of the x-axis* of the display
+  - Using `Super + Alt + left` will relocate window to left side of the *center of the x-axis* of the display
+  - Using `Super + Alt + up` will relocate window to top side of the *center of the y-axis* of the display
+  - Using `Super + Alt + down` will relocate window to bottom side of the *center of the y-axis* of the display
 
 Using these keys together, the user can quickly relocate windows into the center-most corner of the desktop quadrant.
+
+# Changes
+
+See `CHANGELOG.md` to identify changes in newer releases. Releases after `v46.0` including multiple _breaking_ changes.
 
 # Supported Gnome versions
 

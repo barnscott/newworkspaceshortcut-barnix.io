@@ -22,7 +22,7 @@
     </key>
 
     <key type="as" name="emptywsright">
-      <default><![CDATA[['<Control><Super><Alt>Right']]]></default>
+      <default><![CDATA[['<Control><Shift><Alt>Right']]]></default>
       <summary>Empty Workspace Shortcut Right</summary>
       <description>
         Empty Workspace Shortcut key binding
@@ -30,7 +30,7 @@
     </key>
 
     <key type="as" name="emptywsleft">
-      <default><![CDATA[['<Control><Super><Alt>Left']]]></default>
+      <default><![CDATA[['<Control><Shift><Alt>Left']]]></default>
       <summary>Empty Workspace Shortcut Left</summary>
       <description>
         Empty Workspace Shortcut key binding
@@ -78,7 +78,7 @@
     </key>
 
     <key type="as" name="winright">
-      <default><![CDATA[['<Control><Shift>Right']]]></default>
+      <default><![CDATA[['<Super><Alt>Right']]]></default>
       <summary>Slide window right</summary>
       <description>
         Slide window right
@@ -86,7 +86,7 @@
     </key>
 
     <key type="as" name="winleft">
-      <default><![CDATA[['<Control><Shift>Left']]]></default>
+      <default><![CDATA[['<Super><Alt>Left']]]></default>
       <summary>Slide window left</summary>
       <description>
         Slide window left
@@ -94,7 +94,7 @@
     </key>
 
     <key type="as" name="winup">
-      <default><![CDATA[['<Control><Shift>Up']]]></default>
+      <default><![CDATA[['<Super><Alt>Up']]]></default>
       <summary>Slide window up</summary>
       <description>
         Slide window up
@@ -102,7 +102,7 @@
     </key>
     
     <key type="as" name="windown">
-      <default><![CDATA[['<Control><Shift>Down']]]></default>
+      <default><![CDATA[['<Super><Alt>Down']]]></default>
       <summary>Slide window down</summary>
       <description>
         Slide window down
