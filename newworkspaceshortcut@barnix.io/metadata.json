@@ -1,5 +1,5 @@
 {
-  "description": "Shortcuts to (1) insert a new workspace, (2) reorder workspaces and (3) hyper-minimal floating-window quardrant tiler.",
+  "description": "Shortcuts to (1) insert a new workspace, (2) reorder workspaces and (3) window-mangement assitant for minimal tiling.",
   "name": "New Workspace Shortcut",
   "settings-schema": "org.gnome.shell.extensions.newworkspaceshortcut",
   "shell-version": [
