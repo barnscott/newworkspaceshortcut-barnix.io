@@ -106,46 +106,52 @@ function reorderWS() {
 
 // const TilerToggle = GObject.registerClass(
 class TilerToggle {
-    _init() {
-      // this._settings = this.getSettings();
-      // tiler_status_key = this._settings.get_boolean('tiler-toggle');
-      this._settings.connect(`changed::tiler-toggle'`,() => this._toggle_event());
+    constructor(extSettings,flag,mode) {
+      console.log('DEBUG: TilerToggle constructor NOW');
+      this._settings = extSettings;
+      this.flag = flag;
+      this.mode = mode;
+      // this._settings.connect(`changed::tiler-toggle'`,() => {
+      //   console.log('DEBUG: CONNECT_EVENT');
+      //   this.toggle_event();
+      // });
+      // this.toggle_event();
     }
 
-    _toggle_event (){
+    toggle_event () {
+      console.log('DEBUG: toggle_event NOW');
       var tiler_status_key = this._settings.get_boolean('tiler-toggle');
       if(tiler_status_key == true ){
-          this._enable();
+        console.log('DEBUG: ENABLE');
+          this.enable();
+          console.log('DEBUG: ENABLE-DONE');
       }else{
-          this._disable();
+        console.log('DEBUG: DISABLE');
+          this.disable();
+          console.log('DEBUG: DISABLE-DONE');
       }
     }
 
-    _enable () {
-
+    enable () {
       this.wTiler = new tiler();
-
-      // Shortcuts for resizing window
-      Main.wm.addKeybinding("resize-win", this._settings, flag, mode, () => {
+      Main.wm.addKeybinding("resize-win", this._settings, this.flag, this.mode, () => {
         this.wTiler.resize_window();
       });
-
-      // Shortcuts for sliding window
-      Main.wm.addKeybinding("window-right", this._settings, flag, mode, () => {
+      Main.wm.addKeybinding("window-right", this._settings, this.flag, this.mode, () => {
         this.wTiler.right();
       });
-      Main.wm.addKeybinding("window-left", this._settings, flag, mode, () => {
+      Main.wm.addKeybinding("window-left", this._settings, this.flag, this.mode, () => {
         this.wTiler.left();
       });
-      Main.wm.addKeybinding("window-up", this._settings, flag, mode, () => {
+      Main.wm.addKeybinding("window-up", this._settings, this.flag, this.mode, () => {
         this.wTiler.up();
       });
-      Main.wm.addKeybinding("window-down", this._settings, flag, mode, () => {
+      Main.wm.addKeybinding("window-down", this._settings, this.flag, this.mode, () => {
         this.wTiler.down();
       });
     }
 
-    _disable () {
+    disable () {
       Main.wm.removeKeybinding("resize-win");
       Main.wm.removeKeybinding("window-right");
       Main.wm.removeKeybinding("window-left");
@@ -251,7 +257,7 @@ export default class newWorkspaceShortcuts extends Extension {
     let flag = Meta.KeyBindingFlags.NONE;
     this._settings = this.getSettings();
     let m,moveWSTriggersOverview;
-    
+
     // Shortcuts for moving a window
     Main.wm.addKeybinding("move-window-to-right-workspace", this._settings, flag, mode, () => {
       moveWindow(m=1);
@@ -278,7 +284,8 @@ export default class newWorkspaceShortcuts extends Extension {
       this.rWS.left(moveWSTriggersOverview);
     });
 
-    this._tilerToggle = new TilerToggle();
+    this._tilerToggle = new TilerToggle(this._settings,flag,mode);
+    // this._settings.bind('tiler-toggle', this._settings, 'active', Gio.SettingsBindFlags.DEFAULT);
 
   }
 
@@ -289,11 +296,13 @@ export default class newWorkspaceShortcuts extends Extension {
     Main.wm.removeKeybinding("empty-workspace-left");
     Main.wm.removeKeybinding("workspace-right");
     Main.wm.removeKeybinding("workspace-left");
-    Main.wm.removeKeybinding("resize-win");
-    Main.wm.removeKeybinding("window-right");
-    Main.wm.removeKeybinding("window-left");
-    Main.wm.removeKeybinding("window-up");
-    Main.wm.removeKeybinding("window-down");
+
+    this._tilerToggle.disable();
+    // Main.wm.removeKeybinding("resize-win");
+    // Main.wm.removeKeybinding("window-right");
+    // Main.wm.removeKeybinding("window-left");
+    // Main.wm.removeKeybinding("window-up");
+    // Main.wm.removeKeybinding("window-down");
     this.rWS = null;
     this.wTiler = null;
     this._settings = null;

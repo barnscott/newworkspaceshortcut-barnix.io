@@ -19,11 +19,11 @@ These shortcuts are created to work logically with the vanilla gnome shortcuts i
 These shortcuts are intended to be a minimal enhancement to the default window-managment tools (ie, begin-resize, move-window, etc) in a vanilla Gnome configuration. These shortcuts are off by default, but can be enabled in the extension's settings panel.
 
 - `Super + Space` will resize window to 40% width by 45% height. This is preferable for wide-screen displays in landscape.
-- `Control + Alt` and `arrow-key` key will relocate the window to the applicable half of the display. The window will be justified to the center of the applicable axis. There is also a minimal gap applied to offset the center alignment.
-  - Using `Control + Alt + right` will relocate window to right side of the *center of the x-axis* of the display
-  - Using `Control + Alt + left` will relocate window to left side of the *center of the x-axis* of the display
-  - Using `Control + Alt + up` will relocate window to top side of the *center of the y-axis* of the display
-  - Using `Control + Alt + down` will relocate window to bottom side of the *center of the y-axis* of the display
+- `Control + Super` and `arrow-key` key will relocate the window to the applicable half of the display. The window will be justified to the center of the applicable axis. There is also a minimal gap applied to offset the center alignment.
+  - Using `Control + Super + right` will relocate window to right side of the *center of the x-axis* of the display
+  - Using `Control + Super + left` will relocate window to left side of the *center of the x-axis* of the display
+  - Using `Control + Super + up` will relocate window to top side of the *center of the y-axis* of the display
+  - Using `Control + Super + down` will relocate window to bottom side of the *center of the y-axis* of the display
 
 Using these keys together, the user can quickly relocate windows into the center-most corner of the desktop quadrant.
 
