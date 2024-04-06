@@ -178,12 +178,8 @@ function settingsInit() {
             let newshortcutarray = [ String(shortcutEntry.get_buffer().text) ]
             ext_settings.set_strv(sEvent,newshortcutarray)
         });
-
         actionEvent.add_suffix(shortcutEntry);
         actionEvent.activatable_widget = shortcutEntry;
-
-        ext_settings.bind(sEvent,
-            shortcutEntry, 'string', Gio.SettingsBindFlags.DEFAULT);// text
     }
 
     this.switch = function (ext_settings,actionEvent,sEvent) {
@@ -191,11 +187,9 @@ function settingsInit() {
             active: ext_settings.get_boolean(sEvent),
             valign: Gtk.Align.CENTER,
             });
-
+        
+        ext_settings.bind(sEvent,tilerToggleSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
         actionEvent.add_suffix(tilerToggleSwitch);
         actionEvent.activatable_widget = tilerToggleSwitch;
-
-        ext_settings.bind(sEvent,
-            tilerToggleSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
     }
   }

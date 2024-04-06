@@ -104,31 +104,20 @@ function reorderWS() {
   }
 }
 
-// const TilerToggle = GObject.registerClass(
 class TilerToggle {
     constructor(extSettings,flag,mode) {
-      console.log('DEBUG: TilerToggle constructor NOW');
       this._settings = extSettings;
       this.flag = flag;
       this.mode = mode;
-      // this._settings.connect(`changed::tiler-toggle'`,() => {
-      //   console.log('DEBUG: CONNECT_EVENT');
-      //   this.toggle_event();
-      // });
-      // this.toggle_event();
+      this.toggle_event();
     }
 
     toggle_event () {
-      console.log('DEBUG: toggle_event NOW');
       var tiler_status_key = this._settings.get_boolean('tiler-toggle');
       if(tiler_status_key == true ){
-        console.log('DEBUG: ENABLE');
           this.enable();
-          console.log('DEBUG: ENABLE-DONE');
       }else{
-        console.log('DEBUG: DISABLE');
           this.disable();
-          console.log('DEBUG: DISABLE-DONE');
       }
     }
 
@@ -163,7 +152,6 @@ class TilerToggle {
 
 function tiler(){
 
-  // Display constructor
   this.get_display_info = function (myWin){
     let mydisplay = myWin.get_display();
     let monitor_geo = mydisplay.get_monitor_geometry(mydisplay.get_current_monitor());
@@ -285,7 +273,9 @@ export default class newWorkspaceShortcuts extends Extension {
     });
 
     this._tilerToggle = new TilerToggle(this._settings,flag,mode);
-    // this._settings.bind('tiler-toggle', this._settings, 'active', Gio.SettingsBindFlags.DEFAULT);
+    this._settings.connect(`changed::tiler-toggle`,() => {
+      this._tilerToggle.toggle_event();
+    });
 
   }
 
@@ -296,13 +286,7 @@ export default class newWorkspaceShortcuts extends Extension {
     Main.wm.removeKeybinding("empty-workspace-left");
     Main.wm.removeKeybinding("workspace-right");
     Main.wm.removeKeybinding("workspace-left");
-
     this._tilerToggle.disable();
-    // Main.wm.removeKeybinding("resize-win");
-    // Main.wm.removeKeybinding("window-right");
-    // Main.wm.removeKeybinding("window-left");
-    // Main.wm.removeKeybinding("window-up");
-    // Main.wm.removeKeybinding("window-down");
     this.rWS = null;
     this.wTiler = null;
     this._settings = null;
