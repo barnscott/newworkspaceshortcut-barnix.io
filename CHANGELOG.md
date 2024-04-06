@@ -1,3 +1,10 @@
+# 46.2 (Mar 2024)
+## CHANGES
+- Added functionality to disable/enable window-managment for minimal-tiling. Features are now disabled dy default and require user to enable via the extensions settings panel.
+- Modified the defaults for some of shortcuts, including: (1) New-empty-workspace shortcut and (2) Window-mangement-assitant shortcuts
+## New
+- Added basic functionality to modify shortcuts via the setting's panel
+
 # 46.1 (Mar 2024)
 ## CHANGES
 - Added minimal tiling features to v46.0 release

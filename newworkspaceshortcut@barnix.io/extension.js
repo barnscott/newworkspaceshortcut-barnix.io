@@ -104,10 +104,54 @@ function reorderWS() {
   }
 }
 
+class TilerToggle {
+    constructor(extSettings,flag,mode) {
+      this._settings = extSettings;
+      this.flag = flag;
+      this.mode = mode;
+      this.toggle_event();
+    }
+
+    toggle_event () {
+      var tiler_status_key = this._settings.get_boolean('tiler-toggle');
+      if(tiler_status_key == true ){
+          this.enable();
+      }else{
+          this.disable();
+      }
+    }
+
+    enable () {
+      this.wTiler = new tiler();
+      Main.wm.addKeybinding("resize-win", this._settings, this.flag, this.mode, () => {
+        this.wTiler.resize_window();
+      });
+      Main.wm.addKeybinding("window-right", this._settings, this.flag, this.mode, () => {
+        this.wTiler.right();
+      });
+      Main.wm.addKeybinding("window-left", this._settings, this.flag, this.mode, () => {
+        this.wTiler.left();
+      });
+      Main.wm.addKeybinding("window-up", this._settings, this.flag, this.mode, () => {
+        this.wTiler.up();
+      });
+      Main.wm.addKeybinding("window-down", this._settings, this.flag, this.mode, () => {
+        this.wTiler.down();
+      });
+    }
+
+    disable () {
+      Main.wm.removeKeybinding("resize-win");
+      Main.wm.removeKeybinding("window-right");
+      Main.wm.removeKeybinding("window-left");
+      Main.wm.removeKeybinding("window-up");
+      Main.wm.removeKeybinding("window-down");
+    }
+  }
+// )
 
 function tiler(){
 
-  // Display constructor
   this.get_display_info = function (myWin){
     let mydisplay = myWin.get_display();
     let monitor_geo = mydisplay.get_monitor_geometry(mydisplay.get_current_monitor());
@@ -197,70 +241,52 @@ export default class newWorkspaceShortcuts extends Extension {
 
   enable() {
     this.rWS = new reorderWS();
-    this.wTiler = new tiler();
     let mode = Shell.ActionMode.ALL;
     let flag = Meta.KeyBindingFlags.NONE;
     this._settings = this.getSettings();
     let m,moveWSTriggersOverview;
-    
+
     // Shortcuts for moving a window
-    Main.wm.addKeybinding("movewinright", this._settings, flag, mode, () => {
+    Main.wm.addKeybinding("move-window-to-right-workspace", this._settings, flag, mode, () => {
       moveWindow(m=1);
     });
-    Main.wm.addKeybinding("movewinleft", this._settings, flag, mode, () => {
+    Main.wm.addKeybinding("move-window-to-left-workspace", this._settings, flag, mode, () => {
       moveWindow(m=0);
     });
     
     // Shortcuts for creating an empty workspace
-    Main.wm.addKeybinding("emptywsright", this._settings, flag, mode, () => {
+    Main.wm.addKeybinding("empty-workspace-right", this._settings, flag, mode, () => {
       emptyWS(m=1);
     });
-    Main.wm.addKeybinding("emptywsleft", this._settings, flag, mode, () => {
+    Main.wm.addKeybinding("empty-workspace-left", this._settings, flag, mode, () => {
       emptyWS(m=0);
     });
 
     // Shortcuts for moving a workspace
-    Main.wm.addKeybinding("wsright", this._settings, flag, mode, () => {
-      moveWSTriggersOverview = this._settings.get_boolean('move-ws-triggers-overview');
+    Main.wm.addKeybinding("workspace-right", this._settings, flag, mode, () => {
+      moveWSTriggersOverview = this._settings.get_boolean('move-workspace-triggers-overview');
       this.rWS.right(moveWSTriggersOverview);
     });
-    Main.wm.addKeybinding("wsleft", this._settings, flag, mode, () => {
-      moveWSTriggersOverview = this._settings.get_boolean('move-ws-triggers-overview');
+    Main.wm.addKeybinding("workspace-left", this._settings, flag, mode, () => {
+      moveWSTriggersOverview = this._settings.get_boolean('move-workspace-triggers-overview');
       this.rWS.left(moveWSTriggersOverview);
     });
 
-    // Shortcuts for resizing window
-    Main.wm.addKeybinding("resizewin", this._settings, flag, mode, () => {
-      this.wTiler.resize_window();
+    this._tilerToggle = new TilerToggle(this._settings,flag,mode);
+    this._settings.connect(`changed::tiler-toggle`,() => {
+      this._tilerToggle.toggle_event();
     });
 
-    // Shortcuts for sliding window
-    Main.wm.addKeybinding("winright", this._settings, flag, mode, () => {
-      this.wTiler.right();
-    });
-    Main.wm.addKeybinding("winleft", this._settings, flag, mode, () => {
-      this.wTiler.left();
-    });
-    Main.wm.addKeybinding("winup", this._settings, flag, mode, () => {
-      this.wTiler.up();
-    });
-    Main.wm.addKeybinding("windown", this._settings, flag, mode, () => {
-      this.wTiler.down();
-    });
   }
 
   disable() {
-    Main.wm.removeKeybinding("movewinright");
-    Main.wm.removeKeybinding("movewinleft");
-    Main.wm.removeKeybinding("emptywsright");
-    Main.wm.removeKeybinding("emptywsleft");
-    Main.wm.removeKeybinding("wsright");
-    Main.wm.removeKeybinding("wsleft");
-    Main.wm.removeKeybinding("resizewin");
-    Main.wm.removeKeybinding("winright");
-    Main.wm.removeKeybinding("winleft");
-    Main.wm.removeKeybinding("winup");
-    Main.wm.removeKeybinding("windown");
+    Main.wm.removeKeybinding("move-window-to-right-workspace");
+    Main.wm.removeKeybinding("move-window-to-left-workspace");
+    Main.wm.removeKeybinding("empty-workspace-right");
+    Main.wm.removeKeybinding("empty-workspace-left");
+    Main.wm.removeKeybinding("workspace-right");
+    Main.wm.removeKeybinding("workspace-left");
+    this._tilerToggle.disable();
     this.rWS = null;
     this.wTiler = null;
     this._settings = null;

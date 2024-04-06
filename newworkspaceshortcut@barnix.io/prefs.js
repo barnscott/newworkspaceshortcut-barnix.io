@@ -39,15 +39,19 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         
         const mwr = new Adw.ActionRow({
         title: 'Move window to New Workspace - Right',
-        subtitle: 'Ctl + Super + Shift + Right'
+        subtitle: 'Default: Ctl + Super + Shift + Right'
         });
         mwGroup.add(mwr);
+        this.sInit_mwr = new settingsInit();
+        this.sInit_mwr.shortcut(window._settings,mwr,"move-window-to-right-workspace");
 
         const mwl = new Adw.ActionRow({
         title: 'Move window to New Workspace - Left',
-        subtitle: 'Ctl + Super + Shift + Left'
+        subtitle: 'Default: Ctl + Super + Shift + Left'
         });
         mwGroup.add(mwl);
+        this.sInit_mwl = new settingsInit();
+        this.sInit_mwl.shortcut(window._settings,mwl,"move-window-to-left-workspace");
         
 
 
@@ -58,15 +62,19 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         
         const ewr = new Adw.ActionRow({
         title: 'New Empty Workspace - Right',
-        subtitle: 'Ctl + Super + Alt + Right'
+        subtitle: 'Default: Ctl + Shift + Alt + Right'
         });
         ewGroup.add(ewr);
+        this.sInit_ewr = new settingsInit();
+        this.sInit_ewr.shortcut(window._settings,ewr,"empty-workspace-right");
 
         const ewl = new Adw.ActionRow({
         title: 'New Empty Workspace - Left',
-        subtitle: 'Ctl + Super + Alt + Left'
+        subtitle: 'Default: Ctl + Shift + Alt + Left'
         });
         ewGroup.add(ewl);
+        this.sInit_ewl = new settingsInit();
+        this.sInit_ewl.shortcut(window._settings,ewl,"empty-workspace-left");
 
 
 
@@ -77,69 +85,111 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         
         const rwsr = new Adw.ActionRow({
         title: 'Reorder-workspace - Right',
-        subtitle: 'Ctl + Super + Right'
+        subtitle: 'Default: Ctl + Alt + Right'
         });
         rwsGroup.add(rwsr);
+        this.sInit_rwsr = new settingsInit();
+        this.sInit_rwsr.shortcut(window._settings,rwsr,"workspace-right");
 
         const rwsl = new Adw.ActionRow({
         title: 'Reorder-workspace - Left',
-        subtitle: 'Ctl + Super + Left'
+        subtitle: 'Default: Ctl + Alt + Left'
         });
         rwsGroup.add(rwsl);
+        this.sInit_rwsl = new settingsInit();
+        this.sInit_rwsl.shortcut(window._settings,rwsl,"workspace-left");
 
         const triggers_overview = new Adw.ActionRow({
         title: 'Reorder-workspace shortcut will trigger Overview'
         });
         rwsGroup.add(triggers_overview);
-
-        const triggerOverviewSwitch = new Gtk.Switch({
-            active: window._settings.get_boolean('move-ws-triggers-overview'),
-            valign: Gtk.Align.CENTER,
-          });
-
-        triggers_overview.add_suffix(triggerOverviewSwitch);
-        triggers_overview.activatable_widget = triggerOverviewSwitch;
-
-        window._settings.bind('move-ws-triggers-overview',
-            triggerOverviewSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
-
-
+        this.sInit_toverview = new settingsInit();
+        this.sInit_toverview.switch(window._settings,triggers_overview,"move-workspace-triggers-overview");
         
+
+
         // Tiler
         const tilerGroup = new Adw.PreferencesGroup();
-        tilerGroup.set_title('Minimal-Tiler')
+        tilerGroup.set_title('Window managment assistant for tiling')
         page.add(tilerGroup);
+
+        const tiler_toggle = new Adw.ActionRow({
+            title: 'Enable window managment shortcuts'
+        });
+        tilerGroup.add(tiler_toggle);
+        this.sInit_ttoggle = new settingsInit();
+        this.sInit_ttoggle.switch(window._settings,tiler_toggle,"tiler-toggle");
         
+
         const tr = new Adw.ActionRow({
         title: 'Send window right',
-        subtitle: 'Ctl + Shift + Right'
+        subtitle: 'Default: Ctl + Super + Left'
         });
         tilerGroup.add(tr);
+        this.sInit_tr = new settingsInit();
+        this.sInit_tr.shortcut(window._settings,tr,"window-right");
+
 
         const tl = new Adw.ActionRow({
         title: 'Send window left',
-        subtitle: 'Ctl + Shift + Left'
+        subtitle: 'Default: Ctl + Super + Left'
         });
         tilerGroup.add(tl);
+        this.sInit_tl = new settingsInit();
+        this.sInit_tl.shortcut(window._settings,tl,"window-left");
 
         const tu = new Adw.ActionRow({
         title: 'Send window up',
-        subtitle: 'Ctl + Shift + Up'
+        subtitle: 'Default: Ctl + Super + Up'
         });
         tilerGroup.add(tu);
+        this.sInit_tu = new settingsInit();
+        this.sInit_tu.shortcut(window._settings,tu,"window-up");
 
         const td = new Adw.ActionRow({
         title: 'Send window down',
-        subtitle: 'Ctl + Shift + Down'
+        subtitle: 'Default: Ctl + Super + Down'
         });
         tilerGroup.add(td);
+        this.sInit_td = new settingsInit();
+        this.sInit_td.shortcut(window._settings,td,"window-down");
         
         const resize = new Adw.ActionRow({
         title: 'Resize window',
-        subtitle: 'Super + Space'
+        subtitle: 'Default: Super + Space'
         });
         tilerGroup.add(resize);
+        this.sInit_resize = new settingsInit();
+        this.sInit_resize.shortcut(window._settings,resize,"resize-win");
 
     }
 }
 
+function settingsInit() {
+
+    this.shortcut = function (ext_settings,actionEvent,sEvent) {
+        const shortcutEntry = new Gtk.Text({
+            buffer:  new Gtk.EntryBuffer({
+                text: String(ext_settings.get_strv(sEvent))
+            })
+        });
+
+        shortcutEntry.connect('activate', () => {
+            let newshortcutarray = [ String(shortcutEntry.get_buffer().text) ]
+            ext_settings.set_strv(sEvent,newshortcutarray)
+        });
+        actionEvent.add_suffix(shortcutEntry);
+        actionEvent.activatable_widget = shortcutEntry;
+    }
+
+    this.switch = function (ext_settings,actionEvent,sEvent) {
+        const tilerToggleSwitch = new Gtk.Switch({
+            active: ext_settings.get_boolean(sEvent),
+            valign: Gtk.Align.CENTER,
+            });
+        
+        ext_settings.bind(sEvent,tilerToggleSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
+        actionEvent.add_suffix(tilerToggleSwitch);
+        actionEvent.activatable_widget = tilerToggleSwitch;
+    }
+  }

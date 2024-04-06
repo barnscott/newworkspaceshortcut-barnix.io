@@ -5,7 +5,7 @@
   <schema id="org.gnome.shell.extensions.newworkspaceshortcut"
     path="/org/gnome/shell/extensions/newworkspaceshortcut/">
 
-    <key type="as" name="movewinright">
+    <key name="move-window-to-right-workspace" type="as">
       <default><![CDATA[['<Super><Control><Shift>Right']]]></default>
       <summary>New Workspace Shortcut Right</summary>
       <description>
@@ -13,7 +13,7 @@
       </description>
     </key>
 
-    <key type="as" name="movewinleft">
+    <key name="move-window-to-left-workspace" type="as">
       <default><![CDATA[['<Super><Control><Shift>Left']]]></default>
       <summary>New Workspace Shortcut Left</summary>
       <description>
@@ -21,47 +21,55 @@
       </description>
     </key>
 
-    <key type="as" name="emptywsright">
-      <default><![CDATA[['<Control><Super><Alt>Right']]]></default>
+    <key name="empty-workspace-right" type="as">
+      <default><![CDATA[['<Control><Shift><Alt>Right']]]></default>
       <summary>Empty Workspace Shortcut Right</summary>
       <description>
         Empty Workspace Shortcut key binding
       </description>
     </key>
 
-    <key type="as" name="emptywsleft">
-      <default><![CDATA[['<Control><Super><Alt>Left']]]></default>
+    <key name="empty-workspace-left" type="as">
+      <default><![CDATA[['<Control><Shift><Alt>Left']]]></default>
       <summary>Empty Workspace Shortcut Left</summary>
       <description>
         Empty Workspace Shortcut key binding
       </description>
     </key>
 
-    <key type="as" name="wsright">
-      <default><![CDATA[['<Control><Super>Right']]]></default>
-      <summary>Move Workspace Right</summary>
+    <key name="workspace-right" type="as">
+      <default><![CDATA[['<Control><Alt>Right']]]></default>
+      <summary>Reorder Workspace Right</summary>
       <description>
-        Move Workspace Right Shortcut key binding
+        Reorder Workspace Right Shortcut key binding
       </description>
     </key>
 
-    <key type="as" name="wsleft">
-      <default><![CDATA[['<Control><Super>Left']]]></default>
-      <summary>Move Workspace Left</summary>
+    <key name="workspace-left" type="as">
+      <default><![CDATA[['<Control><Alt>Left']]]></default>
+      <summary>Reorder Workspace Left</summary>
       <description>
-        Move Workspace Left Shortcut key binding
+        Reorder Workspace Left Shortcut key binding
       </description>
     </key>
 
-    <key name="move-ws-triggers-overview" type="b">
+    <key name="move-workspace-triggers-overview" type="b">
       <default>true</default>
       <summary>Move WS Triggers Overview</summary>
       <description>
         Define if using the move-workspace shortcut should auto-trigger the Overview mode.
       </description>
     </key>
+    
+    <key name="tiler-toggle" type="b">
+      <default>false</default>
+      <summary>Enable Tiler features</summary>
+      <description>
+        Define if the minimal-tiler features should be available, or if features and their shortcuts, should be disabled.
+      </description>
+    </key>
 
-    <key type="as" name="resizewin">
+    <key name="resize-win" type="as">
       <default><![CDATA[['<Super>Space']]]></default>
       <summary>Resize Window</summary>
       <description>
@@ -69,32 +77,32 @@
       </description>
     </key>
 
-    <key type="as" name="winright">
-      <default><![CDATA[['<Control><Shift>Right']]]></default>
+    <key name="window-right" type="as">
+      <default><![CDATA[['<Control><Super>Right']]]></default>
       <summary>Slide window right</summary>
       <description>
         Slide window right
       </description>
     </key>
 
-    <key type="as" name="winleft">
-      <default><![CDATA[['<Control><Shift>Left']]]></default>
+    <key name="window-left" type="as">
+      <default><![CDATA[['<Control><Super>Left']]]></default>
       <summary>Slide window left</summary>
       <description>
         Slide window left
       </description>
     </key>
 
-    <key type="as" name="winup">
-      <default><![CDATA[['<Control><Shift>Up']]]></default>
+    <key name="window-up" type="as">
+      <default><![CDATA[['<Control><Super>Up']]]></default>
       <summary>Slide window up</summary>
       <description>
         Slide window up
       </description>
     </key>
     
-    <key type="as" name="windown">
-      <default><![CDATA[['<Control><Shift>Down']]]></default>
+    <key name="window-down" type="as">
+      <default><![CDATA[['<Control><Super>Down']]]></default>
       <summary>Slide window down</summary>
       <description>
         Slide window down
