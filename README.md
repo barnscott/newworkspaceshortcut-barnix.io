@@ -16,7 +16,9 @@ These shortcuts are created to work logically with the vanilla gnome shortcuts i
 
 # Window-mangement assitant for minimal tiling
 
-These shortcuts are intended to be a minimal enhancement to the default window-managment tools (ie, begin-resize, move-window, etc) in a vanilla Gnome configuration. These shortcuts are off by default, but can be enabled in the extension's settings panel.
+`NOTE:` These shortcuts are DISABLED by default, and must be enabled via the extention's settings panel.
+
+These shortcuts are intended to be a minimal enhancement to the default window-managment tools (ie, begin-resize, move-window, etc) in a vanilla Gnome configuration.
 
 - `Super + Space` will resize window to 40% width by 45% height. This is preferable for wide-screen displays in landscape.
 - `Control + Super` and `arrow-key` key will relocate the window to the applicable half of the display. The window will be justified to the center of the applicable axis. There is also a minimal gap applied to offset the center alignment.
@@ -25,7 +27,7 @@ These shortcuts are intended to be a minimal enhancement to the default window-m
   - Using `Control + Super + up` will relocate window to top side of the *center of the y-axis* of the display
   - Using `Control + Super + down` will relocate window to bottom side of the *center of the y-axis* of the display
 
-Using these keys together, the user can quickly relocate windows into the center-most corner of the desktop quadrant.
+Using these keys together, the user can quickly relocate windows into the center-most corner of the desktop quadrants.
 
 # How to modify default shortcut bindings
 
