@@ -27,21 +27,13 @@ These shortcuts are intended to be a minimal enhancement to the default window-m
 
 Using these keys together, the user can quickly relocate windows into the center-most corner of the desktop quadrant.
 
-# How to modify defaults
+# How to modify default shortcut bindings
 
-The extension's setting panel has a few settings exposed. However, to modify the shortcuts please use `dconf` or `gsettings`.
-
-The keys for modifying this extension's settings can be found via `dconf` app under the path:
-- /org/gnome/shell/extensions/newworkspaceshortcut
-
-Example, the following command will change the shortcut:
-```bash
-gsettings set org.gnome.shell.extensions.newworkspaceshortcut empty-workspace-right "['<Control><Super><Alt>Right']"
-```
+Changes to the shortcut bindings can be applied via the setting's panel of the extension. This is not any robust error handling, so ensure the syntax of the shortcut is applied correctly, or the binding will fail to perform.
 
 # Changes
 
-See `CHANGELOG.md` to identify changes in newer releases. Releases after `v46.0` including multiple _breaking_ changes.
+See `CHANGELOG.md` to identify changes in newer releases. Releases after `v46.0` including changes to some shortcut bindings.
 
 # Supported Gnome versions
 
@@ -128,4 +120,4 @@ gnome-extensions enable newworkspaceshortcut@barnix.io
 I would like to add the following features, but don't have any priority. Feel free to send a PR.
 
 - [ ] Code cleanup / optimization
-- [ ] Add ability to modify shortcut bindings on the extension's preferences window
+- [ ] Improve the look and user-experience of the setting's panel
