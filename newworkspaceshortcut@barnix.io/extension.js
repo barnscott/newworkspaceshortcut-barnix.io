@@ -122,9 +122,9 @@ class TilerToggle {
     }
 
     enable () {
-      this.wTiler = new tiler();
+      this.wTiler = new tiler(this._settings);
       Main.wm.addKeybinding("resize-win", this._settings, this.flag, this.mode, () => {
-        this.wTiler.resize_window(this._settings);
+        this.wTiler.resize_window();
       });
       Main.wm.addKeybinding("window-right", this._settings, this.flag, this.mode, () => {
         this.wTiler.right();
@@ -150,11 +150,14 @@ class TilerToggle {
   }
 
 class tiler {
+  constructor(extSettings) {
+    this._settings = extSettings;
+  }
 
   get_display_info (myWin){
     let mydisplay = myWin.get_display();
     let monitor_geo = mydisplay.get_monitor_geometry(mydisplay.get_current_monitor());
-    let buffer = monitor_geo.height * 0.005
+    let buffer = this._settings.get_int('window-buffer'); //monitor_geo.height * 0.005
     return [monitor_geo.width,monitor_geo.height,buffer,monitor_geo.x,monitor_geo.y]
   }
   get_height_center (myWin){
@@ -186,11 +189,10 @@ class tiler {
     return panelheight;
 }
 
-  resize_window (extSettings) {
+  resize_window () {
     // get the Focused / active  window
     let myWin = getFocusWin();
     let window_rect = this.window_rect(myWin);
-    this._settings = extSettings;
   
     // determine 45% of display height
     let displayreponse = this.get_display_info(myWin);
@@ -224,7 +226,6 @@ class tiler {
     let window_rect = this.window_rect(myWin);
     let y_axis = (height_center - buffer) - window_rect['height'] + multimonitor_y_offset;
     let top_bar_height = this.top_bar();
-    console.log("LOGGLER ",top_bar_height);
     // if new window is above the top of the monitor-display, then
     //    ...reset y_axis inside display-monitor
     if (y_axis < top_bar_height) {

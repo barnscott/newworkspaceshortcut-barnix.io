@@ -125,6 +125,14 @@
       </description>
     </key>
 
+    <key name="window-buffer" type="i">
+      <default>4</default>
+      <summary>Pixel distance away from center axis</summary>
+      <description>
+        By default, the window will be 4 pixesl offset from center axis.
+      </description>
+    </key>
+
   </schema>
 
 </schemalist>
