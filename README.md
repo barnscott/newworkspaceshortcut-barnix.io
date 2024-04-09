@@ -20,7 +20,7 @@ These shortcuts are created to work logically with the vanilla gnome shortcuts i
 
 These shortcuts are intended to be a minimal enhancement to the default window-managment tools (ie, begin-resize, move-window, etc) in a vanilla Gnome configuration.
 
-- `Super + Space` will resize window to 40% width by 45% height. This is preferable for wide-screen displays in landscape.
+- `Super + Space` will resize window to 40% width by 45% height. This is preferable for wide-screen displays in landscape, but can be modified in the Settings Panel.
 - `Control + Super` and `arrow-key` key will relocate the window to the applicable half of the display. The window will be justified to the center of the applicable axis. There is also a minimal gap applied to offset the center alignment.
   - Using `Control + Super + right` will relocate window to right side of the *center of the x-axis* of the display
   - Using `Control + Super + left` will relocate window to left side of the *center of the x-axis* of the display
@@ -32,6 +32,8 @@ Using these keys together, the user can quickly relocate windows into the center
 # How to modify default shortcut bindings
 
 Changes to the shortcut bindings can be applied via the setting's panel of the extension. This is not any robust error handling, so ensure the syntax of the shortcut is applied correctly, or the binding will fail to perform.
+
+Example format for setting shortcuts: `<Super><Control><Shift>Right`
 
 # Changes
 

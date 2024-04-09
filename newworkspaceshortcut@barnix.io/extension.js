@@ -196,8 +196,6 @@ class tiler {
   
     // determine 45% of display height
     let displayreponse = this.get_display_info(myWin);
-    console.log(this._settings.get_int('window-width'));
-    console.log(this._settings.get_int('window-height'));
     let newWidth = displayreponse[0] * (this._settings.get_int('window-width') * 0.01);
     let newHeight = displayreponse[1] * (this._settings.get_int('window-height') * 0.01);
   

@@ -1,3 +1,10 @@
+# 46.3 (Apr 2024)
+## NEW
+- Added ability to customize width, height, and buffer of window via the settings panel
+- Window-management-assistant now offsets for the top bar
+## CHANGES
+- Minor enhancements to the usibility to settings panel
+
 # 46.2 (Mar 2024)
 ## CHANGES
 - Added functionality to disable/enable window-managment for minimal-tiling. Features are now disabled dy default and require user to enable via the extensions settings panel.
