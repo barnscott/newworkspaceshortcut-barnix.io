@@ -157,7 +157,7 @@ class tiler {
   get_display_info (myWin){
     let mydisplay = myWin.get_display();
     let monitor_geo = mydisplay.get_monitor_geometry(mydisplay.get_current_monitor());
-    let buffer = this._settings.get_int('window-buffer'); //monitor_geo.height * 0.005
+    let buffer = this._settings.get_int('window-buffer');
     return [monitor_geo.width,monitor_geo.height,buffer,monitor_geo.x,monitor_geo.y]
   }
   get_height_center (myWin){
