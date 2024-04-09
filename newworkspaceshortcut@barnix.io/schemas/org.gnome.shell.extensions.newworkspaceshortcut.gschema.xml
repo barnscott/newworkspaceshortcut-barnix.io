@@ -109,6 +109,22 @@
       </description>
     </key>
 
+    <key name="window-height" type="i">
+      <default>45</default>
+      <summary>Desired window height percentage</summary>
+      <description>
+        By default, the window will be resized to 45% of the display width.
+      </description>
+    </key>
+
+    <key name="window-width" type="i">
+      <default>40</default>
+      <summary>Desired window width percentage</summary>
+      <description>
+        By default, the window will be resized to 40% of the display height.
+      </description>
+    </key>
+
   </schema>
 
 </schemalist>

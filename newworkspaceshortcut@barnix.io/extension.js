@@ -124,7 +124,7 @@ class TilerToggle {
     enable () {
       this.wTiler = new tiler();
       Main.wm.addKeybinding("resize-win", this._settings, this.flag, this.mode, () => {
-        this.wTiler.resize_window();
+        this.wTiler.resize_window(this._settings);
       });
       Main.wm.addKeybinding("window-right", this._settings, this.flag, this.mode, () => {
         this.wTiler.right();
@@ -148,17 +148,16 @@ class TilerToggle {
       Main.wm.removeKeybinding("window-down");
     }
   }
-// )
 
-function tiler(){
+class tiler {
 
-  this.get_display_info = function (myWin){
+  get_display_info (myWin){
     let mydisplay = myWin.get_display();
     let monitor_geo = mydisplay.get_monitor_geometry(mydisplay.get_current_monitor());
     let buffer = monitor_geo.height * 0.005
     return [monitor_geo.width,monitor_geo.height,buffer,monitor_geo.x,monitor_geo.y]
   }
-  this.get_height_center = function (myWin){
+  get_height_center (myWin){
     let display_spec = this.get_display_info(myWin)
     let height = display_spec[1];
     let center = height * 0.5;
@@ -166,7 +165,7 @@ function tiler(){
     let multimonitor_y_offset = display_spec[4];
     return [center,buffer,height,multimonitor_y_offset]
   }
-  this.get_width_center = function (myWin){
+  get_width_center (myWin){
     let display_spec = this.get_display_info(myWin)
     let width = display_spec[0];
     let center = width * 0.5;
@@ -175,54 +174,65 @@ function tiler(){
     return [center,buffer,width,multimonitor_x_offset]
   }
 
-  this.window_rect = function (myWin) {
+  window_rect (myWin) {
     let rect = myWin.get_frame_rect();
     // rect is an object that contains: x,y,width,height
     return rect
   }
 
-  this.resize_window = function () {
+  top_bar () {
+    let panelActor = Main.panel.get_actor();
+    let panelheight = panelActor.get_height();
+    return panelheight;
+}
+
+  resize_window (extSettings) {
     // get the Focused / active  window
     let myWin = getFocusWin();
     let window_rect = this.window_rect(myWin);
+    this._settings = extSettings;
   
     // determine 45% of display height
     let displayreponse = this.get_display_info(myWin);
-    let newWidth = displayreponse[0] * 0.40;
-    let newHeight = displayreponse[1] * 0.45;
+    console.log(this._settings.get_int('window-width'));
+    console.log(this._settings.get_int('window-height'));
+    let newWidth = displayreponse[0] * (this._settings.get_int('window-width') * 0.01);
+    let newHeight = displayreponse[1] * (this._settings.get_int('window-height') * 0.01);
   
     // modify window size
     myWin.move_resize_frame(true, window_rect.x, window_rect.y, newWidth, newHeight);
   }
 
   // Window Relocation functions
-  this.left = function () {
+  left () {
     let myWin = getFocusWin();
     let [width_center,buffer,width,multimonitor_x_offset] = this.get_width_center(myWin);
     let window_rect = this.window_rect(myWin);
     let x_axis = (width_center - buffer) - window_rect['width'] + multimonitor_x_offset;
     myWin.move_frame(true, x_axis, window_rect['y']);
   }
-  this.right = function () {
+  right () {
     let myWin = getFocusWin();
     let [width_center,buffer,width,multimonitor_x_offset] = this.get_width_center(myWin);
     let window_rect = this.window_rect(myWin);
     let x_axis = (width_center + buffer) + multimonitor_x_offset;
     myWin.move_frame(true, x_axis, window_rect['y']);
   }
-  this.up = function () {
+  up () {
     let myWin = getFocusWin();
     let [height_center,buffer,height,multimonitor_y_offset] = this.get_height_center(myWin);
     let window_rect = this.window_rect(myWin);
     let y_axis = (height_center - buffer) - window_rect['height'] + multimonitor_y_offset;
+    let top_bar_height = this.top_bar();
+    console.log("LOGGLER ",top_bar_height);
     // if new window is above the top of the monitor-display, then
     //    ...reset y_axis inside display-monitor
-    if (y_axis < 0) {
-      y_axis = (buffer*2) + multimonitor_y_offset;
+    if (y_axis < top_bar_height) {
+      y_axis = (buffer*2) + multimonitor_y_offset + top_bar_height;
     }
     myWin.move_frame(true,window_rect['x'],y_axis);
   }
-  this.down = function () {
+  down () {
     let myWin = getFocusWin();
     let [height_center,buffer,height,multimonitor_y_offset] = this.get_height_center(myWin);
     let window_rect = this.window_rect(myWin);

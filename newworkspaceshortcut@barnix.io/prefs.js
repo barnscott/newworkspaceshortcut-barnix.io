@@ -162,6 +162,22 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         this.sInit_resize = new settingsInit();
         this.sInit_resize.shortcut(window._settings,resize,"resize-win");
 
+        const resize_height = new Adw.ActionRow({
+        title: 'New window height after resize, as percentage of monitor',
+        subtitle: 'Default: 45'
+        });
+        tilerGroup.add(resize_height);
+        this.sInit_resize_height = new settingsInit();
+        this.sInit_resize_height.number_value(window._settings,resize_height,"window-height");
+
+        const resize_width = new Adw.ActionRow({
+        title: 'New window width after resize, as percentage of monitor',
+        subtitle: 'Default: 40'
+        });
+        tilerGroup.add(resize_width);
+        this.sInit_resize_width = new settingsInit();
+        this.sInit_resize_width.number_value(window._settings,resize_width,"window-width");
+
     }
 }
 
@@ -180,6 +196,21 @@ function settingsInit() {
         });
         actionEvent.add_suffix(shortcutEntry);
         actionEvent.activatable_widget = shortcutEntry;
+    }
+
+    this.number_value = function (ext_settings,actionEvent,sEvent) {
+        const integerEntry = new Gtk.Text({
+            buffer:  new Gtk.EntryBuffer({
+                text: String(ext_settings.get_int(sEvent))
+            })
+        });
+
+        integerEntry.connect('activate', () => {
+            let newNumberValue = [ String(integerEntry.get_buffer().text) ]
+            ext_settings.set_strv(sEvent,newNumberValue)
+        });
+        actionEvent.add_suffix(integerEntry);
+        actionEvent.activatable_widget = integerEntry;
     }
 
     this.switch = function (ext_settings,actionEvent,sEvent) {
