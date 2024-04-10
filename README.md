@@ -29,6 +29,26 @@ These shortcuts are intended to be a minimal enhancement to the default window-m
 
 Using these keys together, the user can quickly relocate windows into the center-most corner of the desktop quadrants.
 
+These shortcuts are designed to be used with the built-in window-management bindings that exist in vanilla Gnome, but may not be configured out-of-the-box.
+
+An incomplete list of the Gnome bindings that work well with this extension's window-managment features include:
+```bash
+gsettings set org.gnome.desktop.wm.keybindings begin-resize "['<Alt>F8', '<Control><Super><Alt>Space']"
+gsettings set org.gnome.desktop.wm.keybindings begin-move "['<Alt>F7', '<Super><Alt>Space']"
+gsettings set org.gnome.desktop.wm.keybindings move-to-center "['<Control><Super>Space']"
+gsettings set org.gnome.desktop.wm.keybindings move-to-side-e "['<Control><Super><Alt>Right']"
+gsettings set org.gnome.desktop.wm.keybindings move-to-side-n "['<Control><Super><Alt>Up']"
+gsettings set org.gnome.desktop.wm.keybindings move-to-side-s "['<Control><Super><Alt>Down']"
+gsettings set org.gnome.desktop.wm.keybindings move-to-side-w "['<Control><Super><Alt>Left']"
+gsettings set org.gnome.desktop.wm.keybindings move-to-corner-ne "['']"
+gsettings set org.gnome.desktop.wm.keybindings move-to-corner-nw "['']"
+gsettings set org.gnome.desktop.wm.keybindings move-to-corner-se "['']"
+gsettings set org.gnome.desktop.wm.keybindings move-to-corner-sw "['']"
+gsettings set org.gnome.desktop.wm.keybindings maximize-vertically "['<Super><Alt>v']"
+gsettings set org.gnome.desktop.wm.keybindings maximize-horizontally "['<Super><Alt>h']"
+gsettings set org.gnome.desktop.wm.preferences resize-with-right-button true
+```
+
 # How to modify default shortcut bindings
 
 Changes to the shortcut bindings can be applied via the setting's panel of the extension. This is not any robust error handling, so ensure the syntax of the shortcut is applied correctly, or the binding will fail to perform.
