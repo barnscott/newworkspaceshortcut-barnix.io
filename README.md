@@ -23,10 +23,10 @@ These shortcuts enable repositioning of floating windows along the center X and 
 
 - `Super + Space` will resize window to 40% width by 45% height. These dimensions can be modified in the settings-panel.
 - `Control + Super` and `arrow-key` key will relocate the window to the applicable half of the display. The window will be anchored to the center of the display.
-  - Using `Control + Super + right` will relocate window to right side of the *center of the x-axis* of the display
-  - Using `Control + Super + left` will relocate window to left side of the *center of the x-axis* of the display
-  - Using `Control + Super + up` will relocate window to top side of the *center of the y-axis* of the display
-  - Using `Control + Super + down` will relocate window to bottom side of the *center of the y-axis* of the display
+  - `Control + Super + right` will relocate window to right side of the *center of the x-axis* of the display
+  - `Control + Super + left` will relocate window to left side of the *center of the x-axis* of the display
+  - `Control + Super + up` will relocate window to top side of the *center of the y-axis* of the display
+  - `Control + Super + down` will relocate window to bottom side of the *center of the y-axis* of the display
 
 ## Native Gnome window management shortcuts
 
@@ -55,6 +55,8 @@ gsettings set org.gnome.desktop.wm.keybindings begin-resize "['<Alt>F8', '<Contr
 # How to modify default shortcut bindings
 
 Changes to the shortcut bindings can be applied via the setting's panel of the extension. This is not any robust error handling, so ensure the syntax of the shortcut is applied correctly, or the binding will fail to perform.
+
+Example format for setting shortcuts: `<Super><Control><Shift>Right`
 
 # Changes
 
