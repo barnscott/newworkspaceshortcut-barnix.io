@@ -1,3 +1,7 @@
+# 46.5 (June 2024)
+## CHANGES
+- Improve buffer implementation
+
 # 46.4 (June 2024)
 ## CHANGES
 - Adjust Top Bar offset for optional tiler feature
