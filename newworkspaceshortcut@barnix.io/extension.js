@@ -197,8 +197,10 @@ class tiler {
   
     // determine 45% of display height
     let displayreponse = this.get_display_info(myWin);
-    let newWidth = displayreponse[0] * (this._settings.get_int('window-width') * 0.01);
-    let newHeight = ( displayreponse[1] - this.top_bar() ) * (this._settings.get_int('window-height') * 0.01);
+    // Display-width * user-defined-window-width, then minus Buffer (multiplied by 3 to account for trimming both sides of window, plus the extra padding for outer-edge so gaps are even)
+    let newWidth = (displayreponse[0] * (this._settings.get_int('window-width') * 0.01)) - (displayreponse[2] * 3);
+    // Display-height (minus the top-bar) * user-defined-window-height, then minus Buffer (multiplied by 3 to account for trimming both sides of window, plus the extra padding for outer-edge so gaps are even)
+    let newHeight = (( displayreponse[1] - this.top_bar() ) * (this._settings.get_int('window-height') * 0.01)) - (displayreponse[2] * 3);
   
     // modify window size
     myWin.move_resize_frame(true, window_rect.x, window_rect.y, newWidth, newHeight);
@@ -228,7 +230,7 @@ class tiler {
     // if new window is above the top of the monitor-display, then
     //    ...reset y_axis inside display-monitor
     if (y_axis < top_bar_height) {
-      y_axis = (buffer*2) + multimonitor_y_offset + top_bar_height;
+      y_axis = (buffer *2) + multimonitor_y_offset + top_bar_height;
     }
     myWin.move_frame(true,window_rect['x'],y_axis);
   }
@@ -241,7 +243,7 @@ class tiler {
     // if bottom of window falls off the bottom of display-monitor, then
     //    ...reset y_axis so that it is inside display-monitor bourdary
     if ((y_axis+window_rect['height']) > (height+multimonitor_y_offset-buffer)) {
-      y_axis = y_axis-((y_axis+window_rect['height'])-height)+multimonitor_y_offset-buffer;
+      y_axis = y_axis-((y_axis+window_rect['height'])-height)+multimonitor_y_offset-(buffer *2);
     }
     myWin.move_frame(true,window_rect['x'],y_axis);
   }
