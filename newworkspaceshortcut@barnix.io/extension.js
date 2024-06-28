@@ -163,7 +163,8 @@ class tiler {
   get_height_center (myWin){
     let display_spec = this.get_display_info(myWin)
     let height = display_spec[1];
-    let center = height * 0.5;
+    let top_bar_height = this.top_bar();
+    let center = top_bar_height + ((height - top_bar_height) * 0.5)
     let buffer = display_spec[2];
     let multimonitor_y_offset = display_spec[4];
     return [center,buffer,height,multimonitor_y_offset]
@@ -197,7 +198,7 @@ class tiler {
     // determine 45% of display height
     let displayreponse = this.get_display_info(myWin);
     let newWidth = displayreponse[0] * (this._settings.get_int('window-width') * 0.01);
-    let newHeight = displayreponse[1] * (this._settings.get_int('window-height') * 0.01);
+    let newHeight = ( displayreponse[1] - this.top_bar() ) * (this._settings.get_int('window-height') * 0.01);
   
     // modify window size
     myWin.move_resize_frame(true, window_rect.x, window_rect.y, newWidth, newHeight);

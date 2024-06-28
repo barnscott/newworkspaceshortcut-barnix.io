@@ -10,12 +10,6 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         window._settings = this.getSettings();
 
         const page = new Adw.PreferencesPage();
-
-        const group = new Adw.PreferencesGroup({
-            title: _('New Workspace Shortcut'),
-        });
-        page.add(group);
-
         window.add(page);
 
         // About Section

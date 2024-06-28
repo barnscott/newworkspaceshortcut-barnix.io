@@ -1,3 +1,7 @@
+# 46.4 (June 2024)
+## CHANGES
+- Adjust Top Bar offset for optional tiler feature
+
 # 46.3 (Apr 2024)
 ## NEW
 - Added ability to customize width, height, and buffer of window via the settings panel
