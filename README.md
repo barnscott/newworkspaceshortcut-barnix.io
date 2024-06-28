@@ -1,6 +1,6 @@
 # New Workspace Shortcut extension for Gnome Desktop
 
-# Workspace features
+# Workspace shortcuts
 
 - Move-window-to-new-workspace Shortcut: 
   - Use a shortcut to move the in-focus window to a *new* workspace on the right of your current workspace: `Ctl + Super + Shift + Right`
@@ -14,20 +14,43 @@
 
 These shortcuts are created to work logically with the vanilla gnome shortcuts including change-workspace (`Super + ALT + Left/Right`) and move-window-to-next-workspace (`Shift + Super + ALT + Left/Right`).
 
-# Window-mangement assitant for minimal tiling
+# Window shortcuts
 
-`NOTE:` These shortcuts are DISABLED by default, and must be enabled via the extention's settings panel.
+## Repositioning floating windows
+`NOTE:` These shortcuts are DISABLED by default, and must be enabled via the extension's settings panel.
 
-These shortcuts are intended to be a minimal enhancement to the default window-managment tools (ie, begin-resize, move-window, etc) in a vanilla Gnome configuration.
+These shortcuts enable repositioning of floating windows along the center X and Y axis of the display. They are intended to be a minimal enhancement to the default window-management shortcuts (ie, `begin-resize`, `begin-move`, `move-to-side-e`, etc) that are available natively in Gnome. If you are not familiar with the native Gnome shortcuts, see the following section, `Native Gnome window management shortcuts`.
 
-- `Super + Space` will resize window to 40% width by 45% height. This is preferable for wide-screen displays in landscape, but can be modified in the Settings Panel.
-- `Control + Super` and `arrow-key` key will relocate the window to the applicable half of the display. The window will be justified to the center of the applicable axis. There is also a minimal gap applied to offset the center alignment.
-  - Using `Control + Super + right` will relocate window to right side of the *center of the x-axis* of the display
-  - Using `Control + Super + left` will relocate window to left side of the *center of the x-axis* of the display
-  - Using `Control + Super + up` will relocate window to top side of the *center of the y-axis* of the display
-  - Using `Control + Super + down` will relocate window to bottom side of the *center of the y-axis* of the display
+- `Super + Space` will resize window to 40% width by 45% height. These dimensions can be modified in the settings-panel.
+- `Control + Super` and `arrow-key` key will relocate the window to the applicable half of the display. The window will be anchored to the center of the display.
+  - `Control + Super + right` will relocate window to right side of the *center of the x-axis* of the display
+  - `Control + Super + left` will relocate window to left side of the *center of the x-axis* of the display
+  - `Control + Super + up` will relocate window to top side of the *center of the y-axis* of the display
+  - `Control + Super + down` will relocate window to bottom side of the *center of the y-axis* of the display
 
-Using these keys together, the user can quickly relocate windows into the center-most corner of the desktop quadrants.
+## Native Gnome window management shortcuts
+
+This extension's shortcuts are designed to extend the window-management bindings that exist natively in Gnome, but may not be configured out-of-the-box. Below is incomplete list of the native Gnome bindings that this extension extends. Additionally, you can use the application `dconf Editor` to customize these shortcuts.
+```bash
+gsettings get org.gnome.desktop.wm.keybindings begin-resize
+gsettings get org.gnome.desktop.wm.keybindings begin-move
+gsettings get org.gnome.desktop.wm.keybindings move-to-center
+gsettings get org.gnome.desktop.wm.keybindings move-to-side-e
+gsettings get org.gnome.desktop.wm.keybindings move-to-side-n
+gsettings get org.gnome.desktop.wm.keybindings move-to-side-s
+gsettings get org.gnome.desktop.wm.keybindings move-to-side-w
+gsettings get org.gnome.desktop.wm.keybindings move-to-corner-ne
+gsettings get org.gnome.desktop.wm.keybindings move-to-corner-nw
+gsettings get org.gnome.desktop.wm.keybindings move-to-corner-se
+gsettings get org.gnome.desktop.wm.keybindings move-to-corner-sw
+gsettings get org.gnome.desktop.wm.keybindings maximize-vertically
+gsettings get org.gnome.desktop.wm.keybindings maximize-horizontally
+gsettings get org.gnome.desktop.wm.preferences resize-with-right-button
+```
+Below is an example of how to customize these Gnome shortcuts:
+```bash
+gsettings set org.gnome.desktop.wm.keybindings begin-resize "['<Alt>F8', '<Control><Super><Alt>Space']"
+```
 
 # How to modify default shortcut bindings
 
