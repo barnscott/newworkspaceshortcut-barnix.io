@@ -121,7 +121,7 @@
       <default>50</default>
       <summary>Desired window height percentage</summary>
       <description>
-        By default, the window will be resized to 50% of the display width.
+        By default, resize to 50% of the display width.
       </description>
     </key>
 
@@ -129,7 +129,7 @@
       <default>35</default>
       <summary>Desired window width percentage</summary>
       <description>
-        By default, the window will be resized to 35% of the display height.
+        By default, resize to 35% of the display height.
       </description>
     </key>
 
@@ -145,7 +145,7 @@
       <default>50</default>
       <summary>Alternative #1 Desired window height percentage</summary>
       <description>
-        By default, the window will be resized to 50% of the display width.
+        By default, resize to 50% of the display width.
       </description>
     </key>
 
@@ -153,7 +153,7 @@
       <default>50</default>
       <summary>Alternative #1 Desired window width percentage</summary>
       <description>
-        By default, the window will be resized to 50% of the display height.
+        By default, resize to 50% of the display height.
       </description>
     </key>
 
@@ -169,7 +169,7 @@
       <default>50</default>
       <summary>Alternative #2 Desired window height percentage</summary>
       <description>
-        By default, the window will be resized to 50% of the display width.
+        By default, resize to 50% of the display width.
       </description>
     </key>
 
@@ -177,12 +177,12 @@
       <default>15</default>
       <summary>Alternative #2 Desired window width percentage</summary>
       <description>
-        By default, the window will be resized to 15% of the display height.
+        By default, resize to 15% of the display height.
       </description>
     </key>
 
     <key name="resize-win3" type="as">
-      <default><![CDATA[['<Super>Space']]]></default>
+      <default><![CDATA[['<Super><Alt>3']]]></default>
       <summary>Alternative #3 Resize Window</summary>
       <description>
         Resize Window to tiling size
@@ -193,7 +193,7 @@
       <default>35</default>
       <summary>Alternative #3 Desired window height percentage</summary>
       <description>
-        By default, the window will be resized to 35% of the display width.
+        By default, resize to 35% of the display width.
       </description>
     </key>
 
@@ -201,7 +201,7 @@
       <default>30</default>
       <summary>Alternative #3 Desired window width percentage</summary>
       <description>
-        By default, the window will be resized to 30% of the display height.
+        By default, resize to 30% of the display height.
       </description>
     </key>
 

@@ -165,7 +165,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         
 
         // Window resize- default group
-        const resizeGroup0 = new Adw.PreferencesGroup();
+        const resizeGroup0 = new Adw.PreferencesGroup({description: _('Primary window-size shortcut'),});
         page.add(resizeGroup0);
 
         const resize = new Adw.ActionRow({
@@ -194,7 +194,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
 
 
         // Window resize- Alternative1 group 
-        const resizeGroup1 = new Adw.PreferencesGroup();
+        const resizeGroup1 = new Adw.PreferencesGroup({description: _('Alternative #1 window-size shortcut'),});
         page.add(resizeGroup1);
 
         const resize1 = new Adw.ActionRow({
@@ -203,7 +203,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         });
         resizeGroup1.add(resize1);
         this.sInit_resize1 = new settingsInit();
-        this.sInit_resize1.shortcut(window._settings,resize1,"resize-win");
+        this.sInit_resize1.shortcut(window._settings,resize1,"resize-win1");
 
         const resize_height1 = new Adw.ActionRow({
             title: 'New window height after resize',
@@ -211,7 +211,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         });
         resizeGroup1.add(resize_height1);
         this.sInit_resize_height1 = new settingsInit();
-        this.sInit_resize_height1.number_value(window._settings,resize_height1,"window-height");
+        this.sInit_resize_height1.number_value(window._settings,resize_height1,"window-height1");
 
         const resize_width1 = new Adw.ActionRow({
             title: 'New window width after resize',
@@ -219,10 +219,10 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         });
         resizeGroup1.add(resize_width1);
         this.sInit_resize_width1 = new settingsInit();
-        this.sInit_resize_width1.number_value(window._settings,resize_width1,"window-width");
+        this.sInit_resize_width1.number_value(window._settings,resize_width1,"window-width1");
 
         // Window resize- Alternative2 group
-        const resizeGroup2 = new Adw.PreferencesGroup();
+        const resizeGroup2 = new Adw.PreferencesGroup({description: _('Alternative #2 window-size shortcut'),});
         page.add(resizeGroup2);
         
         const resize2 = new Adw.ActionRow({
@@ -231,7 +231,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         });
         resizeGroup2.add(resize2);
         this.sInit_resize2 = new settingsInit();
-        this.sInit_resize2.shortcut(window._settings,resize2,"resize-win");
+        this.sInit_resize2.shortcut(window._settings,resize2,"resize-win2");
 
         const resize_height2 = new Adw.ActionRow({
             title: 'New window height after resize',
@@ -239,7 +239,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         });
         resizeGroup2.add(resize_height2);
         this.sInit_resize_height2 = new settingsInit();
-        this.sInit_resize_height2.number_value(window._settings,resize_height2,"window-height");
+        this.sInit_resize_height2.number_value(window._settings,resize_height2,"window-height2");
 
         const resize_width2 = new Adw.ActionRow({
             title: 'New window width after resize',
@@ -247,10 +247,10 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         });
         resizeGroup2.add(resize_width2);
         this.sInit_resize_width2 = new settingsInit();
-        this.sInit_resize_width2.number_value(window._settings,resize_width2,"window-width");
+        this.sInit_resize_width2.number_value(window._settings,resize_width2,"window-width2");
 
         // Window resize- Alternative3 group
-        const resizeGroup3 = new Adw.PreferencesGroup();
+        const resizeGroup3 = new Adw.PreferencesGroup({description: _('Alternative #3 window-size shortcut'),});
         page.add(resizeGroup3);
 
         const resize3 = new Adw.ActionRow({
@@ -259,7 +259,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         });
         resizeGroup3.add(resize3);
         this.sInit_resize3 = new settingsInit();
-        this.sInit_resize3.shortcut(window._settings,resize3,"resize-win");
+        this.sInit_resize3.shortcut(window._settings,resize3,"resize-win3");
 
         const resize_height3 = new Adw.ActionRow({
             title: 'New window height after resize',
@@ -267,7 +267,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         });
         resizeGroup3.add(resize_height3);
         this.sInit_resize_height3 = new settingsInit();
-        this.sInit_resize_height3.number_value(window._settings,resize_height3,"window-height");
+        this.sInit_resize_height3.number_value(window._settings,resize_height3,"window-height3");
 
         const resize_width3 = new Adw.ActionRow({
             title: 'New window width after resize',
@@ -275,7 +275,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         });
         resizeGroup3.add(resize_width3);
         this.sInit_resize_width3 = new settingsInit();
-        this.sInit_resize_width3.number_value(window._settings,resize_width3,"window-width");
+        this.sInit_resize_width3.number_value(window._settings,resize_width3,"window-width3");
     }
 }
 
