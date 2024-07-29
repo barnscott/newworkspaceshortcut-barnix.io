@@ -1,4 +1,4 @@
-# 46.6 (June 2024)
+# 46.6 (Jul 2024)
 ## CHANGES
 - Add shortcuts for additional window-resizes
 
