@@ -154,30 +154,6 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         tilerGroup.add(td);
         this.sInit_td = new settingsInit();
         this.sInit_td.shortcut(window._settings,td,"window-down");
-        
-        const resize = new Adw.ActionRow({
-            title: 'Resize window',
-            subtitle: 'Default: Super+Space'
-        });
-        tilerGroup.add(resize);
-        this.sInit_resize = new settingsInit();
-        this.sInit_resize.shortcut(window._settings,resize,"resize-win");
-
-        const resize_height = new Adw.ActionRow({
-            title: 'New window height after resize',
-            subtitle: 'Percentage of monitor. Default: 45'
-        });
-        tilerGroup.add(resize_height);
-        this.sInit_resize_height = new settingsInit();
-        this.sInit_resize_height.number_value(window._settings,resize_height,"window-height");
-
-        const resize_width = new Adw.ActionRow({
-            title: 'New window width after resize',
-            subtitle: 'Percentage of monitor. Default: 40'
-        });
-        tilerGroup.add(resize_width);
-        this.sInit_resize_width = new settingsInit();
-        this.sInit_resize_width.number_value(window._settings,resize_width,"window-width");
 
         const win_buffer = new Adw.ActionRow({
             title: 'Pixel offset from center axis',
@@ -186,7 +162,120 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         tilerGroup.add(win_buffer);
         this.sInit_win_buffer = new settingsInit();
         this.sInit_win_buffer.number_value(window._settings,win_buffer,"window-buffer");
+        
 
+        // Window resize- default group
+        const resizeGroup0 = new Adw.PreferencesGroup({description: _('Primary window-size shortcut'),});
+        page.add(resizeGroup0);
+
+        const resize = new Adw.ActionRow({
+            title: 'Resize window',
+            subtitle: 'Default: Super+Space'
+        });
+        resizeGroup0.add(resize);
+        this.sInit_resize = new settingsInit();
+        this.sInit_resize.shortcut(window._settings,resize,"resize-win");
+
+        const resize_height = new Adw.ActionRow({
+            title: 'New window height after resize',
+            subtitle: 'Percentage of monitor. Default: 50'
+        });
+        resizeGroup0.add(resize_height);
+        this.sInit_resize_height = new settingsInit();
+        this.sInit_resize_height.number_value(window._settings,resize_height,"window-height");
+
+        const resize_width = new Adw.ActionRow({
+            title: 'New window width after resize',
+            subtitle: 'Percentage of monitor. Default: 35'
+        });
+        resizeGroup0.add(resize_width);
+        this.sInit_resize_width = new settingsInit();
+        this.sInit_resize_width.number_value(window._settings,resize_width,"window-width");
+
+
+        // Window resize- Alternative1 group 
+        const resizeGroup1 = new Adw.PreferencesGroup({description: _('Alternative #1 window-size shortcut'),});
+        page.add(resizeGroup1);
+
+        const resize1 = new Adw.ActionRow({
+            title: 'Resize window',
+            subtitle: 'Default: Super+Space'
+        });
+        resizeGroup1.add(resize1);
+        this.sInit_resize1 = new settingsInit();
+        this.sInit_resize1.shortcut(window._settings,resize1,"resize-win1");
+
+        const resize_height1 = new Adw.ActionRow({
+            title: 'New window height after resize',
+            subtitle: 'Percentage of monitor. Default: 50'
+        });
+        resizeGroup1.add(resize_height1);
+        this.sInit_resize_height1 = new settingsInit();
+        this.sInit_resize_height1.number_value(window._settings,resize_height1,"window-height1");
+
+        const resize_width1 = new Adw.ActionRow({
+            title: 'New window width after resize',
+            subtitle: 'Percentage of monitor. Default: 50'
+        });
+        resizeGroup1.add(resize_width1);
+        this.sInit_resize_width1 = new settingsInit();
+        this.sInit_resize_width1.number_value(window._settings,resize_width1,"window-width1");
+
+        // Window resize- Alternative2 group
+        const resizeGroup2 = new Adw.PreferencesGroup({description: _('Alternative #2 window-size shortcut'),});
+        page.add(resizeGroup2);
+        
+        const resize2 = new Adw.ActionRow({
+            title: 'Resize window',
+            subtitle: 'Default: Super+Space'
+        });
+        resizeGroup2.add(resize2);
+        this.sInit_resize2 = new settingsInit();
+        this.sInit_resize2.shortcut(window._settings,resize2,"resize-win2");
+
+        const resize_height2 = new Adw.ActionRow({
+            title: 'New window height after resize',
+            subtitle: 'Percentage of monitor. Default: 50'
+        });
+        resizeGroup2.add(resize_height2);
+        this.sInit_resize_height2 = new settingsInit();
+        this.sInit_resize_height2.number_value(window._settings,resize_height2,"window-height2");
+
+        const resize_width2 = new Adw.ActionRow({
+            title: 'New window width after resize',
+            subtitle: 'Percentage of monitor. Default: 15'
+        });
+        resizeGroup2.add(resize_width2);
+        this.sInit_resize_width2 = new settingsInit();
+        this.sInit_resize_width2.number_value(window._settings,resize_width2,"window-width2");
+
+        // Window resize- Alternative3 group
+        const resizeGroup3 = new Adw.PreferencesGroup({description: _('Alternative #3 window-size shortcut'),});
+        page.add(resizeGroup3);
+
+        const resize3 = new Adw.ActionRow({
+            title: 'Resize window',
+            subtitle: 'Default: Super+Space'
+        });
+        resizeGroup3.add(resize3);
+        this.sInit_resize3 = new settingsInit();
+        this.sInit_resize3.shortcut(window._settings,resize3,"resize-win3");
+
+        const resize_height3 = new Adw.ActionRow({
+            title: 'New window height after resize',
+            subtitle: 'Percentage of monitor. Default: 30'
+        });
+        resizeGroup3.add(resize_height3);
+        this.sInit_resize_height3 = new settingsInit();
+        this.sInit_resize_height3.number_value(window._settings,resize_height3,"window-height3");
+
+        const resize_width3 = new Adw.ActionRow({
+            title: 'New window width after resize',
+            subtitle: 'Percentage of monitor. Default: 25'
+        });
+        resizeGroup3.add(resize_width3);
+        this.sInit_resize_width3 = new settingsInit();
+        this.sInit_resize_width3.number_value(window._settings,resize_width3,"window-width3");
     }
 }
 

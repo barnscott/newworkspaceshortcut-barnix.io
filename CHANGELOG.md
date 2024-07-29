@@ -1,3 +1,7 @@
+# 46.6 (Jul 2024)
+## CHANGES
+- Add shortcuts for additional window-resizes
+
 # 46.5 (June 2024)
 ## CHANGES
 - Improve buffer implementation
