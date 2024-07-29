@@ -263,7 +263,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
 
         const resize_height3 = new Adw.ActionRow({
             title: 'New window height after resize',
-            subtitle: 'Percentage of monitor. Default: 35'
+            subtitle: 'Percentage of monitor. Default: 30'
         });
         resizeGroup3.add(resize_height3);
         this.sInit_resize_height3 = new settingsInit();
@@ -271,7 +271,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
 
         const resize_width3 = new Adw.ActionRow({
             title: 'New window width after resize',
-            subtitle: 'Percentage of monitor. Default: 30'
+            subtitle: 'Percentage of monitor. Default: 25'
         });
         resizeGroup3.add(resize_width3);
         this.sInit_resize_width3 = new settingsInit();
