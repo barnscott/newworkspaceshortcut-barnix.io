@@ -124,7 +124,16 @@ class TilerToggle {
     enable () {
       this.wTiler = new tiler(this._settings);
       Main.wm.addKeybinding("resize-win", this._settings, this.flag, this.mode, () => {
-        this.wTiler.resize_window();
+        this.wTiler.resize_window('window-height','window-width');
+      });
+      Main.wm.addKeybinding("resize-win1", this._settings, this.flag, this.mode, () => {
+        this.wTiler.resize_window('window-height1','window-width1');
+      });
+      Main.wm.addKeybinding("resize-win2", this._settings, this.flag, this.mode, () => {
+        this.wTiler.resize_window('window-height2','window-width2');
+      });
+      Main.wm.addKeybinding("resize-win3", this._settings, this.flag, this.mode, () => {
+        this.wTiler.resize_window('window-height3','window-width3');
       });
       Main.wm.addKeybinding("window-right", this._settings, this.flag, this.mode, () => {
         this.wTiler.right();
@@ -142,6 +151,9 @@ class TilerToggle {
 
     disable () {
       Main.wm.removeKeybinding("resize-win");
+      Main.wm.removeKeybinding("resize-win1");
+      Main.wm.removeKeybinding("resize-win2");
+      Main.wm.removeKeybinding("resize-win3");
       Main.wm.removeKeybinding("window-right");
       Main.wm.removeKeybinding("window-left");
       Main.wm.removeKeybinding("window-up");
@@ -190,7 +202,7 @@ class tiler {
     return panelheight;
 }
 
-  resize_window () {
+  resize_window (heightKey,widthKey) {
     // get the Focused / active  window
     let myWin = getFocusWin();
     let window_rect = this.window_rect(myWin);
@@ -198,9 +210,9 @@ class tiler {
     // determine 45% of display height
     let displayreponse = this.get_display_info(myWin);
     // Display-width * user-defined-window-width, then minus Buffer (multiplied by 3 to account for trimming both sides of window, plus the extra padding for outer-edge so gaps are even)
-    let newWidth = (displayreponse[0] * (this._settings.get_int('window-width') * 0.01)) - (displayreponse[2] * 3);
+    let newWidth = (displayreponse[0] * (this._settings.get_int(widthKey) * 0.01)) - (displayreponse[2] * 3);
     // Display-height (minus the top-bar) * user-defined-window-height, then minus Buffer (multiplied by 3 to account for trimming both sides of window, plus the extra padding for outer-edge so gaps are even)
-    let newHeight = (( displayreponse[1] - this.top_bar() ) * (this._settings.get_int('window-height') * 0.01)) - (displayreponse[2] * 3);
+    let newHeight = (( displayreponse[1] - this.top_bar() ) * (this._settings.get_int(heightKey) * 0.01)) - (displayreponse[2] * 3);
   
     // modify window size
     myWin.move_resize_frame(true, window_rect.x, window_rect.y, newWidth, newHeight);

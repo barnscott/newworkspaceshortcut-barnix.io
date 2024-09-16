@@ -21,7 +21,7 @@ These shortcuts are created to work logically with the vanilla gnome shortcuts i
 
 These shortcuts enable repositioning of floating windows along the center X and Y axis of the display. They are intended to be a minimal enhancement to the default window-management shortcuts (ie, `begin-resize`, `begin-move`, `move-to-side-e`, etc) that are available natively in Gnome. If you are not familiar with the native Gnome shortcuts, see the following section, `Native Gnome window management shortcuts`.
 
-- `Super + Space` will resize window to 40% width by 45% height. These dimensions can be modified in the settings-panel.
+- `Super + Space` will resize window to 40% width by 45% height. These dimensions can be modified in the settings-panel, as well as, additional window frame sizes.
 - `Control + Super` and `arrow-key` key will relocate the window to the applicable half of the display. The window will be anchored to the center of the display.
   - `Control + Super + right` will relocate window to right side of the *center of the x-axis* of the display
   - `Control + Super + left` will relocate window to left side of the *center of the x-axis* of the display
