@@ -259,6 +259,46 @@ class tiler {
     }
     myWin.move_frame(true,window_rect['x'],y_axis);
   }
+  left_edge () {
+    let myWin = getFocusWin();
+    let [display_width,display_height,buffer,multimonitor_x_offset,multimonitor_y_offset] = this.get_display_info(myWin)
+    let window_rect = this.window_rect(myWin);
+    let x_axis = (0 + buffer) + multimonitor_x_offset;
+    myWin.move_frame(true, x_axis, window_rect['y']);
+  }
+  right_edge () { //wip
+    let myWin = getFocusWin();
+    let [width_center,buffer,width,multimonitor_x_offset] = this.get_width_center(myWin);
+    let window_rect = this.window_rect(myWin);
+    let x_axis = (width_center + buffer) + multimonitor_x_offset;
+    myWin.move_frame(true, x_axis, window_rect['y']);
+  }
+  up_edge () { //wip
+    let myWin = getFocusWin();
+    let [height_center,buffer,height,multimonitor_y_offset] = this.get_height_center(myWin);
+    let window_rect = this.window_rect(myWin);
+    let y_axis = (height_center - buffer) - window_rect['height'] + multimonitor_y_offset;
+    let top_bar_height = this.top_bar();
+    // if new window is above the top of the monitor-display, then
+    //    ...reset y_axis inside display-monitor
+    if (y_axis < top_bar_height) {
+      y_axis = (buffer *2) + multimonitor_y_offset + top_bar_height;
+    }
+    myWin.move_frame(true,window_rect['x'],y_axis);
+  }
+  down_edge () { //wip
+    let myWin = getFocusWin();
+    let [height_center,buffer,height,multimonitor_y_offset] = this.get_height_center(myWin);
+    let window_rect = this.window_rect(myWin);
+    let y_axis = height_center + buffer + multimonitor_y_offset;
+
+    // if bottom of window falls off the bottom of display-monitor, then
+    //    ...reset y_axis so that it is inside display-monitor bourdary
+    if ((y_axis+window_rect['height']) > (height+multimonitor_y_offset-buffer)) {
+      y_axis = y_axis-((y_axis+window_rect['height'])-height)+multimonitor_y_offset-(buffer *2);
+    }
+    myWin.move_frame(true,window_rect['x'],y_axis);
+  }
 }
 
 export default class newWorkspaceShortcuts extends Extension {
