@@ -1,3 +1,7 @@
+# 470 (Sept 2024)
+## CHANGES
+- Gnome 47
+
 # 46.6 (Jul 2024)
 ## CHANGES
 - Add shortcuts for additional window-resizes
