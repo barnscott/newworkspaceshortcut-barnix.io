@@ -9,34 +9,20 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         window._settings = this.getSettings();
 
-        const page = new Adw.PreferencesPage();
-        window.add(page);
-
-        // About Section
-        const about = new Adw.PreferencesGroup();
-        about.set_title('About')
-        page.add(about);
-
+        /////////////////////////////////////////////
         // Move window to New Workspace
-        const githubLink = new Adw.ActionRow({
-            subtitle: 'https://github.com/barnscott/newworkspaceshortcut-barnix.io#tldr'
-        });
-        const buttonlink = new Gtk.LinkButton({
-            label: 'Project Home Page',
-            uri: 'https://github.com/barnscott/newworkspaceshortcut-barnix.io#tldr'
-        });
+        const page_main = new Adw.PreferencesPage();
+        page_main.set_icon_name('window-new-symbolic');
+        page_main.set_name('Main');
+        page_main.set_title('Main');
+        window.add(page_main);
 
-        about.add(githubLink);
-        githubLink.add_prefix(buttonlink)
-        githubLink.activatable_widget = buttonlink;
-
-
-
-        // Move window to New Workspace
+        /////////////////////////
+        // Group
         const mwGroup = new Adw.PreferencesGroup();
         mwGroup.width_chars = 150;
         mwGroup.set_title('Move window to New Workspace')
-        page.add(mwGroup);
+        page_main.add(mwGroup);
         
         const mwr = new Adw.ActionRow({
             title: 'Move window to New Workspace - Right',
@@ -55,11 +41,12 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         this.sInit_mwl.shortcut(window._settings,mwl,"move-window-to-left-workspace");
         
 
-
+        /////////////////////////
+        // Next Group
         // New Empty Workspace
         const ewGroup = new Adw.PreferencesGroup();
         ewGroup.set_title('New Empty Workspace')
-        page.add(ewGroup);
+        page_main.add(ewGroup);
         
         const ewr = new Adw.ActionRow({
             title: 'New Empty Workspace - Right',
@@ -78,11 +65,12 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         this.sInit_ewl.shortcut(window._settings,ewl,"empty-workspace-left");
 
 
-
+        /////////////////////////
+        // Next Group
         // Reorder-workspace
         const rwsGroup = new Adw.PreferencesGroup();
         rwsGroup.set_title('Reorder-workspace')
-        page.add(rwsGroup);
+        page_main.add(rwsGroup);
         
         const rwsr = new Adw.ActionRow({
             title: 'Reorder-workspace - Right',
@@ -107,26 +95,46 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         this.sInit_toverview = new settingsInit();
         this.sInit_toverview.switch(window._settings,triggers_overview,"move-workspace-triggers-overview");
         
+        /////////////////////////////////////////////
+        // WinManager
+        const page_winman = new Adw.PreferencesPage();
+        page_winman.set_icon_name('focus-top-bar-symbolic');
+        page_winman.set_name('Window Manager');
+        page_winman.set_title('Window Manager');
+        window.add(page_winman);
 
+        /////////////////////////
+        // Group
+        const winMoveToggleGroup = new Adw.PreferencesGroup();
+        winMoveToggleGroup.set_title('Window managment assistant');
+        page_winman.add(winMoveToggleGroup);
 
-        // Tiler
-        const tilerGroup = new Adw.PreferencesGroup();
-        tilerGroup.set_title('Window managment assistant for tiling')
-        page.add(tilerGroup);
-
-        const tiler_toggle = new Adw.ActionRow({
+        const winman_toggle = new Adw.ActionRow({
             title: 'Enable window managment shortcuts'
         });
-        tilerGroup.add(tiler_toggle);
+        winMoveToggleGroup.add(winman_toggle);
         this.sInit_ttoggle = new settingsInit();
-        this.sInit_ttoggle.switch(window._settings,tiler_toggle,"tiler-toggle");
-        
+        this.sInit_ttoggle.switch(window._settings,winman_toggle,"winman-toggle");
 
+        const win_buffer = new Adw.ActionRow({
+            title: 'Window gaps (pixels)',
+            subtitle: 'Default: 4'
+        });
+        winMoveToggleGroup.add(win_buffer);
+        this.sInit_win_buffer = new settingsInit();
+        this.sInit_win_buffer.number_value(window._settings,win_buffer,"window-buffer");
+
+        /////////////////////////
+        // Next Group
+        const winMoveInnerGroup = new Adw.PreferencesGroup();
+        winMoveInnerGroup.set_title('Move Windows - Inside Axis');
+        page_winman.add(winMoveInnerGroup);
+        
         const tr = new Adw.ActionRow({
             title: 'Send window right',
             subtitle: 'Default: Control+Super+Right'
         });
-        tilerGroup.add(tr);
+        winMoveInnerGroup.add(tr);
         this.sInit_tr = new settingsInit();
         this.sInit_tr.shortcut(window._settings,tr,"window-right");
 
@@ -135,7 +143,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
             title: 'Send window left',
             subtitle: 'Default: Control+Super+Left'
         });
-        tilerGroup.add(tl);
+        winMoveInnerGroup.add(tl);
         this.sInit_tl = new settingsInit();
         this.sInit_tl.shortcut(window._settings,tl,"window-left");
 
@@ -143,7 +151,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
             title: 'Send window up',
             subtitle: 'Default: Control+Super+Up'
         });
-        tilerGroup.add(tu);
+        winMoveInnerGroup.add(tu);
         this.sInit_tu = new settingsInit();
         this.sInit_tu.shortcut(window._settings,tu,"window-up");
 
@@ -151,22 +159,55 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
             title: 'Send window down',
             subtitle: 'Default: Control+Super+Down'
         });
-        tilerGroup.add(td);
+        winMoveInnerGroup.add(td);
         this.sInit_td = new settingsInit();
         this.sInit_td.shortcut(window._settings,td,"window-down");
 
-        const win_buffer = new Adw.ActionRow({
-            title: 'Pixel offset from center axis',
-            subtitle: 'Default: 4'
-        });
-        tilerGroup.add(win_buffer);
-        this.sInit_win_buffer = new settingsInit();
-        this.sInit_win_buffer.number_value(window._settings,win_buffer,"window-buffer");
+        /////////////////////////
+        // Next Group
+        const winMoveEdgeGroup = new Adw.PreferencesGroup();
+        winMoveEdgeGroup.set_title('Move Windows - Outer Display Edge');
+        page_winman.add(winMoveEdgeGroup);
         
+        const tre = new Adw.ActionRow({
+            title: 'Send window right',
+            subtitle: 'Default: Control+Super+Right'
+        });
+        winMoveEdgeGroup.add(tre);
+        this.sInit_tr = new settingsInit();
+        this.sInit_tr.shortcut(window._settings,tre,"window-right-edge");
 
+
+        const tle = new Adw.ActionRow({
+            title: 'Send window left',
+            subtitle: 'Default: Control+Super+Left'
+        });
+        winMoveEdgeGroup.add(tle);
+        this.sInit_tl = new settingsInit();
+        this.sInit_tl.shortcut(window._settings,tle,"window-left-edge");
+
+        const tue = new Adw.ActionRow({
+            title: 'Send window up',
+            subtitle: 'Default: Control+Super+Up'
+        });
+        winMoveEdgeGroup.add(tue);
+        this.sInit_tu = new settingsInit();
+        this.sInit_tu.shortcut(window._settings,tue,"window-up-edge");
+
+        const tde = new Adw.ActionRow({
+            title: 'Send window down',
+            subtitle: 'Default: Control+Super+Down'
+        });
+        winMoveEdgeGroup.add(tde);
+        this.sInit_td = new settingsInit();
+        this.sInit_td.shortcut(window._settings,tde,"window-down-edge");
+        
+        /////////////////////////
+        // Next Group
         // Window resize- default group
-        const resizeGroup0 = new Adw.PreferencesGroup({description: _('Primary window-size shortcut'),});
-        page.add(resizeGroup0);
+        const resizeGroup0 = new Adw.PreferencesGroup();
+        resizeGroup0.set_title('Primary window-size shortcut');
+        page_winman.add(resizeGroup0);
 
         const resize = new Adw.ActionRow({
             title: 'Resize window',
@@ -192,10 +233,12 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         this.sInit_resize_width = new settingsInit();
         this.sInit_resize_width.number_value(window._settings,resize_width,"window-width");
 
-
-        // Window resize- Alternative1 group 
-        const resizeGroup1 = new Adw.PreferencesGroup({description: _('Alternative #1 window-size shortcut'),});
-        page.add(resizeGroup1);
+        /////////////////////////
+        // Next Group
+        // Window resize- Alternatives
+        const resizeGroup1 = new Adw.PreferencesGroup();
+        resizeGroup1.set_title('Alternative #1 window-size shortcut');
+        page_winman.add(resizeGroup1);
 
         const resize1 = new Adw.ActionRow({
             title: 'Resize window',
@@ -221,9 +264,12 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         this.sInit_resize_width1 = new settingsInit();
         this.sInit_resize_width1.number_value(window._settings,resize_width1,"window-width1");
 
+        /////////////////////////
+        // Next Group
         // Window resize- Alternative2 group
-        const resizeGroup2 = new Adw.PreferencesGroup({description: _('Alternative #2 window-size shortcut'),});
-        page.add(resizeGroup2);
+        const resizeGroup2 = new Adw.PreferencesGroup();
+        resizeGroup2.set_title('Alternative #2 window-size shortcut');
+        page_winman.add(resizeGroup2);
         
         const resize2 = new Adw.ActionRow({
             title: 'Resize window',
@@ -249,9 +295,12 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         this.sInit_resize_width2 = new settingsInit();
         this.sInit_resize_width2.number_value(window._settings,resize_width2,"window-width2");
 
+        /////////////////////////
+        // Next Group
         // Window resize- Alternative3 group
-        const resizeGroup3 = new Adw.PreferencesGroup({description: _('Alternative #3 window-size shortcut'),});
-        page.add(resizeGroup3);
+        const resizeGroup3 = new Adw.PreferencesGroup();
+        resizeGroup3.set_title('Alternative #3 window-size shortcut');
+        page_winman.add(resizeGroup3);
 
         const resize3 = new Adw.ActionRow({
             title: 'Resize window',
@@ -276,6 +325,31 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         resizeGroup3.add(resize_width3);
         this.sInit_resize_width3 = new settingsInit();
         this.sInit_resize_width3.number_value(window._settings,resize_width3,"window-width3");
+
+        /////////////////////////////////////////////
+        // About
+        const page_about = new Adw.PreferencesPage();
+        page_about.set_icon_name('bookmark-new-symbolic');
+        page_about.set_name('About');
+        page_about.set_title('About');
+        window.add(page_about);
+
+        const aboutGroup = new Adw.PreferencesGroup();
+        aboutGroup.set_title('About');
+        page_about.add(aboutGroup);
+
+        // Move window to New Workspace
+        const githubLink = new Adw.ActionRow({
+            subtitle: 'https://github.com/barnscott/newworkspaceshortcut-barnix.io#tldr'
+        });
+        const buttonlink = new Gtk.LinkButton({
+            label: 'Project Home Page',
+            uri: 'https://github.com/barnscott/newworkspaceshortcut-barnix.io#tldr'
+        });
+
+        aboutGroup.add(githubLink);
+        githubLink.add_prefix(buttonlink)
+        githubLink.activatable_widget = buttonlink;
     }
 }
 
@@ -329,13 +403,13 @@ class settingsInit {
     }
 
     switch (ext_settings,actionEvent,sEvent) {
-        const tilerToggleSwitch = new Gtk.Switch({
+        const winmanToggleSwitch = new Gtk.Switch({
             active: ext_settings.get_boolean(sEvent),
             valign: Gtk.Align.CENTER,
             });
         
-        ext_settings.bind(sEvent,tilerToggleSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
-        actionEvent.add_suffix(tilerToggleSwitch);
-        actionEvent.activatable_widget = tilerToggleSwitch;
+        ext_settings.bind(sEvent,winmanToggleSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
+        actionEvent.add_suffix(winmanToggleSwitch);
+        actionEvent.activatable_widget = winmanToggleSwitch;
     }
   }

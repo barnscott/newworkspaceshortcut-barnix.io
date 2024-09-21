@@ -17,8 +17,10 @@
 
 import Shell from 'gi://Shell';
 import Meta from 'gi://Meta';
+import Gio from 'gi://Gio';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as WinMan from './extension/winman.js';
 
 // FUNCTION, move the window to the new workspace
 function moveWindow(m) {
@@ -62,7 +64,7 @@ function getNewIndex(m){
 }
 
 // FUNCTION, find Win that currently has shell focus
-function getFocusWin(){
+export function getFocusWin(){
 
   let myWins = global.get_window_actors();
   let focusWin;
@@ -104,7 +106,7 @@ function reorderWS() {
   }
 }
 
-class TilerToggle {
+class winManToggle {
     constructor(extSettings,flag,mode) {
       this._settings = extSettings;
       this.flag = flag;
@@ -113,8 +115,8 @@ class TilerToggle {
     }
 
     toggle_event () {
-      var tiler_status_key = this._settings.get_boolean('tiler-toggle');
-      if(tiler_status_key == true ){
+      var winman_status_key = this._settings.get_boolean('winman-toggle');
+      if(winman_status_key == true ){
           this.enable();
       }else{
           this.disable();
@@ -122,30 +124,51 @@ class TilerToggle {
     }
 
     enable () {
-      this.wTiler = new tiler(this._settings);
+      // Enabling this extension should disable the following native Gnome shortcuts
+      let keybinding_schema_settings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
+      keybinding_schema_settings.set_strv('move-to-side-e', []);
+      keybinding_schema_settings.set_strv('move-to-side-n', []);
+      keybinding_schema_settings.set_strv('move-to-side-s', []);
+      keybinding_schema_settings.set_strv('move-to-side-w', []);
+
+      this.winManEvent = new WinMan.windowManager(this._settings);
       Main.wm.addKeybinding("resize-win", this._settings, this.flag, this.mode, () => {
-        this.wTiler.resize_window('window-height','window-width');
+        this.winManEvent.resize_window('window-height','window-width');
       });
       Main.wm.addKeybinding("resize-win1", this._settings, this.flag, this.mode, () => {
-        this.wTiler.resize_window('window-height1','window-width1');
+        this.winManEvent.resize_window('window-height1','window-width1');
       });
-      Main.wm.addKeybinding("resize-win2", this._settings, this.flag, this.mode, () => {
-        this.wTiler.resize_window('window-height2','window-width2');
+      Main.wm.addKeybinding("resize-win2", this._settings, this.flag, this.mode, () => { 
+        this.winManEvent.resize_window('window-height2','window-width2');
       });
       Main.wm.addKeybinding("resize-win3", this._settings, this.flag, this.mode, () => {
-        this.wTiler.resize_window('window-height3','window-width3');
+        this.winManEvent.resize_window('window-height3','window-width3');
       });
+      // Inner window relocations:
       Main.wm.addKeybinding("window-right", this._settings, this.flag, this.mode, () => {
-        this.wTiler.right();
+        this.winManEvent.right();
       });
       Main.wm.addKeybinding("window-left", this._settings, this.flag, this.mode, () => {
-        this.wTiler.left();
+        this.winManEvent.left();
       });
       Main.wm.addKeybinding("window-up", this._settings, this.flag, this.mode, () => {
-        this.wTiler.up();
+        this.winManEvent.up();
       });
       Main.wm.addKeybinding("window-down", this._settings, this.flag, this.mode, () => {
-        this.wTiler.down();
+        this.winManEvent.down();
+      });
+      // Display-edge window relocations:
+      Main.wm.addKeybinding("window-right-edge", this._settings, this.flag, this.mode, () => {
+        this.winManEvent.right_edge();
+      });
+      Main.wm.addKeybinding("window-left-edge", this._settings, this.flag, this.mode, () => {
+        this.winManEvent.left_edge();
+      });
+      Main.wm.addKeybinding("window-up-edge", this._settings, this.flag, this.mode, () => {
+        this.winManEvent.up_edge();
+      });
+      Main.wm.addKeybinding("window-down-edge", this._settings, this.flag, this.mode, () => {
+        this.winManEvent.down_edge();
       });
     }
 
@@ -158,148 +181,12 @@ class TilerToggle {
       Main.wm.removeKeybinding("window-left");
       Main.wm.removeKeybinding("window-up");
       Main.wm.removeKeybinding("window-down");
+      Main.wm.removeKeybinding("window-right-edge");
+      Main.wm.removeKeybinding("window-left-edge");
+      Main.wm.removeKeybinding("window-up-edge");
+      Main.wm.removeKeybinding("window-down-edge");
     }
   }
-
-class tiler {
-  constructor(extSettings) {
-    this._settings = extSettings;
-  }
-
-  get_display_info (myWin){
-    let mydisplay = myWin.get_display();
-    let monitor_geo = mydisplay.get_monitor_geometry(mydisplay.get_current_monitor());
-    let buffer = this._settings.get_int('window-buffer');
-    return [monitor_geo.width,monitor_geo.height,buffer,monitor_geo.x,monitor_geo.y]
-  }
-  get_height_center (myWin){
-    let display_spec = this.get_display_info(myWin)
-    let height = display_spec[1];
-    let top_bar_height = this.top_bar();
-    let center = top_bar_height + ((height - top_bar_height) * 0.5)
-    let buffer = display_spec[2];
-    let multimonitor_y_offset = display_spec[4];
-    return [center,buffer,height,multimonitor_y_offset]
-  }
-  get_width_center (myWin){
-    let display_spec = this.get_display_info(myWin)
-    let width = display_spec[0];
-    let center = width * 0.5;
-    let buffer = display_spec[2];
-    let multimonitor_x_offset = display_spec[3];
-    return [center,buffer,width,multimonitor_x_offset]
-  }
-
-  window_rect (myWin) {
-    let rect = myWin.get_frame_rect();
-    // rect is an object that contains: x,y,width,height
-    return rect
-  }
-
-  top_bar () {
-    let panelActor = Main.panel.get_actor();
-    let panelheight = panelActor.get_height();
-    return panelheight;
-}
-
-  resize_window (heightKey,widthKey) {
-    // get the Focused / active  window
-    let myWin = getFocusWin();
-    let window_rect = this.window_rect(myWin);
-  
-    // determine 45% of display height
-    let displayreponse = this.get_display_info(myWin);
-    // Display-width * user-defined-window-width, then minus Buffer (multiplied by 3 to account for trimming both sides of window, plus the extra padding for outer-edge so gaps are even)
-    let newWidth = (displayreponse[0] * (this._settings.get_int(widthKey) * 0.01)) - (displayreponse[2] * 3);
-    // Display-height (minus the top-bar) * user-defined-window-height, then minus Buffer (multiplied by 3 to account for trimming both sides of window, plus the extra padding for outer-edge so gaps are even)
-    let newHeight = (( displayreponse[1] - this.top_bar() ) * (this._settings.get_int(heightKey) * 0.01)) - (displayreponse[2] * 3);
-  
-    // modify window size
-    myWin.move_resize_frame(true, window_rect.x, window_rect.y, newWidth, newHeight);
-  }
-
-  // Window Relocation functions
-  left () {
-    let myWin = getFocusWin();
-    let [width_center,buffer,width,multimonitor_x_offset] = this.get_width_center(myWin);
-    let window_rect = this.window_rect(myWin);
-    let x_axis = (width_center - buffer) - window_rect['width'] + multimonitor_x_offset;
-    myWin.move_frame(true, x_axis, window_rect['y']);
-  }
-  right () {
-    let myWin = getFocusWin();
-    let [width_center,buffer,width,multimonitor_x_offset] = this.get_width_center(myWin);
-    let window_rect = this.window_rect(myWin);
-    let x_axis = (width_center + buffer) + multimonitor_x_offset;
-    myWin.move_frame(true, x_axis, window_rect['y']);
-  }
-  up () {
-    let myWin = getFocusWin();
-    let [height_center,buffer,height,multimonitor_y_offset] = this.get_height_center(myWin);
-    let window_rect = this.window_rect(myWin);
-    let y_axis = (height_center - buffer) - window_rect['height'] + multimonitor_y_offset;
-    let top_bar_height = this.top_bar();
-    // if new window is above the top of the monitor-display, then
-    //    ...reset y_axis inside display-monitor
-    if (y_axis < top_bar_height) {
-      y_axis = (buffer *2) + multimonitor_y_offset + top_bar_height;
-    }
-    myWin.move_frame(true,window_rect['x'],y_axis);
-  }
-  down () {
-    let myWin = getFocusWin();
-    let [height_center,buffer,height,multimonitor_y_offset] = this.get_height_center(myWin);
-    let window_rect = this.window_rect(myWin);
-    let y_axis = height_center + buffer + multimonitor_y_offset;
-
-    // if bottom of window falls off the bottom of display-monitor, then
-    //    ...reset y_axis so that it is inside display-monitor bourdary
-    if ((y_axis+window_rect['height']) > (height+multimonitor_y_offset-buffer)) {
-      y_axis = y_axis-((y_axis+window_rect['height'])-height)+multimonitor_y_offset-(buffer *2);
-    }
-    myWin.move_frame(true,window_rect['x'],y_axis);
-  }
-  left_edge () {
-    let myWin = getFocusWin();
-    let [display_width,display_height,buffer,multimonitor_x_offset,multimonitor_y_offset] = this.get_display_info(myWin)
-    let window_rect = this.window_rect(myWin);
-    let x_axis = (0 + buffer) + multimonitor_x_offset;
-    myWin.move_frame(true, x_axis, window_rect['y']);
-  }
-  right_edge () { //wip
-    let myWin = getFocusWin();
-    let [width_center,buffer,width,multimonitor_x_offset] = this.get_width_center(myWin);
-    let window_rect = this.window_rect(myWin);
-    let x_axis = (width_center + buffer) + multimonitor_x_offset;
-    myWin.move_frame(true, x_axis, window_rect['y']);
-  }
-  up_edge () { //wip
-    let myWin = getFocusWin();
-    let [height_center,buffer,height,multimonitor_y_offset] = this.get_height_center(myWin);
-    let window_rect = this.window_rect(myWin);
-    let y_axis = (height_center - buffer) - window_rect['height'] + multimonitor_y_offset;
-    let top_bar_height = this.top_bar();
-    // if new window is above the top of the monitor-display, then
-    //    ...reset y_axis inside display-monitor
-    if (y_axis < top_bar_height) {
-      y_axis = (buffer *2) + multimonitor_y_offset + top_bar_height;
-    }
-    myWin.move_frame(true,window_rect['x'],y_axis);
-  }
-  down_edge () { //wip
-    let myWin = getFocusWin();
-    let [height_center,buffer,height,multimonitor_y_offset] = this.get_height_center(myWin);
-    let window_rect = this.window_rect(myWin);
-    let y_axis = height_center + buffer + multimonitor_y_offset;
-
-    // if bottom of window falls off the bottom of display-monitor, then
-    //    ...reset y_axis so that it is inside display-monitor bourdary
-    if ((y_axis+window_rect['height']) > (height+multimonitor_y_offset-buffer)) {
-      y_axis = y_axis-((y_axis+window_rect['height'])-height)+multimonitor_y_offset-(buffer *2);
-    }
-    myWin.move_frame(true,window_rect['x'],y_axis);
-  }
-}
 
 export default class newWorkspaceShortcuts extends Extension {
 
@@ -336,9 +223,9 @@ export default class newWorkspaceShortcuts extends Extension {
       this.rWS.left(moveWSTriggersOverview);
     });
 
-    this._tilerToggle = new TilerToggle(this._settings,flag,mode);
-    this._settings.connect(`changed::tiler-toggle`,() => {
-      this._tilerToggle.toggle_event();
+    this._winManToggle = new winManToggle(this._settings,flag,mode);
+    this._settings.connect(`changed::winman-toggle`,() => {
+      this._winManToggle.toggle_event();
     });
 
   }
@@ -350,9 +237,9 @@ export default class newWorkspaceShortcuts extends Extension {
     Main.wm.removeKeybinding("empty-workspace-left");
     Main.wm.removeKeybinding("workspace-right");
     Main.wm.removeKeybinding("workspace-left");
-    this._tilerToggle.disable();
+    this._winManToggle.disable();
     this.rWS = null;
-    this.wTiler = null;
+    this.winManEvent = null;
     this._settings = null;
   }
 }

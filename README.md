@@ -27,6 +27,11 @@ These shortcuts enable repositioning of floating windows along the center X and 
   - `Control + Super + left` will relocate window to left side of the *center of the x-axis* of the display
   - `Control + Super + up` will relocate window to top side of the *center of the y-axis* of the display
   - `Control + Super + down` will relocate window to bottom side of the *center of the y-axis* of the display
+- Additionally, there are shortcuts that extend the built-in Gnome shortcuts that move-windows to the display's edge. These shorcuts are re-implemented for the sake of respecting the optional gaps/buffers that are available via this Extension.
+  - `Control + Super + Alt + right` will relocate window to right side of the *center of the x-axis* of the display
+  - `Control + Super + Alt + left` will relocate window to left side of the *center of the x-axis* of the display
+  - `Control + Super + Alt + up` will relocate window to top side of the *center of the y-axis* of the display
+  - `Control + Super + Alt + down` will relocate window to bottom side of the *center of the y-axis* of the display
 
 ## Native Gnome window management shortcuts
 
@@ -35,14 +40,6 @@ This extension's shortcuts are designed to extend the window-management bindings
 gsettings get org.gnome.desktop.wm.keybindings begin-resize
 gsettings get org.gnome.desktop.wm.keybindings begin-move
 gsettings get org.gnome.desktop.wm.keybindings move-to-center
-gsettings get org.gnome.desktop.wm.keybindings move-to-side-e
-gsettings get org.gnome.desktop.wm.keybindings move-to-side-n
-gsettings get org.gnome.desktop.wm.keybindings move-to-side-s
-gsettings get org.gnome.desktop.wm.keybindings move-to-side-w
-gsettings get org.gnome.desktop.wm.keybindings move-to-corner-ne
-gsettings get org.gnome.desktop.wm.keybindings move-to-corner-nw
-gsettings get org.gnome.desktop.wm.keybindings move-to-corner-se
-gsettings get org.gnome.desktop.wm.keybindings move-to-corner-sw
 gsettings get org.gnome.desktop.wm.keybindings maximize-vertically
 gsettings get org.gnome.desktop.wm.keybindings maximize-horizontally
 gsettings get org.gnome.desktop.wm.preferences resize-with-right-button
