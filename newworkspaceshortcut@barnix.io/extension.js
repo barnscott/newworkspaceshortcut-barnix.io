@@ -185,6 +185,7 @@ class winManToggle {
       Main.wm.removeKeybinding("window-left-edge");
       Main.wm.removeKeybinding("window-up-edge");
       Main.wm.removeKeybinding("window-down-edge");
+      this.winManEvent = null;
     }
   }
 
@@ -239,7 +240,7 @@ export default class newWorkspaceShortcuts extends Extension {
     Main.wm.removeKeybinding("workspace-left");
     this._winManToggle.disable();
     this.rWS = null;
-    this.winManEvent = null;
+    this._winManToggle = null;
     this._settings = null;
   }
 }
