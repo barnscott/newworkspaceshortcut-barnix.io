@@ -61,11 +61,11 @@
       </description>
     </key>
     
-    <key name="tiler-toggle" type="b">
+    <key name="winman-toggle" type="b">
       <default>false</default>
-      <summary>Enable Tiler features</summary>
+      <summary>Enable Window Managment features</summary>
       <description>
-        Define if the minimal-tiler features should be available, or if features and their shortcuts, should be disabled.
+        Define if the minimal window management features should be available, or if features and their shortcuts, should be disabled.
       </description>
     </key>
 
@@ -101,6 +101,38 @@
       </description>
     </key>
 
+    <key name="window-right-edge" type="as">
+      <default><![CDATA[['<Control><Super><Alt>Right']]]></default>
+      <summary>Slide window to right edge</summary>
+      <description>
+        Slide window right
+      </description>
+    </key>
+
+    <key name="window-left-edge" type="as">
+      <default><![CDATA[['<Control><Super><Alt>Left']]]></default>
+      <summary>Slide window to left edge</summary>
+      <description>
+        Slide window left
+      </description>
+    </key>
+
+    <key name="window-up-edge" type="as">
+      <default><![CDATA[['<Control><Super><Alt>Up']]]></default>
+      <summary>Slide window to top edge</summary>
+      <description>
+        Slide window up
+      </description>
+    </key>
+    
+    <key name="window-down-edge" type="as">
+      <default><![CDATA[['<Control><Super><Alt>Down']]]></default>
+      <summary>Slide window to down edge</summary>
+      <description>
+        Slide window down
+      </description>
+    </key>
+
     <key name="window-buffer" type="i">
       <default>4</default>
       <summary>Pixel distance away from center axis</summary>
@@ -125,7 +157,7 @@
     </key>
 
     <key name="resize-win1" type="as">
-      <default><![CDATA[['<Super><Shift>Space','<Super><Alt>2']]]></default>
+      <default><![CDATA[['<Super><Alt>2']]]></default>
       <summary>Alternative #1 Resize Window</summary>
     </key>
 
@@ -140,7 +172,7 @@
     </key>
 
     <key name="resize-win2" type="as">
-      <default><![CDATA[['<Super><Alt>3']]]></default>
+      <default><![CDATA[['<Super><Shift>Space','<Super><Alt>3']]]></default>
       <summary>Alternative #2 Resize Window</summary>
     </key>
 
