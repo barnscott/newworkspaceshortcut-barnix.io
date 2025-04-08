@@ -61,11 +61,6 @@ See `CHANGELOG.md` to identify changes in newer releases. Releases after `v46.0`
 
 # Supported Gnome versions
 
-This version of this extension is tested on the following Gnome releases:
-- 47
-- 46
-- 45
-
 See `CHANGELOG.md` to identify which versions of this extension support which versions of Gnome.
 
 # How to use

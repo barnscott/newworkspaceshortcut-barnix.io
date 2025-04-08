@@ -1,3 +1,7 @@
+# 480 (Apr 2025)
+## CHANGES
+- Gnome 48 
+
 # 471 (Sept 2024)
 ## CHANGES
 - Add shortcuts to move windows to display edges to override native DE shortcuts so that optional buffers/gaps are respected
