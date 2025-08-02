@@ -1,3 +1,7 @@
+# 481 (Aug 2025)
+## CHANGES
+- Make the focused window always visible on the screen when moving it to a new created workspace
+
 # 480 (Apr 2025)
 ## CHANGES
 - Gnome 48 
