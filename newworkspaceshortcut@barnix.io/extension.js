@@ -33,13 +33,16 @@ function moveWindow(m) {
   //2. create  new  workspace
   Main.wm.insertWorkspace(newIndex);
 
-  //3. on the Focused Meta.Window object
-  myWin.change_workspace_by_index(newIndex, false);
+  //3. stick the focused/active window (the same as Always on Visible Workspace), so it can move to the new workspace and stay always visible on the screen when GNOME Shell plays workspace switch animation
+  myWin.stick();
 
   //4. move me to new workspace
   let myTime = global.get_current_time();
   let ws = global.workspaceManager.get_workspace_by_index(newIndex);
   ws.activate_with_focus(myWin, myTime);
+
+  //5. leave the just moved window in the new workspace
+  myWin.unstick();
 }
 
 // FUNCTION, create an empty workspace
