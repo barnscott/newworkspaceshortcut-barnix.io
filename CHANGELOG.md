@@ -1,3 +1,8 @@
+# 482 (Aug 2025)
+## CHANGES
+- Top-bar enhancement so that top-bar offset is only implemented on the primary display
+- This setting can be overridden with a gsettings key, captured in README. Not exposed in Preferences Applet, as I do not know if there is a valid usecase for it.
+
 # 481 (Aug 2025)
 ## CHANGES
 - Make the focused window always visible on the screen when moving it to a new created workspace

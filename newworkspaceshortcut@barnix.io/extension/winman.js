@@ -16,11 +16,12 @@ export const windowManager = class windowManager {
     get_height_center (myWin){
       let display_spec = this.get_display_info(myWin)
       let height = display_spec[1];
-      let top_bar_height = this.top_bar();
+      let window_rect = this.window_rect(myWin);
+      let top_bar_height = this.top_bar(window_rect);
       let center = top_bar_height + ((height - top_bar_height) * 0.5);
       let buffer = display_spec[2];
       let multimonitor_y_offset = display_spec[4];
-      return [center,buffer,height,multimonitor_y_offset]
+      return [center,buffer,height,multimonitor_y_offset,top_bar_height]
     }
     get_width_center (myWin){
       let display_spec = this.get_display_info(myWin)
@@ -37,10 +38,51 @@ export const windowManager = class windowManager {
       return rect
     }
   
-    top_bar () {
+    top_bar (window_rect) {
       let panelActor = Main.panel.get_actor();
-      let panelheight = panelActor.get_height();
+      let panelheight = 0;
+      let topBarPref = this._settings.get_string('top-bar-pref');
+
+      // If undefined, set to default value
+      if (!topBarPref) {
+        topBarPref = "primary";
+      }
+
+      // Set it lower-case
+      topBarPref = topBarPref.toLowerCase();
+
+      // Available options: primary (default), always, never
+      // If invalid value, reset to primary (default)
+      if (!["always", "primary", "never"].includes(topBarPref)) {
+        topBarPref = "primary";
+      }
+
+      // If Primary
+      if (topBarPref == "primary" && this.isActiveWindowOnPrimaryMonitor(window_rect)) {
+        panelheight =+ panelActor.get_height();
+      }
+
+      // If Always
+      if (topBarPref == "always") {
+        panelheight =+ panelActor.get_height();
+      }
+
+      // If "never", then proceed without modifying default of initialization
       return panelheight;
+    }
+
+    isActiveWindowOnPrimaryMonitor (window_rect) {
+      // Get the primary monitor
+      let primaryMonitor = Main.layoutManager.primaryMonitor;
+
+      // Check if the window's rectangle intersects with the primary monitor
+      let isOnPrimary =
+          window_rect.x >= primaryMonitor.x &&
+          window_rect.x + window_rect.width <= primaryMonitor.x + primaryMonitor.width &&
+          window_rect.y >= primaryMonitor.y &&
+          window_rect.y + window_rect.height <= primaryMonitor.y + primaryMonitor.height;
+
+      return isOnPrimary;
     }
   
     resize_window (heightKey,widthKey) {
@@ -53,7 +95,7 @@ export const windowManager = class windowManager {
       // Display-width * user-defined-window-width, then minus Buffer (multiplied by 3 to account for trimming both sides of window, plus the extra padding for outer-edge so gaps are even)
       let newWidth = (displayreponse[0] * (this._settings.get_int(widthKey) * 0.01)) - (displayreponse[2] * 3);
       // Display-height (minus the top-bar) * user-defined-window-height, then minus Buffer (multiplied by 3 to account for trimming both sides of window, plus the extra padding for outer-edge so gaps are even)
-      let newHeight = (( displayreponse[1] - this.top_bar() ) * (this._settings.get_int(heightKey) * 0.01)) - (displayreponse[2] * 3);
+      let newHeight = (( displayreponse[1] - this.top_bar(window_rect) ) * (this._settings.get_int(heightKey) * 0.01)) - (displayreponse[2] * 3);
     
       // modify window size
       myWin.move_resize_frame(true, window_rect.x, window_rect.y, newWidth, newHeight);
@@ -76,10 +118,9 @@ export const windowManager = class windowManager {
     }
     up () {
       let myWin = getFocusWin();
-      let [height_center,buffer,height,multimonitor_y_offset] = this.get_height_center(myWin);
+      let [height_center,buffer,height,multimonitor_y_offset,top_bar_height] = this.get_height_center(myWin);
       let window_rect = this.window_rect(myWin);
       let y_axis = (height_center - buffer) - window_rect['height'] + multimonitor_y_offset;
-      let top_bar_height = this.top_bar();
       // if new window is above the top of the monitor-display, then
       //    ...reset y_axis inside display-monitor
       if (y_axis < top_bar_height) {
@@ -89,7 +130,7 @@ export const windowManager = class windowManager {
     }
     down () {
       let myWin = getFocusWin();
-      let [height_center,buffer,height,multimonitor_y_offset] = this.get_height_center(myWin);
+      let [height_center,buffer,height,multimonitor_y_offset,top_bar_height] = this.get_height_center(myWin);
       let window_rect = this.window_rect(myWin);
       let y_axis = Math.round(height_center) + buffer + multimonitor_y_offset;
   
@@ -118,7 +159,7 @@ export const windowManager = class windowManager {
       let myWin = getFocusWin();
       let [display_width,display_height,buffer,multimonitor_x_offset,multimonitor_y_offset] = this.get_display_info(myWin);
       let window_rect = this.window_rect(myWin);
-      let top_bar_height = this.top_bar();
+      let top_bar_height = this.top_bar(window_rect);
       let y_axis = (buffer*2) + top_bar_height + multimonitor_y_offset;
       myWin.move_frame(true,window_rect['x'],y_axis);
     }

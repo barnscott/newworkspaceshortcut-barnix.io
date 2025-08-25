@@ -2,6 +2,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
 
+  <enum id="org.gnome.shell.extensions.newworkspaceshortcut.TopBarPref">
+    <value value="0" nick="never"/>
+    <value value="1" nick="always"/>
+    <value value="2" nick="primary"/>
+  </enum>
+
   <schema id="org.gnome.shell.extensions.newworkspaceshortcut"
     path="/org/gnome/shell/extensions/newworkspaceshortcut/">
 
@@ -199,6 +205,12 @@
     <key name="window-width3" type="i">
       <default>15</default>
       <summary>Alternative #3 Desired window width percentage</summary>
+    </key>
+
+    <key name="top-bar-pref" enum="org.gnome.shell.extensions.newworkspaceshortcut.TopBarPref">
+      <default>'primary'</default>
+      <summary>Top bar preference for Window Manager</summary>
+      <description>Defines if the Window Manager considers the Gnome TopBar. Valid values are 'always', 'primary', or 'never'.</description>
     </key>
 
   </schema>
