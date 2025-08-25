@@ -55,6 +55,14 @@ Changes to the shortcut bindings can be applied via the setting's panel of the e
 
 Example format for setting shortcuts: `<Super><Control><Shift>Right`
 
+## Using Dconf or Gsettings 
+
+You will find the settings stored in Gnome's Dconf datastore. If you desire to define settings programatically, you will need the schema directory path. Below is an example:
+
+```bash
+gsettings --schemadir ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io/schemas/ set org.gnome.shell.extensions.newworkspaceshortcut top-bar-pref 'always'
+```
+
 # Changes
 
 See `CHANGELOG.md` to identify changes in newer releases. Releases after `v46.0` including changes to some shortcut bindings.
