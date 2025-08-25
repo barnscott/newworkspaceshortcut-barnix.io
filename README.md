@@ -57,11 +57,24 @@ Example format for setting shortcuts: `<Super><Control><Shift>Right`
 
 ## Using Dconf or Gsettings 
 
-You will find the settings stored in Gnome's Dconf datastore. If you desire to define settings programatically, you will need the schema directory path. Below is an example:
+You will find user settings stored in Gnome's Dconf datastore, however, it is not recommended to interface with settings via Dconf. Nonetheless, if you desire to define settings programmatically, you will need the schema directory path.
 
 ```bash
-gsettings --schemadir ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io/schemas/ set org.gnome.shell.extensions.newworkspaceshortcut top-bar-pref 'always'
+gsettings --schemadir ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io/schemas/ set org.gnome.shell.extensions.newworkspaceshortcut top-bar-pref 'primary'
 ```
+
+## Hidden Settings
+
+The properties below are not exposed via the Preferences Applet.
+
+### Top Bar Pref
+```bash
+gsettings --schemadir ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io/schemas/ set org.gnome.shell.extensions.newworkspaceshortcut top-bar-pref 'primary'
+```
+The above gsetting property, "top-bar-pref" defines if the Window Management shortcuts should compensate for the top-bar. Available options include:
+- 'primary' - Default. Only offset for the Top Bar on the primary display. This is the appropriate option for a vanilla Gnome experience.
+- 'always' - Always offset for the Top Bar. This may be useful if you have an Extension that places the Top Bar on multiple monitors.
+- 'never' - Never offset window management for the Top Bar. This may be useful if you have hidden the Top Bar on the primary display.
 
 # Changes
 
