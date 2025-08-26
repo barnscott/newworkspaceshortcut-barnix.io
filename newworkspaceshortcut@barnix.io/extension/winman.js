@@ -9,7 +9,7 @@ export const windowManager = class windowManager {
   
     get_display_info (myWin){
       let mydisplay = myWin.get_display();
-      let monitor_geo = mydisplay.get_monitor_geometry(mydisplay.get_current_monitor());
+      let monitor_geo = mydisplay.get_monitor_geometry(myWin.get_monitor());
       let buffer = this._settings.get_int('window-buffer');
       return [monitor_geo.width,monitor_geo.height,buffer,monitor_geo.x,monitor_geo.y]
     }

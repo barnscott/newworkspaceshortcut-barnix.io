@@ -68,16 +68,7 @@ function getNewIndex(m){
 
 // FUNCTION, find Win that currently has shell focus
 export function getFocusWin(){
-
-  let myWins = global.get_window_actors();
-  let focusWin;
-  myWins.forEach((winCont) => {
-    let win = winCont.get_meta_window();
-    let focstat = win.has_focus();
-    if ( focstat ){
-      focusWin = win;
-    }
-  });
+  let focusWin = global.display.focus_window;
   return focusWin;
 }
 
