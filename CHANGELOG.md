@@ -1,3 +1,7 @@
+# 490 (Oct 2025)
+## CHANGES
+- Gnome 49 support
+
 # 483 (Aug 2025)
 ## CHANGES
 - Bug fix for WindowManager - after using a Gnome shortcut to move a window between multiple monitors, this extension would detect the wrong monitor for use with the Window Manager
