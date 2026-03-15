@@ -1,3 +1,7 @@
+# 500 (Mar 2026)
+## CHANGES
+- Gnome 50 support
+
 # 490 (Oct 2025)
 ## CHANGES
 - Gnome 49 support

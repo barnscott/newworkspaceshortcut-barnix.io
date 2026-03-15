@@ -131,8 +131,8 @@ If you are on Wayland, after you complete the  installation, you may need to log
 
 When creating a PR, review the following files and make changes as necessary:
 
-- Update the "Supported Gnome versions" section on this `README.md`
 - Update `CHANGELOG.md` with a summary of the changes
+- Update `metadata.json` to reflect Gnome releases that are supported
 
 ## Build testing/debugging
 
