@@ -1,163 +1,160 @@
-# New Workspace Shortcut extension for Gnome Desktop
+# New Workspace Shortcut — GNOME Extension
 
-# Workspace shortcuts
+Keyboard shortcuts for workspace management, window repositioning, directional focus navigation, and focused-window highlighting.
 
-- Move-window-to-new-workspace Shortcut: 
-  - Use a shortcut to move the in-focus window to a *new* workspace on the right of your current workspace: `Ctl + Super + Shift + Right`
-  - Or to the left / *backward*: `Ctl + Super + Shift + Left`
-- New-empty-workspace Shortcut:
-  - Use a shortcut to create an *empty* workspace on the right: `Ctl + Shift + Alt + Right` (Changed in `v46.2`, March 2024)
-  - Or to the left / *backward*: `Ctl + Shift + Alt + Left` (Changed in `v46.2`, March 2024)
-- Reorder-workspace Shortcut:
-  - Use a shortcut to move an entire workspace left or right of the current workspace: `Ctl + Super + Left` or `Ctl + Super + Right`
-  - By default, this shortcut with automatically trigger the Overview to provide a limited form of visual feedback. However, this preference can be changed via the extension's Settings panel.
-
-These shortcuts are created to work logically with the vanilla gnome shortcuts including change-workspace (`Super + ALT + Left/Right`) and move-window-to-next-workspace (`Shift + Super + ALT + Left/Right`).
-
-# Window shortcuts
-
-## Repositioning floating windows
-`NOTE:` These shortcuts are DISABLED by default, and must be enabled via the extension's settings panel.
-
-These shortcuts enable repositioning of floating windows along the center X and Y axis of the display. They are intended to be a minimal enhancement to the default window-management shortcuts (ie, `begin-resize`, `begin-move`, `move-to-side-e`, etc) that are available natively in Gnome. If you are not familiar with the native Gnome shortcuts, see the following section, `Native Gnome window management shortcuts`.
-
-- `Super + Space` will resize window to 40% width by 45% height. These dimensions can be modified in the settings-panel, as well as, additional window frame sizes.
-- `Control + Super` and `arrow-key` key will relocate the window to the applicable half of the display. The window will be anchored to the center of the display.
-  - `Control + Super + right` will relocate window to right side of the *center of the x-axis* of the display
-  - `Control + Super + left` will relocate window to left side of the *center of the x-axis* of the display
-  - `Control + Super + up` will relocate window to top side of the *center of the y-axis* of the display
-  - `Control + Super + down` will relocate window to bottom side of the *center of the y-axis* of the display
-- Additionally, there are shortcuts that extend the built-in Gnome shortcuts that move-windows to the display's edge. These shorcuts are re-implemented for the sake of respecting the optional gaps/buffers that are available via this Extension.
-  - `Control + Super + Alt + right` will relocate window to right side of the *center of the x-axis* of the display
-  - `Control + Super + Alt + left` will relocate window to left side of the *center of the x-axis* of the display
-  - `Control + Super + Alt + up` will relocate window to top side of the *center of the y-axis* of the display
-  - `Control + Super + Alt + down` will relocate window to bottom side of the *center of the y-axis* of the display
-
-## Native Gnome window management shortcuts
-
-This extension's shortcuts are designed to extend the window-management bindings that exist natively in Gnome, but may not be configured out-of-the-box. Below is incomplete list of the native Gnome bindings that this extension extends. Additionally, you can use the application `dconf Editor` to customize these shortcuts.
-```bash
-gsettings get org.gnome.desktop.wm.keybindings begin-resize
-gsettings get org.gnome.desktop.wm.keybindings begin-move
-gsettings get org.gnome.desktop.wm.keybindings move-to-center
-gsettings get org.gnome.desktop.wm.keybindings maximize-vertically
-gsettings get org.gnome.desktop.wm.keybindings maximize-horizontally
-gsettings get org.gnome.desktop.wm.preferences resize-with-right-button
-```
-Below is an example of how to customize these Gnome shortcuts:
-```bash
-gsettings set org.gnome.desktop.wm.keybindings begin-resize "['<Alt>F8', '<Control><Super><Alt>Space']"
-```
-
-# How to modify default shortcut bindings
-
-Changes to the shortcut bindings can be applied via the setting's panel of the extension. This is not any robust error handling, so ensure the syntax of the shortcut is applied correctly, or the binding will fail to perform.
-
-Example format for setting shortcuts: `<Super><Control><Shift>Right`
-
-## Using Dconf or Gsettings 
-
-You will find user settings stored in Gnome's Dconf datastore, however, it is not recommended to interface with settings via Dconf. Nonetheless, if you desire to define settings programmatically, you will need the schema directory path.
-
-```bash
-gsettings --schemadir ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io/schemas/ set org.gnome.shell.extensions.newworkspaceshortcut top-bar-pref 'primary'
-```
-
-## Hidden Settings
-
-The properties below are not exposed via the Preferences Applet.
-
-### Top Bar Pref
-```bash
-gsettings --schemadir ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io/schemas/ set org.gnome.shell.extensions.newworkspaceshortcut top-bar-pref 'primary'
-```
-The above gsetting property, "top-bar-pref" defines if the Window Management shortcuts should compensate for the top-bar. Available options include:
-- 'primary' - Default. Only offset for the Top Bar on the primary display. This is the appropriate option for a vanilla Gnome experience.
-- 'always' - Always offset for the Top Bar. This may be useful if you have an Extension that places the Top Bar on multiple monitors.
-- 'never' - Never offset window management for the Top Bar. This may be useful if you have hidden the Top Bar on the primary display.
-
-# Changes
-
-See `CHANGELOG.md` to identify changes in newer releases. Releases after `v46.0` including changes to some shortcut bindings.
-
-# Supported Gnome versions
-
-See `CHANGELOG.md` to identify which versions of this extension support which versions of Gnome.
-
-# How to use
-
-After installing the extension, simply use the shortcuts.
-
-# How to install
-
-## GNOME Extensions Website
-
-This extension is available on [GNOME Extensions Website](https://extensions.gnome.org/extension/4597/new-workspace-shortcut/).
+Available on [GNOME Extensions](https://extensions.gnome.org/extension/4597/new-workspace-shortcut/).
 
 [![Available on extensions.gnome.org](img/gnome.svg)](https://extensions.gnome.org/extension/4597/new-workspace-shortcut/)
 
-## Manual Installation
+---
 
-Use the following commands to install this extension:
+## Features
 
-Change-directory to your preferred working directory
+### Workspace shortcuts
+
+| Action | Default shortcut |
+|---|---|
+| Move focused window to new workspace (right) | `Super + Control + Shift + Right` |
+| Move focused window to new workspace (left) | `Super + Control + Shift + Left` |
+| Create empty workspace (right) | `Control + Shift + Alt + Right` |
+| Create empty workspace (left) | `Control + Shift + Alt + Left` |
+| Reorder current workspace right | `Control + Alt + Right` |
+| Reorder current workspace left | `Control + Alt + Left` |
+
+Workspace shortcuts complement GNOME's built-in bindings: switch workspace (`Super + Alt + Left/Right`) and move window to adjacent workspace (`Shift + Super + Alt + Left/Right`).
+
+The reorder shortcut can optionally trigger the Overview for visual feedback — configurable in the preferences panel.
+
+The move-to-new-workspace shortcut has an optional toggle to maximize the window on arrival — disabled by default, configurable in the preferences panel.
+
+---
+
+### Window Manager
+
+> **Disabled by default.** Enable via the preferences panel under *Window Manager*.
+
+Repositions and resizes floating windows along the center axes of the display.
+
+**Move to display half** (`Control + Super + Arrow`):
+
+| Shortcut | Result |
+|---|---|
+| `Control + Super + Right` | Right half of display |
+| `Control + Super + Left` | Left half of display |
+| `Control + Super + Up` | Top half of display |
+| `Control + Super + Down` | Bottom half of display |
+
+**Move to display edge** (`Control + Super + Alt + Arrow`):
+
+These re-implement GNOME's native `move-to-side-*` shortcuts so they respect the configurable window gap.
+
+| Shortcut | Result |
+|---|---|
+| `Control + Super + Alt + Right` | Right edge |
+| `Control + Super + Alt + Left` | Left edge |
+| `Control + Super + Alt + Up` | Top edge |
+| `Control + Super + Alt + Down` | Bottom edge |
+
+**Resize window** — up to four configurable size presets, each binding a shortcut to a target width/height (as a percentage of the monitor).
+
+| Shortcut | Default size |
+|---|---|
+| `Super + Space` | 50% × 50% |
+| `Super + Alt + 2` | 50% × 35% |
+| `Super + Shift + Space` | 50% × 25% |
+| `Super + Alt + 4` | 50% × 15% |
+
+All window positions account for a configurable pixel gap (*Window gaps*, default 4 px) and respect the GNOME top bar via the *Top bar behaviour* setting (`Primary monitor only` / `Always` / `Never`).
+
+---
+
+### Highlight Focus
+
+> **Disabled by default.** Enable via the preferences panel under *Highlight Focus*.
+
+Draws a temporary border around the focused window whenever focus changes, making it easy to locate the active window at a glance.
+
+- Border color, width, and corner radius are configurable.
+- The border auto-hides after a configurable delay (default 1000 ms). Auto-hide can be disabled to keep the border permanently visible.
+- A manual keybinding (`Super + B` by default) re-triggers the highlight on demand.
+
+---
+
+### Focus Changer
+
+> **Disabled by default.** Enable via the preferences panel under *Focus Changer*.
+
+Moves keyboard focus between windows by geometric direction — without cycling through a list.
+
+| Shortcut | Action |
+|---|---|
+| `Shift + Control + Alt + Up` | Focus window above |
+| `Shift + Control + Alt + Down` | Focus window below |
+| `Shift + Control + Alt + Left` | Focus window to the left |
+| `Shift + Control + Alt + Right` | Focus window to the right |
+
+Focus selection prefers the window closest along the direction of travel, using perpendicular distance as a tiebreaker. When no window exists on the current monitor in the given direction, focus moves to the nearest monitor in that direction.
+
+---
+
+## Configuration
+
+All shortcuts and feature settings are configurable via the preferences panel (`gnome-extensions prefs newworkspaceshortcut@barnix.io`).
+
+Click any shortcut row to open a capture dialog, then press the desired key combination. Press `Escape` or `Backspace` to cancel.
+
+### Programmatic configuration
+
+Settings are stored in GSettings under `org.gnome.shell.extensions.newworkspaceshortcut`. To set a value from the command line, include the schema directory:
+
 ```bash
-cd ~ 
+gsettings --schemadir ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io/schemas/ \
+  set org.gnome.shell.extensions.newworkspaceshortcut top-bar-pref 'primary'
 ```
 
-Copy down the source code repository
+Available values for `top-bar-pref`: `primary` (default), `always`, `never`.
+
+---
+
+## Installation
+
+### GNOME Extensions website
+
+Install directly from [extensions.gnome.org](https://extensions.gnome.org/extension/4597/new-workspace-shortcut/).
+
+### Manual installation
+
 ```bash
 git clone git@github.com:barnscott/newworkspaceshortcut-barnix.io.git
-```
-
-Symbolic-link the extension-code to the extension directory
-```bash
-ln -s $PWD/newworkspaceshortcut-barnix.io/newworkspaceshortcut@barnix.io ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io
-```
-
-Compile the schema
-```bash
+ln -s $PWD/newworkspaceshortcut-barnix.io/newworkspaceshortcut@barnix.io \
+  ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io
 glib-compile-schemas newworkspaceshortcut-barnix.io/newworkspaceshortcut@barnix.io/schemas/
-```
-
-If on X11, reset shell with ALT-F2 and enter "r". On Wayland, see note below.
-Then, enable the extension. 
-```bash
 gnome-extensions enable newworkspaceshortcut@barnix.io
 ```
-If you are on Wayland, after you complete the  installation, you may need to log-out and log-in for the shell to register the key-bindings.
 
-# Contribution guidelines
+On Wayland, log out and back in after installation if keybindings are not registered.
 
-When creating a PR, review the following files and make changes as necessary:
+---
 
-- Update `CHANGELOG.md` with a summary of the changes
-- Update `metadata.json` to reflect Gnome releases that are supported
+## Contributing
 
-## Build testing/debugging
+Before submitting a PR:
 
-Eliminate any errors caused by the extension before submitting PR. Debugging workflow may include:
+- Update `CHANGELOG.md` with a summary of the changes.
+- Update `metadata.json` to reflect the supported GNOME versions.
 
-This command will open a nested Gnome shell. On the console where this command is executed, you can read real-time errors of the nested shell.
+### Build and debugging
+
 ```bash
+# Nested Wayland session for live testing
 dbus-run-session -- gnome-shell --nested --wayland
-```
 
-Additional commands:
-
-CLI reference for reading shell logs:
-```bash
+# Tail shell logs
 journalctl -f -o cat /usr/bin/gnome-shell
-```
-CLI reference for disabling/enabling extension:
-```bash
+
+# Reload the extension
 gnome-extensions disable newworkspaceshortcut@barnix.io
 gnome-extensions enable newworkspaceshortcut@barnix.io
 ```
 
-# To do
-
-I would like to add the following features, but don't have any priority. Feel free to send a PR.
-
-- [ ] Code cleanup / optimization
-- [ ] Improve the look and user-experience of the setting's panel
+See `CHANGELOG.md` for version history and supported GNOME versions.
