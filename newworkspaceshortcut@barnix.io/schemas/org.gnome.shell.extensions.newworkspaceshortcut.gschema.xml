@@ -66,6 +66,14 @@
         Define if using the move-workspace shortcut should auto-trigger the Overview mode.
       </description>
     </key>
+
+    <key name="move-window-maximize" type="b">
+      <default>false</default>
+      <summary>Maximize window after moving to new workspace</summary>
+      <description>
+        When enabled, the window will be maximized after being moved to a new workspace.
+      </description>
+    </key>
     
     <key name="winman-toggle" type="b">
       <default>false</default>
@@ -148,7 +156,7 @@
     </key>
 
     <key name="resize-win" type="as">
-      <default><![CDATA[['<Super>Space','<Super><Alt>1']]]></default>
+      <default><![CDATA[['<Super>Space']]]></default>
       <summary>Resize Window</summary>
     </key>
 
@@ -178,7 +186,7 @@
     </key>
 
     <key name="resize-win2" type="as">
-      <default><![CDATA[['<Super><Shift>Space','<Super><Alt>3']]]></default>
+      <default><![CDATA[['<Super><Shift>Space']]]></default>
       <summary>Alternative #2 Resize Window</summary>
     </key>
 
@@ -211,6 +219,78 @@
       <default>'primary'</default>
       <summary>Top bar preference for Window Manager</summary>
       <description>Defines if the Window Manager considers the Gnome TopBar. Valid values are 'always', 'primary', or 'never'.</description>
+    </key>
+
+    <key name="highlight-toggle" type="b">
+      <default>false</default>
+      <summary>Enable Highlight Focus</summary>
+      <description>Draw a temporary border around the focused window on focus change.</description>
+    </key>
+
+    <key name="highlight-keybinding" type="as">
+      <default><![CDATA[['<Super>b']]]></default>
+      <summary>Highlight focused window keybinding</summary>
+      <description>Keybinding to manually trigger the focus highlight.</description>
+    </key>
+
+    <key name="highlight-border-color" type="s">
+      <default>"#99c1f1"</default>
+      <summary>Highlight border color</summary>
+      <description>CSS color value for the focus highlight border.</description>
+    </key>
+
+    <key name="highlight-border-width" type="i">
+      <default>4</default>
+      <summary>Highlight border width</summary>
+      <description>Width in pixels of the focus highlight border.</description>
+    </key>
+
+    <key name="highlight-border-radius" type="i">
+      <default>6</default>
+      <summary>Highlight border radius</summary>
+      <description>Corner radius in pixels of the focus highlight border.</description>
+    </key>
+
+    <key name="highlight-disable-hiding" type="b">
+      <default>false</default>
+      <summary>Always show highlight border</summary>
+      <description>Keep the border visible on the focused window instead of hiding it after the delay.</description>
+    </key>
+
+    <key name="highlight-hide-delay" type="i">
+      <default>1000</default>
+      <summary>Highlight hide delay (ms)</summary>
+      <description>Milliseconds after focus change before the highlight border is hidden.</description>
+    </key>
+
+    <key name="focus-changer-toggle" type="b">
+      <default>false</default>
+      <summary>Enable Focus Changer</summary>
+      <description>Move keyboard focus between windows by direction.</description>
+    </key>
+
+    <key name="focus-changer-up" type="as">
+      <default><![CDATA[['<Shift><Control><Alt>Up']]]></default>
+      <summary>Focus window above</summary>
+      <description>Move focus to the nearest window above the current one.</description>
+    </key>
+
+    <key name="focus-changer-down" type="as">
+      <default><![CDATA[['<Shift><Control><Alt>Down']]]></default>
+      <summary>Focus window below</summary>
+      <description>Move focus to the nearest window below the current one.</description>
+    </key>
+
+    <key name="focus-changer-left" type="as">
+      <default><![CDATA[['<Shift><Control><Alt>Left']]]></default>
+      <summary>Focus window to the left</summary>
+      <description>Move focus to the nearest window to the left of the current one.</description>
+    </key>
+
+    <key name="focus-changer-right" type="as">
+      <default><![CDATA[['<Shift><Control><Alt>Right']]]></default>
+      <summary>Focus window to the right</summary>
+      <description>Move focus to the nearest window to the right of the current one.</description>
     </key>
 
   </schema>

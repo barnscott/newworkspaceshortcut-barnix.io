@@ -19,16 +19,20 @@ import Shell from 'gi://Shell';
 import Meta from 'gi://Meta';
 import Gio from 'gi://Gio';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as WinMan from './extension/winman.js';
+import { getFocusWin } from './extension/utils.js';
+import { highlightFocus } from './extension/highlight.js';
+import { focusChanger } from './extension/focus.js';
 
 // FUNCTION, move the window to the new workspace
-function moveWindow(m) {
+function moveWindow(m, settings) {
   //0. Define the WS index I want to move to
   let newIndex = getNewIndex(m);
 
   //1. get the Focused / active  window
   let myWin = getFocusWin();
+  if (!myWin) return;
 
   //2. create  new  workspace
   Main.wm.insertWorkspace(newIndex);
@@ -43,6 +47,10 @@ function moveWindow(m) {
 
   //5. leave the just moved window in the new workspace
   myWin.unstick();
+
+  //6. optionally maximize the window on arrival
+  if (settings.get_boolean('move-window-maximize'))
+    myWin.maximize(Meta.MaximizeFlags.BOTH);
 }
 
 // FUNCTION, create an empty workspace
@@ -59,45 +67,23 @@ function emptyWS(m) {
   ws.activate(myTime);
 }
 
+// Direction constants for workspace insertion: LEFT=0 inserts at myIndex, RIGHT=1 inserts at myIndex+1
+const Direction = Object.freeze({ LEFT: 0, RIGHT: 1 });
+
 // FUNCTION, define the workspace # we are moving to
-function getNewIndex(m){
-  let myIndex = global.workspaceManager.get_active_workspace_index();
-  let newIndex = myIndex + m;
-  return newIndex
+function getNewIndex(direction) {
+  return global.workspaceManager.get_active_workspace_index() + direction;
 }
 
-// FUNCTION, find Win that currently has shell focus
-export function getFocusWin(){
-  let focusWin = global.display.focus_window;
-  return focusWin;
-}
-
-function reorderWS() {
-
-  this.left = function (moveWSTriggersOverview) {
-    let ws = global.workspaceManager.get_active_workspace();
-    let myIndex = global.workspaceManager.get_active_workspace_index();
-    let newIndex = myIndex;
-    if ( (myIndex-1) >= 0){
-      newIndex = myIndex-1;
-      this.moveWS(ws,newIndex,moveWSTriggersOverview);
-    }
-  }
-  this.right = function (moveWSTriggersOverview) {
-    let ws = global.workspaceManager.get_active_workspace();
-    let myIndex = global.workspaceManager.get_active_workspace_index();
-    let newIndex = myIndex;
-    if ( (myIndex+1) <= (global.workspaceManager.n_workspaces-1)){
-      newIndex = myIndex+1;
-      this.moveWS(ws,newIndex,moveWSTriggersOverview);
-    }
-  }
-  this.moveWS = function(ws,newIndex,moveWSTriggersOverview){
-    if ( !Main.overview.visible && moveWSTriggersOverview ){
-      Main.overview.toggle();
-    }
-    global.workspaceManager.reorder_workspace(ws, newIndex);
-  }
+function reorderWorkspace(direction, moveWSTriggersOverview) {
+  const wm = global.workspaceManager;
+  const myIndex = wm.get_active_workspace_index();
+  const newIndex = myIndex + direction;
+  const inBounds = direction < 0 ? newIndex >= 0 : newIndex <= wm.n_workspaces - 1;
+  if (!inBounds) return;
+  if (!Main.overview.visible && moveWSTriggersOverview)
+    Main.overview.toggle();
+  wm.reorder_workspace(wm.get_active_workspace(), newIndex);
 }
 
 class winManToggle {
@@ -109,21 +95,21 @@ class winManToggle {
     }
 
     toggle_event () {
-      var winman_status_key = this._settings.get_boolean('winman-toggle');
-      if(winman_status_key == true ){
-          this.enable();
-      }else{
-          this.disable();
-      }
+      if (this._settings.get_boolean('winman-toggle'))
+        this.enable();
+      else
+        this.disable();
     }
 
     enable () {
-      // Enabling this extension should disable the following native Gnome shortcuts
-      let keybinding_schema_settings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
-      keybinding_schema_settings.set_strv('move-to-side-e', []);
-      keybinding_schema_settings.set_strv('move-to-side-n', []);
-      keybinding_schema_settings.set_strv('move-to-side-s', []);
-      keybinding_schema_settings.set_strv('move-to-side-w', []);
+      // Enabling this extension should disable the following native Gnome shortcuts,
+      // saving current values so they can be restored in disable().
+      this._keybindingSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
+      this._savedNativeKeybindings = {};
+      for (const key of ['move-to-side-e', 'move-to-side-n', 'move-to-side-s', 'move-to-side-w']) {
+        this._savedNativeKeybindings[key] = this._keybindingSettings.get_strv(key);
+        this._keybindingSettings.set_strv(key, []);
+      }
 
       this.winManEvent = new WinMan.windowManager(this._settings);
       Main.wm.addKeybinding("resize-win", this._settings, this.flag, this.mode, () => {
@@ -180,47 +166,70 @@ class winManToggle {
       Main.wm.removeKeybinding("window-up-edge");
       Main.wm.removeKeybinding("window-down-edge");
       this.winManEvent = null;
+      if (this._savedNativeKeybindings) {
+        for (const [key, value] of Object.entries(this._savedNativeKeybindings)) {
+          this._keybindingSettings.set_strv(key, value);
+        }
+        this._savedNativeKeybindings = null;
+        this._keybindingSettings = null;
+      }
     }
   }
 
 export default class newWorkspaceShortcuts extends Extension {
 
   enable() {
-    this.rWS = new reorderWS();
     let mode = Shell.ActionMode.ALL;
     let flag = Meta.KeyBindingFlags.NONE;
     this._settings = this.getSettings();
-    let m,moveWSTriggersOverview;
 
     // Shortcuts for moving a window
     Main.wm.addKeybinding("move-window-to-right-workspace", this._settings, flag, mode, () => {
-      moveWindow(m=1);
+      moveWindow(Direction.RIGHT, this._settings);
     });
     Main.wm.addKeybinding("move-window-to-left-workspace", this._settings, flag, mode, () => {
-      moveWindow(m=0);
+      moveWindow(Direction.LEFT, this._settings);
     });
-    
+
     // Shortcuts for creating an empty workspace
     Main.wm.addKeybinding("empty-workspace-right", this._settings, flag, mode, () => {
-      emptyWS(m=1);
+      emptyWS(Direction.RIGHT);
     });
     Main.wm.addKeybinding("empty-workspace-left", this._settings, flag, mode, () => {
-      emptyWS(m=0);
+      emptyWS(Direction.LEFT);
     });
 
     // Shortcuts for moving a workspace
     Main.wm.addKeybinding("workspace-right", this._settings, flag, mode, () => {
-      moveWSTriggersOverview = this._settings.get_boolean('move-workspace-triggers-overview');
-      this.rWS.right(moveWSTriggersOverview);
+      reorderWorkspace(1, this._settings.get_boolean('move-workspace-triggers-overview'));
     });
     Main.wm.addKeybinding("workspace-left", this._settings, flag, mode, () => {
-      moveWSTriggersOverview = this._settings.get_boolean('move-workspace-triggers-overview');
-      this.rWS.left(moveWSTriggersOverview);
+      reorderWorkspace(-1, this._settings.get_boolean('move-workspace-triggers-overview'));
     });
 
     this._winManToggle = new winManToggle(this._settings,flag,mode);
-    this._settings.connect(`changed::winman-toggle`,() => {
+    this._winmanToggleHandlerId = this._settings.connect('changed::winman-toggle', () => {
       this._winManToggle.toggle_event();
+    });
+
+    this._highlight = new highlightFocus(this._settings);
+    if (this._settings.get_boolean('highlight-toggle'))
+      this._highlight.enable();
+    this._highlightToggleHandlerId = this._settings.connect('changed::highlight-toggle', () => {
+      if (this._settings.get_boolean('highlight-toggle'))
+        this._highlight.enable();
+      else
+        this._highlight.disable();
+    });
+
+    this._focusChanger = new focusChanger(this._settings);
+    if (this._settings.get_boolean('focus-changer-toggle'))
+      this._focusChanger.enable();
+    this._focusChangerToggleHandlerId = this._settings.connect('changed::focus-changer-toggle', () => {
+      if (this._settings.get_boolean('focus-changer-toggle'))
+        this._focusChanger.enable();
+      else
+        this._focusChanger.disable();
     });
 
   }
@@ -233,8 +242,23 @@ export default class newWorkspaceShortcuts extends Extension {
     Main.wm.removeKeybinding("workspace-right");
     Main.wm.removeKeybinding("workspace-left");
     this._winManToggle.disable();
-    this.rWS = null;
     this._winManToggle = null;
+    if (this._winmanToggleHandlerId) {
+      this._settings.disconnect(this._winmanToggleHandlerId);
+      this._winmanToggleHandlerId = null;
+    }
+    this._highlight.disable();
+    this._highlight = null;
+    if (this._highlightToggleHandlerId) {
+      this._settings.disconnect(this._highlightToggleHandlerId);
+      this._highlightToggleHandlerId = null;
+    }
+    this._focusChanger.disable();
+    this._focusChanger = null;
+    if (this._focusChangerToggleHandlerId) {
+      this._settings.disconnect(this._focusChangerToggleHandlerId);
+      this._focusChangerToggleHandlerId = null;
+    }
     this._settings = null;
   }
 }

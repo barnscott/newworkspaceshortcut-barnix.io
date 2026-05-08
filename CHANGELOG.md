@@ -1,3 +1,19 @@
+# 501 (May 2026)
+## NEW FEATURES
+- Highlight Focus: draws a configurable border around the focused window on focus change; auto-hides after a configurable delay. Disabled by default, enabled via the Preferences panel.
+- Focus Changer: moves keyboard focus between windows by geometric direction (up/down/left/right); navigates across monitors. Disabled by default, enabled via the Preferences panel.
+- Move to new workspace: optional toggle to automatically maximize the window after it is moved to a new workspace. Disabled by default.
+## CHANGES
+- About page now uses native Adw.AboutDialog (application name, version, license, website, issue tracker)
+- Keyboard shortcut capture: all shortcut fields in the Preferences panel now use a click-to-capture dialog instead of a text entry field
+- Top bar behaviour setting is now exposed in the Preferences panel (previously only configurable via gsettings)
+- Highlight Focus default keybinding: Super+B; border color: #99c1f1; border width: 4px
+- Focus Changer default shortcuts: Shift+Control+Alt+Arrow
+- Shortcut display in preferences now validates stored values before rendering, preventing blank rows for manually-set bindings
+- Refactor: fixed signal handler leak on repeated disable/enable cycles
+- Refactor: native GNOME keybindings (`move-to-side-*`) are now correctly restored when the Window Manager feature is disabled
+- Refactor: window manager operations no longer crash when no window is focused
+
 # 500 (Mar 2026)
 ## CHANGES
 - Gnome 50 support
