@@ -50,7 +50,7 @@ function moveWindow(m, settings) {
 
   //6. optionally maximize the window on arrival
   if (settings.get_boolean('move-window-maximize'))
-    myWin.maximize(Meta.MaximizeFlags.BOTH);
+    myWin.maximize();
 }
 
 // FUNCTION, create an empty workspace
