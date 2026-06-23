@@ -1,3 +1,7 @@
+# 502 (Jun 2026)
+## BUG FIXES
+- Highlight Focus now reacts only to focus changes. It previously also reacted to window size changes (resize/maximize/tile), which interfered with GNOME's native window restore (`Super + Down`) after snapping a window to a display half — the window kept the snapped position instead of returning to its original location.
+
 # 501 (May 2026)
 ## NEW FEATURES
 - Highlight Focus: draws a configurable border around the focused window on focus change; auto-hides after a configurable delay. Disabled by default, enabled via the Preferences panel.
