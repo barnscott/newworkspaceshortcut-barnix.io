@@ -10,9 +10,7 @@ export class highlightFocus {
     this._settings = settings;
     this._borders = [];
     this._timeouts = [];
-    this._sizing = false;
     this._handles_display = [];
-    this._handles_wm = [];
     this._handles_settings = [];
     this._readSettings();
   }
@@ -26,31 +24,13 @@ export class highlightFocus {
   }
 
   enable() {
+    // Highlight only on focus change. We deliberately do NOT react to
+    // size-change / size-changed / grab-op / unminimize: drawing into
+    // global.window_group during a native maximize/tile/restore interferes
+    // with Mutter's restore geometry (the window keeps the snapped position
+    // instead of returning to its original location).
     this._handles_display.push(
       global.display.connect('notify::focus-window', () => this._highlightWindow()),
-      global.display.connect('grab-op-begin', () => this._removeAllBorders()),
-      global.display.connect('grab-op-end', () => {
-        this._removeAllBorders();
-        this._highlightWindow();
-      }),
-    );
-    this._handles_wm.push(
-      global.window_manager.connect('size-change', () => {
-        this._removeAllBorders();
-        this._sizing = true;
-      }),
-      global.window_manager.connect('size-changed', () => {
-        this._sizing = false;
-        this._highlightWindow();
-      }),
-      global.window_manager.connect('unminimize', () => {
-        this._sizing = true;
-        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 250, () => {
-          this._sizing = false;
-          this._highlightWindow();
-          return GLib.SOURCE_REMOVE;
-        });
-      }),
     );
 
     for (const key of ['highlight-border-color', 'highlight-border-width', 'highlight-border-radius', 'highlight-hide-delay', 'highlight-disable-hiding']) {
@@ -69,7 +49,6 @@ export class highlightFocus {
 
   disable() {
     this._handles_display.splice(0).forEach(h => global.display.disconnect(h));
-    this._handles_wm.splice(0).forEach(h => global.window_manager.disconnect(h));
     this._handles_settings.splice(0).forEach(h => this._settings.disconnect(h));
     this._removeAllTimeouts();
     this._removeAllBorders();
@@ -85,8 +64,6 @@ export class highlightFocus {
   }
 
   _highlightWindow() {
-    if (this._sizing) return;
-
     this._removeAllBorders();
     this._removeAllTimeouts();
 
