@@ -1,3 +1,5 @@
+
+
 # New Workspace Shortcut — GNOME Extension
 
 Keyboard shortcuts for workspace management, window repositioning, directional focus navigation, and focused-window highlighting.
@@ -77,6 +79,7 @@ Draws a temporary border around the focused window whenever focus changes, makin
 - Border color, width, and corner radius are configurable.
 - The border auto-hides after a configurable delay (default 1000 ms). Auto-hide can be disabled to keep the border permanently visible.
 - A manual keybinding (`Super + B` by default) re-triggers the highlight on demand.
+- No border is drawn when the focused window is fully maximized.
 
 ---
 
