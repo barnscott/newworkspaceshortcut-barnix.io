@@ -81,18 +81,24 @@ Draws a temporary border around the focused window whenever focus changes, makin
 
 ---
 
-### Known upstream issue: windows do not restore after keyboard snapping
+### Windows do not restore after keyboard snapping (GNOME 49/50)
 
-On GNOME 49 and later, pressing `Super + Left` or `Super + Right` to snap a window and then `Super + Down` to restore it does **not** return the window to its previous size. This is a Mutter regression, not a bug in this extension, and it cannot be fixed from an extension: keyboard tiling commits the tile mode to the window before saving its geometry, so the pre-snap size is never recorded and the restore replays a stale value.
+On GNOME 49 and 50, pressing `Super + Left` or `Super + Right` to snap a window and then `Super + Down` to restore it does **not** return the window to its previous size. Mutter commits the tile mode to the window before saving its pre-snap geometry, so the size is never recorded and the restore replays a stale value. This affects both X11 and Wayland windows, and is not caused by this extension.
 
 Tracked upstream as [mutter#4481](https://gitlab.gnome.org/GNOME/mutter/-/issues/4481) and [mutter#4918](https://gitlab.gnome.org/GNOME/mutter/-/issues/4918).
 
-**Workaround** — do either of these while the window is still floating, *before* snapping it:
+**This extension works around it.** *Restore window size after un-snapping* (Preferences → Main → Snap restore, enabled by default) records each window's floating geometry and reapplies it when the window is un-snapped. The correction runs before the next redraw, so there is no visible jump.
 
-- Press `Super + Up`, then `Super + Down`.
-- Or drag-snap the window to a screen edge once with the mouse.
+The workaround is inert on every other GNOME version, and **disables itself on GNOME 51 and later** on the assumption that Mutter will have fixed the bug by then. If you upgrade and find the problem is still present, re-enable it by editing `AFFECTED_MAJORS` at the top of `extension/snaprestore.js`.
 
-Both record the window's geometry through a code path the regression does not affect, after which snapping and restoring behave correctly for that window.
+To turn it off, use the Preferences switch or:
+
+```bash
+gsettings --schemadir ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io/schemas/ \
+  set org.gnome.shell.extensions.newworkspaceshortcut snap-restore-fix false
+```
+
+With the workaround disabled, the manual fallback is to press `Super + Up` then `Super + Down` while the window is still floating, *before* snapping it — that records the geometry through a code path the regression does not affect. Note that on a window larger than 80% of the work area this shrinks it slightly, which is deliberate GNOME behaviour.
 
 ---
 

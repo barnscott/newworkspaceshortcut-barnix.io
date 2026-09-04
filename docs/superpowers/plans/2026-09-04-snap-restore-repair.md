@@ -14,7 +14,7 @@
 - "as much as possible, write the new code on a new isolated js file."
 - "the top of the file should include a comment that this code is to overcome the related bug in gnome 49/50 and will be removed in future upgrades."
 - "share for review before implementing" — this document is that review artifact. No code is written until it is approved.
-- Ships as **504**, after 503 lands (agreed in the preceding exchange).
+- Ships inside **503** (retargeted from 504 after implementation, at the user's request).
 - **D1** — `snap-restore-fix` defaults to **on**. The version gate already keeps it inert outside 49/50.
 - **D2** — `AFFECTED_MAJORS = [49, 50]`; the module **auto-expires on GNOME 51**. If the bug outlives 50, bump the array.
 - **D3** — the toggle **gets a Preferences row**. Chosen over gsettings-only; removal is five steps instead of four.
@@ -106,8 +106,8 @@ Every touch point outside the two module files carries a `// snapRestore: remove
 | `tests/test-snaprestore.js` | **create** | Headless `gjs` test of `needsRepair`. |
 | `prefs.js` | modify | One group + one switch row on the Main page, three lines, marker-commented. |
 | `README.md` | modify | Rewrite the "Known upstream issue" section — the workaround becomes automatic. |
-| `CHANGELOG.md` | modify | 504 entry. |
-| `metadata.json` | modify | `version` 503 → 504. |
+| `CHANGELOG.md` | modify | Folded into the 503 entry. |
+| `metadata.json` | modify | Stays at 503. |
 
 ## 5. Decisions (resolved)
 
@@ -473,9 +473,9 @@ git commit -m "feat: wire snap-restore repair behind a version gate and setting"
 **Acceptance Criteria:**
 - [ ] Every row of the manual matrix below passes.
 - [ ] README no longer instructs the user to run the manual `Super+Up`/`Super+Down` workaround.
-- [ ] `bin/packager.sh` produces `newworkspaceshortcut504.zip` and passes its own verification.
+- [ ] `bin/packager.sh` produces `newworkspaceshortcut503.zip` and passes its own verification.
 
-**Verify:** `bash bin/packager.sh` → `Packaged v504`
+**Verify:** `bash bin/packager.sh` → `Packaged v503`
 
 **Steps:**
 
@@ -496,20 +496,20 @@ git commit -m "feat: wire snap-restore repair behind a version gate and setting"
 
 - [ ] **Step 3: Rewrite README.md:84-95** — replace the manual workaround with a description of the automatic repair, keeping the upstream links and noting the `snap-restore-fix` key and that it is inert outside GNOME 49/50.
 
-- [ ] **Step 4: Add the 504 CHANGELOG entry**
+- [ ] **Step 4: Fold the entry into 503 in CHANGELOG**
 
 ```markdown
-# 504 (Sep 2026)
+# 503 (Sep 2026)
 ## BUG FIXES
 - Windows snapped with `Super + Left` / `Super + Right` now return to their previous size on `Super + Down`. GNOME 49 and 50 fail to record the pre-snap geometry ([mutter#4918](https://gitlab.gnome.org/GNOME/mutter/-/issues/4918)), so the extension records it and reapplies it. Inert on other GNOME versions; disable with the `snap-restore-fix` key.
 ```
 
-- [ ] **Step 5: Bump metadata.json to 504, package, and commit**
+- [ ] **Step 5: Package and commit**
 
 ```bash
 bash bin/packager.sh
 git add README.md CHANGELOG.md newworkspaceshortcut@barnix.io/metadata.json
-git commit -m "docs: document automatic snap-restore repair; release 504"
+git commit -m "docs: document automatic snap-restore repair"
 ```
 
 ## 7. Risks

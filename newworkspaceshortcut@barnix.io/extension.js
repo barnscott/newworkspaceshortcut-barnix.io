@@ -24,6 +24,8 @@ import * as WinMan from './extension/winman.js';
 import { getFocusWin } from './extension/utils.js';
 import { highlightFocus } from './extension/highlight.js';
 import { focusChanger } from './extension/focus.js';
+// snapRestore: remove with extension/snaprestore.js
+import { snapRestoreFix } from './extension/snaprestore.js';
 
 // Move the focused window to a newly inserted workspace.
 function moveWindow(m, settings) {
@@ -238,6 +240,16 @@ export default class newWorkspaceShortcuts extends Extension {
         this._focusChanger.disable();
     });
 
+    // snapRestore: remove with extension/snaprestore.js
+    this._snapRestore = new snapRestoreFix(this._settings);
+    if (snapRestoreFix.isAffected() && this._settings.get_boolean('snap-restore-fix'))
+      this._snapRestore.enable();
+    this._snapRestoreHandlerId = this._settings.connect('changed::snap-restore-fix', () => {
+      if (snapRestoreFix.isAffected() && this._settings.get_boolean('snap-restore-fix'))
+        this._snapRestore.enable();
+      else
+        this._snapRestore.disable();
+    });
   }
 
   disable() {
@@ -264,6 +276,13 @@ export default class newWorkspaceShortcuts extends Extension {
     if (this._focusChangerToggleHandlerId) {
       this._settings.disconnect(this._focusChangerToggleHandlerId);
       this._focusChangerToggleHandlerId = null;
+    }
+    // snapRestore: remove with extension/snaprestore.js
+    this._snapRestore.disable();
+    this._snapRestore = null;
+    if (this._snapRestoreHandlerId) {
+      this._settings.disconnect(this._snapRestoreHandlerId);
+      this._snapRestoreHandlerId = null;
     }
     this._settings = null;
   }

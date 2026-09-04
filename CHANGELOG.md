@@ -1,8 +1,8 @@
 # 503 (Sep 2026)
 ## CORRECTION TO THE 502 NOTE BELOW
 - **The 502 entry misdiagnosed its own bug.** It claimed Highlight Focus interfered with GNOME's native window restore (`Super + Down`) after snapping. It does not, and cannot: an actor added to `global.window_group` has no code path to Mutter's saved geometry, and Mutter's compositor explicitly tolerates foreign actors in that group.
-- **The real cause is an upstream Mutter regression**, present from 49.1 through 50.x. Keyboard tiling (`Super + Left` / `Super + Right`) commits the tile mode to the window before saving its geometry, so the pre-tile size is never recorded and `Super + Down` restores a stale rectangle. Tracked upstream as [mutter#4481](https://gitlab.gnome.org/GNOME/mutter/-/issues/4481) and [mutter#4918](https://gitlab.gnome.org/GNOME/mutter/-/issues/4918). **This cannot be fixed from an extension.**
-- **Workaround:** press `Super + Up` then `Super + Down` while the window is still floating, *before* tiling it — or drag-snap it to the edge once with the mouse. Either records the geometry through a path the regression does not affect.
+- **The real cause is an upstream Mutter regression**, present from 49.1 through 50.x. Keyboard tiling (`Super + Left` / `Super + Right`) commits the tile mode to the window before saving its geometry, so the pre-tile size is never recorded and `Super + Down` restores a stale rectangle. Tracked upstream as [mutter#4481](https://gitlab.gnome.org/GNOME/mutter/-/issues/4481) and [mutter#4918](https://gitlab.gnome.org/GNOME/mutter/-/issues/4918). The root cause cannot be fixed from an extension, but this release compensates for it — see below.
+- **Manual fallback**, if the new *Restore window size after un-snapping* setting is turned off: press `Super + Up` then `Super + Down` while the window is still floating, *before* tiling it. That records the geometry through a path the regression does not affect.
 - Removing the `size-change` handler in 502 was still correct, for a different reason: Mutter emits `size-change` synchronously part-way through a tile transition, so a handler that redraws there reads a rectangle that is neither the old nor the new one.
 
 ## BUG FIXES
@@ -10,9 +10,11 @@
 - Highlight Focus now removes a stale border when the focused window is snapped, maximized or made fullscreen. Snapping fires no focus change, so a border drawn beforehand previously stayed at the old coordinates until the hide delay expired — indefinitely with auto-hide disabled.
 - The Window Manager feature no longer overwrites its saved native keybindings with empty values. If GNOME Shell exited without running the extension's cleanup, `move-to-side-*` were left empty in dconf and the next enable saved those empty values as the originals, permanently losing the user's bindings.
 - Highlight Focus no longer logs `Source ID N was not found when attempting to remove it` to the journal. The auto-hide timer left its source id in the pending list after firing, so the next highlight passed a dead source to `GLib.Source.remove()`.
+- Windows snapped with `Super + Left` / `Super + Right` now return to their previous size and position on `Super + Down`. GNOME 49 and 50 never record the pre-snap geometry, so the extension records it and reapplies it when the window is un-snapped.
 - The Window Manager toggle is now migrated from the pre-471 `tiler-toggle` key. Release 471 (Sept 2024) renamed it to `winman-toggle` with no migration, silently disabling all fourteen Window Manager keybindings on upgrade for anyone who had enabled the feature before then.
 
 ## CHANGES
+- New setting *Restore window size after un-snapping* (Preferences → Main → Snap restore), enabled by default. Inert outside GNOME 49/50 and disabled automatically on GNOME 51 and later.
 - Supported GNOME versions are now 49 and 50. Releases 45–48 were declared but never exercised, and `move-window-maximize` has been broken on them since 502 — `meta_window_maximize()` required a directions argument before GNOME 49.
 
 # 502 (Jun 2026)

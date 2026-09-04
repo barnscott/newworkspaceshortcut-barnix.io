@@ -83,6 +83,16 @@
       </description>
     </key>
 
+    <key name="snap-restore-fix" type="b">
+      <default>true</default>
+      <summary>Restore window size after un-snapping</summary>
+      <description>
+        Workaround for a GNOME 49/50 Mutter regression where Super+Down does not
+        restore a window snapped with Super+Left or Super+Right. Inert on other
+        GNOME versions. Remove with extension/snaprestore.js.
+      </description>
+    </key>
+
     <key name="tiler-toggle" type="b">
       <default>false</default>
       <summary>Deprecated: superseded by winman-toggle</summary>
