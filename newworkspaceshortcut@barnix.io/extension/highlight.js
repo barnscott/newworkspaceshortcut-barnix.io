@@ -49,7 +49,8 @@ export class highlightFocus {
     this._handles_display.splice(0).forEach(h => global.display.disconnect(h));
     this._handles_settings.splice(0).forEach(h => this._settings.disconnect(h));
     this._unwatchWindow();
-    this._clearHighlight();
+    this._removeAllTimeouts();
+    this._removeAllBorders();
     Main.wm.removeKeybinding('highlight-keybinding');
   }
 
