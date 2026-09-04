@@ -1,9 +1,6 @@
 // Shared utilities for newworkspaceshortcut@barnix.io
 
-/**
- * Returns the window that currently holds keyboard focus, or null if none.
- * @returns {Meta.Window|null}
- */
+// Returns the focused window, or null.
 export function getFocusWin() {
   return global.display.focus_window;
 }

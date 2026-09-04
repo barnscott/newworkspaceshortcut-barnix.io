@@ -83,6 +83,17 @@
       </description>
     </key>
 
+    <key name="tiler-toggle" type="b">
+      <default>false</default>
+      <summary>Deprecated: superseded by winman-toggle</summary>
+      <description>
+        Legacy key, renamed to winman-toggle in release 471 (PR #25). Retained
+        only so _migrateLegacySettings() in extension.js can read a value written
+        before that release. Never written by the extension and not exposed in
+        Preferences. Safe to delete after release 520.
+      </description>
+    </key>
+
     <key name="window-right" type="as">
       <default><![CDATA[['<Control><Super>Right']]]></default>
       <summary>Slide window right</summary>

@@ -25,52 +25,42 @@ import { getFocusWin } from './extension/utils.js';
 import { highlightFocus } from './extension/highlight.js';
 import { focusChanger } from './extension/focus.js';
 
-// FUNCTION, move the window to the new workspace
+// Move the focused window to a newly inserted workspace.
 function moveWindow(m, settings) {
-  //0. Define the WS index I want to move to
   let newIndex = getNewIndex(m);
 
-  //1. get the Focused / active  window
   let myWin = getFocusWin();
   if (!myWin) return;
 
-  //2. create  new  workspace
   Main.wm.insertWorkspace(newIndex);
 
-  //3. stick the focused/active window (the same as Always on Visible Workspace), so it can move to the new workspace and stay always visible on the screen when GNOME Shell plays workspace switch animation
+  // Stick so the window stays visible during the workspace switch animation.
   myWin.stick();
 
-  //4. move me to new workspace
   let myTime = global.get_current_time();
   let ws = global.workspaceManager.get_workspace_by_index(newIndex);
   ws.activate_with_focus(myWin, myTime);
 
-  //5. leave the just moved window in the new workspace
   myWin.unstick();
 
-  //6. optionally maximize the window on arrival
   if (settings.get_boolean('move-window-maximize'))
     myWin.maximize();
 }
 
-// FUNCTION, create an empty workspace
+// Create an empty workspace and switch to it.
 function emptyWS(m) {
-  //0. Define the WS index I want to move to
   let newIndex = getNewIndex(m);
 
-  //1. create  new  workspace
   Main.wm.insertWorkspace(newIndex);
 
-  //2. move me to new workspace
   let myTime = global.get_current_time();
   let ws = global.workspaceManager.get_workspace_by_index(newIndex);
   ws.activate(myTime);
 }
 
-// Direction constants for workspace insertion: LEFT=0 inserts at myIndex, RIGHT=1 inserts at myIndex+1
+// LEFT inserts at the current index, RIGHT after it.
 const Direction = Object.freeze({ LEFT: 0, RIGHT: 1 });
 
-// FUNCTION, define the workspace # we are moving to
 function getNewIndex(direction) {
   return global.workspaceManager.get_active_workspace_index() + direction;
 }
@@ -102,12 +92,14 @@ class winManToggle {
     }
 
     enable () {
-      // Enabling this extension should disable the following native Gnome shortcuts,
-      // saving current values so they can be restored in disable().
+      // Disable the native shortcuts we re-implement; restored in disable().
       this._keybindingSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
       this._savedNativeKeybindings = {};
       for (const key of ['move-to-side-e', 'move-to-side-n', 'move-to-side-s', 'move-to-side-w']) {
-        this._savedNativeKeybindings[key] = this._keybindingSettings.get_strv(key);
+        const current = this._keybindingSettings.get_strv(key);
+        // Never save []: an unclean shutdown would make the loss permanent.
+        if (current.length === 0) continue;
+        this._savedNativeKeybindings[key] = current;
         this._keybindingSettings.set_strv(key, []);
       }
 
@@ -178,10 +170,24 @@ class winManToggle {
 
 export default class newWorkspaceShortcuts extends Extension {
 
+  // Restores 'tiler-toggle', renamed to 'winman-toggle' in 471 with no migration.
+  // https://github.com/barnscott/newworkspaceshortcut-barnix.io/commit/a51294c
+  _migrateLegacySettings() {
+    if (this._settings.get_user_value('winman-toggle') !== null)
+      return;
+    if (!this._settings.get_boolean('tiler-toggle'))
+      return;
+    this._settings.set_boolean('winman-toggle', true);
+    this._settings.reset('tiler-toggle');
+  }
+
   enable() {
     let mode = Shell.ActionMode.ALL;
     let flag = Meta.KeyBindingFlags.NONE;
     this._settings = this.getSettings();
+
+    // Must run before winManToggle reads 'winman-toggle'.
+    this._migrateLegacySettings();
 
     // Shortcuts for moving a window
     Main.wm.addKeybinding("move-window-to-right-workspace", this._settings, flag, mode, () => {

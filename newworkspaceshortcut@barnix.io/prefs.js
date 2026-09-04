@@ -4,9 +4,7 @@ import Gtk from 'gi://Gtk';
 import Adw from 'gi://Adw';
 import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-// ---------------------------------------------------------------------------
-// Keyboard capture helpers (pattern from focus-changer extension)
-// ---------------------------------------------------------------------------
+// Keyboard capture helpers (pattern from the focus-changer extension).
 
 const FORBIDDEN_KEYVALS = [
   Gdk.KEY_Home, Gdk.KEY_Page_Up, Gdk.KEY_Page_Down, Gdk.KEY_End,
@@ -26,9 +24,7 @@ function isValidBinding(mask, keycode, keyval) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Row builder helpers
-// ---------------------------------------------------------------------------
+// Row builder helpers.
 
 function makePage(window, title, icon) {
   const page = new Adw.PreferencesPage({ name: title, title, icon_name: icon });
@@ -148,9 +144,7 @@ function addStringRow(settings, group, title, subtitle, key) {
   row.activatable_widget = entry;
 }
 
-// ---------------------------------------------------------------------------
-// Preferences window
-// ---------------------------------------------------------------------------
+// Preferences window.
 
 export default class MyExtensionPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
