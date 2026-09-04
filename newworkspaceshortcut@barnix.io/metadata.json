@@ -3,14 +3,10 @@
   "name": "New Workspace Shortcut",
   "settings-schema": "org.gnome.shell.extensions.newworkspaceshortcut",
   "shell-version": [
-    "45",
-    "46",
-    "47",
-    "48",
     "49",
     "50"
   ],
   "url": "https://github.com/barnscott/newworkspaceshortcut-barnix.io",
   "uuid": "newworkspaceshortcut@barnix.io",
-  "version": 502
+  "version": 503
 }

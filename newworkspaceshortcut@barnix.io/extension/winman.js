@@ -85,8 +85,7 @@ export class windowManager {
       this._withFocusedWindow(myWin => {
         const window_rect = this.window_rect(myWin);
         const d = this.get_display_info(myWin);
-        // Display dimension * user-defined percentage, minus buffer × BUFFER_WITH_OUTER
-        // (both sides of window plus outer-edge padding so gaps are even)
+        // Percentage of the display, less buffer on both sides plus outer padding.
         const newWidth  = (d.width  * (this._settings.get_int(widthKey)  * PERCENT_TO_RATIO)) - (d.buffer * BUFFER_WITH_OUTER);
         const newHeight = ((d.height - this.top_bar(window_rect)) * (this._settings.get_int(heightKey) * PERCENT_TO_RATIO)) - (d.buffer * BUFFER_WITH_OUTER);
         myWin.move_resize_frame(true, window_rect.x, window_rect.y, newWidth, newHeight);

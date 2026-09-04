@@ -77,6 +77,28 @@ Draws a temporary border around the focused window whenever focus changes, makin
 - Border color, width, and corner radius are configurable.
 - The border auto-hides after a configurable delay (default 1000 ms). Auto-hide can be disabled to keep the border permanently visible.
 - A manual keybinding (`Super + B` by default) re-triggers the highlight on demand.
+- **Snapped, maximized and fullscreen windows are not highlighted.** These sit flush against the screen edges, where a border drawn outside the window frame falls off-screen and clips. Mutter reports a side snap as a vertical-only maximize and offers no public way to distinguish the two, so any window maximized on either axis is skipped. If a window is snapped while a border is already showing, the border is removed rather than left at stale coordinates.
+
+---
+
+### Windows do not restore after keyboard snapping (GNOME 49/50)
+
+On GNOME 49 and 50, pressing `Super + Left` or `Super + Right` to snap a window and then `Super + Down` to restore it does **not** return the window to its previous size. Mutter commits the tile mode to the window before saving its pre-snap geometry, so the size is never recorded and the restore replays a stale value. This affects both X11 and Wayland windows, and is not caused by this extension.
+
+Tracked upstream as [mutter#4481](https://gitlab.gnome.org/GNOME/mutter/-/issues/4481) and [mutter#4918](https://gitlab.gnome.org/GNOME/mutter/-/issues/4918).
+
+**This extension works around it.** *Restore window size after un-snapping* (Preferences → Main → Snap restore, enabled by default) records each window's floating geometry and reapplies it when the window is un-snapped. The correction runs before the next redraw, so there is no visible jump.
+
+The workaround is inert on every other GNOME version, and **disables itself on GNOME 51 and later** on the assumption that Mutter will have fixed the bug by then. If you upgrade and find the problem is still present, re-enable it by editing `AFFECTED_MAJORS` at the top of `extension/snaprestore.js`.
+
+To turn it off, use the Preferences switch or:
+
+```bash
+gsettings --schemadir ~/.local/share/gnome-shell/extensions/newworkspaceshortcut@barnix.io/schemas/ \
+  set org.gnome.shell.extensions.newworkspaceshortcut snap-restore-fix false
+```
+
+With the workaround disabled, the manual fallback is to press `Super + Up` then `Super + Down` while the window is still floating, *before* snapping it — that records the geometry through a code path the regression does not affect. Note that on a window larger than 80% of the work area this shrinks it slightly, which is deliberate GNOME behaviour.
 
 ---
 
@@ -141,7 +163,9 @@ On Wayland, log out and back in after installation if keybindings are not regist
 Before submitting a PR:
 
 - Update `CHANGELOG.md` with a summary of the changes.
-- Update `metadata.json` to reflect the supported GNOME versions.
+- Update `metadata.json` to reflect the supported GNOME versions, and bump its `version`.
+- Recompile the schema if you changed it: `glib-compile-schemas newworkspaceshortcut@barnix.io/schemas/`. The output is gitignored and must not be committed.
+- Build the upload archive with `bin/packager.sh` (see [Packaging a release](#packaging-a-release)).
 
 ### Build and debugging
 
@@ -156,5 +180,38 @@ journalctl -f -o cat /usr/bin/gnome-shell
 gnome-extensions disable newworkspaceshortcut@barnix.io
 gnome-extensions enable newworkspaceshortcut@barnix.io
 ```
+
+On Wayland, `disable`/`enable` reloads settings but not changed code — log out and back in to pick up edits.
+
+### Packaging a release
+
+`bin/packager.sh` builds the upload archive for [extensions.gnome.org](https://extensions.gnome.org) (EGO).
+
+```bash
+# Writes ~/Downloads/newworkspaceshortcut@barnix.io/newworkspaceshortcut<version>.zip
+bin/packager.sh
+
+# Or choose your own destination
+bin/packager.sh /path/to/output
+```
+
+The archive is named from the `version` field in `metadata.json`, so bump that first.
+
+**What ships:** `metadata.json` and `extension.js` at the archive root, plus `prefs.js`, `stylesheet.css` if present, every `extension/*.js`, and every `schemas/*.gschema.xml`.
+
+**What does not ship:** `schemas/gschemas.compiled`, and repo furniture such as `README.md`, `CHANGELOG.md`, `bin/` and `img/`. EGO's review guidelines require the schema **source** (`.gschema.xml`) to be in the archive — it is the compiled artifact that must be left out, since EGO regenerates it on install and reviewers reject unnecessary build output.
+
+Before building, the script fails on anything EGO would reject at review:
+
+| Check | Fails when |
+|---|---|
+| `metadata.json` | no `version` integer, or an empty `shell-version` array |
+| Schema | no `.gschema.xml` present, or it does not survive `glib-compile-schemas --strict` |
+| JavaScript | any `.js` file has a syntax error (skipped if `node` is not installed) |
+| Required files | `metadata.json` or `extension.js` is missing |
+
+After building, it re-opens the archive and asserts that `metadata.json` and `extension.js` are at the root, a `.gschema.xml` is present, and no `gschemas.compiled`, dotfile, or editor leftover (`*.orig`, `*.bak`, `*~`, `*.swp`) crept in. A rejected archive is deleted rather than left on disk, so a bad build cannot be uploaded by mistake. It warns without stopping if the extension has uncommitted changes, or if it is overwriting an existing archive for the same version.
+
+Files under `extension/` are enumerated explicitly rather than recursed, so a stray file left in that directory is never packaged.
 
 See `CHANGELOG.md` for version history and supported GNOME versions.

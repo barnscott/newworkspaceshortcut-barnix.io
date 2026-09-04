@@ -4,9 +4,7 @@ import Gtk from 'gi://Gtk';
 import Adw from 'gi://Adw';
 import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-// ---------------------------------------------------------------------------
-// Keyboard capture helpers (pattern from focus-changer extension)
-// ---------------------------------------------------------------------------
+// Keyboard capture helpers (pattern from the focus-changer extension).
 
 const FORBIDDEN_KEYVALS = [
   Gdk.KEY_Home, Gdk.KEY_Page_Up, Gdk.KEY_Page_Down, Gdk.KEY_End,
@@ -26,9 +24,7 @@ function isValidBinding(mask, keycode, keyval) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Row builder helpers
-// ---------------------------------------------------------------------------
+// Row builder helpers.
 
 function makePage(window, title, icon) {
   const page = new Adw.PreferencesPage({ name: title, title, icon_name: icon });
@@ -148,9 +144,7 @@ function addStringRow(settings, group, title, subtitle, key) {
   row.activatable_widget = entry;
 }
 
-// ---------------------------------------------------------------------------
-// Preferences window
-// ---------------------------------------------------------------------------
+// Preferences window.
 
 export default class MyExtensionPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
@@ -173,6 +167,10 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         addShortcutRow(s, rwsGroup, 'Reorder-workspace - Right', 'Default: Control+Alt+Right', 'workspace-right');
         addShortcutRow(s, rwsGroup, 'Reorder-workspace - Left',  'Default: Control+Alt+Left',  'workspace-left');
         addSwitchRow(s, rwsGroup, 'Reorder-workspace shortcut will trigger Overview', 'move-workspace-triggers-overview');
+
+        // snapRestore: remove with extension/snaprestore.js
+        const srGroup = makeGroup(page_main, 'Snap restore (GNOME 49/50 workaround)');
+        addSwitchRow(s, srGroup, 'Restore window size after un-snapping', 'snap-restore-fix');
 
         // Page: Window Manager
         const page_winman = makePage(window, 'Window Manager', 'focus-top-bar-symbolic');
