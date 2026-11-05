@@ -1,3 +1,8 @@
+# 510 (Nov 2026)
+## CHANGES
+- GNOME 51 support.
+- Read the About version from metadata instead of it being hardcoded in multiple places.
+
 # 503 (Sep 2026)
 ## CORRECTION TO THE 502 NOTE BELOW
 - **The 502 entry misdiagnosed its own bug.** It claimed Highlight Focus interfered with GNOME's native window restore (`Super + Down`) after snapping. It does not, and cannot: an actor added to `global.window_group` has no code path to Mutter's saved geometry, and Mutter's compositor explicitly tolerates foreign actors in that group.

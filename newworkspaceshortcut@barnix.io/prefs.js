@@ -251,7 +251,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
 
         const aboutRow = new Adw.ActionRow({
           title: 'New Workspace Shortcut',
-          subtitle: 'Version 501',
+          subtitle: `Version ${this.metadata.version}`,
           activatable: true,
         });
         aboutRow.add_suffix(new Gtk.Image({ icon_name: 'go-next-symbolic', valign: Gtk.Align.CENTER }));
@@ -262,7 +262,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
             application_name: 'New Workspace Shortcut',
             application_icon: 'preferences-desktop-keyboard-shortcuts-symbolic',
             developer_name: 'barnscott',
-            version: '501',
+            version: String(this.metadata.version),
             website: 'https://github.com/barnscott/newworkspaceshortcut-barnix.io',
             issue_url: 'https://github.com/barnscott/newworkspaceshortcut-barnix.io/issues',
             license_type: Gtk.License.GPL_2_0,
