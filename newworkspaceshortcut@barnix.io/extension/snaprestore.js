@@ -1,4 +1,4 @@
-// TEMPORARY: works around a GNOME 49/50 regression, removed once mutter fixes
+// TEMPORARY: works around a GNOME 49–51 regression, removed once mutter fixes
 // it. Every touch point outside this file is marked "snapRestore:".
 // https://gitlab.gnome.org/GNOME/mutter/-/issues/4918
 
@@ -7,8 +7,9 @@ import Meta from 'gi://Meta';
 import * as Config from 'resource:///org/gnome/shell/misc/config.js';
 import { shouldRepair } from './snaprestore-pure.js';
 
-// Bump or delete when mutter ships a fix.
-const AFFECTED_MAJORS = [49, 50];
+// Bump or delete when mutter ships a fix. Unfixed in 51.1: tile_window() still
+// sets tile mode before save_rect(). https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/5449
+const AFFECTED_MAJORS = [49, 50, 51];
 
 export class snapRestoreFix {
   constructor(settings) {

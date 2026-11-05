@@ -87,7 +87,7 @@
       <default>true</default>
       <summary>Restore window size after un-snapping</summary>
       <description>
-        Workaround for a GNOME 49/50 Mutter regression where Super+Down does not
+        Workaround for a GNOME 49–51 Mutter regression where Super+Down does not
         restore a window snapped with Super+Left or Super+Right. Inert on other
         GNOME versions. Remove with extension/snaprestore.js.
       </description>

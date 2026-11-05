@@ -81,15 +81,15 @@ Draws a temporary border around the focused window whenever focus changes, makin
 
 ---
 
-### Windows do not restore after keyboard snapping (GNOME 49/50)
+### Windows do not restore after keyboard snapping (GNOME 49–51)
 
-On GNOME 49 and 50, pressing `Super + Left` or `Super + Right` to snap a window and then `Super + Down` to restore it does **not** return the window to its previous size. Mutter commits the tile mode to the window before saving its pre-snap geometry, so the size is never recorded and the restore replays a stale value. This affects both X11 and Wayland windows, and is not caused by this extension.
+On GNOME 49, 50 and 51, pressing `Super + Left` or `Super + Right` to snap a window and then `Super + Down` to restore it does **not** return the window to its previous size. Mutter commits the tile mode to the window before saving its pre-snap geometry, so the size is never recorded and the restore replays a stale value. This affects both X11 and Wayland windows, and is not caused by this extension.
 
 Tracked upstream as [mutter#4481](https://gitlab.gnome.org/GNOME/mutter/-/issues/4481) and [mutter#4918](https://gitlab.gnome.org/GNOME/mutter/-/issues/4918).
 
 **This extension works around it.** *Restore window size after un-snapping* (Preferences → Main → Snap restore, enabled by default) records each window's floating geometry and reapplies it when the window is un-snapped. The correction runs before the next redraw, so there is no visible jump.
 
-The workaround is inert on every other GNOME version, and **disables itself on GNOME 51 and later** on the assumption that Mutter will have fixed the bug by then. If you upgrade and find the problem is still present, re-enable it by editing `AFFECTED_MAJORS` at the top of `extension/snaprestore.js`.
+The workaround is inert on every other GNOME version, and **disables itself on GNOME 52 and later** on the assumption that Mutter will have fixed the bug by then (the fix, [mutter!5449](https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/5449), was still unmerged at GNOME 51.1). If you upgrade and find the problem is still present, re-enable it by editing `AFFECTED_MAJORS` at the top of `extension/snaprestore.js`.
 
 To turn it off, use the Preferences switch or:
 
@@ -163,7 +163,7 @@ On Wayland, log out and back in after installation if keybindings are not regist
 Before submitting a PR:
 
 - Update `CHANGELOG.md` with a summary of the changes.
-- Update `metadata.json` to reflect the supported GNOME versions, and bump its `version`.
+- Update `metadata.json` to reflect the supported GNOME versions, and bump its `version` and `version-name` together (the packager refuses a mismatch).
 - Recompile the schema if you changed it: `glib-compile-schemas newworkspaceshortcut@barnix.io/schemas/`. The output is gitignored and must not be committed.
 - Build the upload archive with `bin/packager.sh` (see [Packaging a release](#packaging-a-release)).
 
@@ -195,7 +195,7 @@ bin/packager.sh
 bin/packager.sh /path/to/output
 ```
 
-The archive is named from the `version` field in `metadata.json`, so bump that first.
+The archive is named from the `version` field in `metadata.json`, so bump that first, and keep `version-name` (shown in Preferences → About) in step with it.
 
 **What ships:** `metadata.json` and `extension.js` at the archive root, plus `prefs.js`, `stylesheet.css` if present, every `extension/*.js`, and every `schemas/*.gschema.xml`.
 
@@ -205,7 +205,7 @@ Before building, the script fails on anything EGO would reject at review:
 
 | Check | Fails when |
 |---|---|
-| `metadata.json` | no `version` integer, or an empty `shell-version` array |
+| `metadata.json` | no `version` integer, a missing or mismatched `version-name`, or an empty `shell-version` array |
 | Schema | no `.gschema.xml` present, or it does not survive `glib-compile-schemas --strict` |
 | JavaScript | any `.js` file has a syntax error (skipped if `node` is not installed) |
 | Required files | `metadata.json` or `extension.js` is missing |

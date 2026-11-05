@@ -149,6 +149,8 @@ function addStringRow(settings, group, title, subtitle, key) {
 export default class MyExtensionPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const s = this.getSettings();
+        // EGO overwrites 'version' on upload; 'version-name' is ours.
+        const versionName = String(this.metadata['version-name'] ?? this.metadata.version ?? '');
         window._settings = s;
 
         // Page: Main
@@ -169,7 +171,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         addSwitchRow(s, rwsGroup, 'Reorder-workspace shortcut will trigger Overview', 'move-workspace-triggers-overview');
 
         // snapRestore: remove with extension/snaprestore.js
-        const srGroup = makeGroup(page_main, 'Snap restore (GNOME 49/50 workaround)');
+        const srGroup = makeGroup(page_main, 'Snap restore (GNOME 49–51 workaround)');
         addSwitchRow(s, srGroup, 'Restore window size after un-snapping', 'snap-restore-fix');
 
         // Page: Window Manager
@@ -251,7 +253,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
 
         const aboutRow = new Adw.ActionRow({
           title: 'New Workspace Shortcut',
-          subtitle: `Version ${this.metadata.version}`,
+          subtitle: `Version ${versionName}`,
           activatable: true,
         });
         aboutRow.add_suffix(new Gtk.Image({ icon_name: 'go-next-symbolic', valign: Gtk.Align.CENTER }));
@@ -262,7 +264,7 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
             application_name: 'New Workspace Shortcut',
             application_icon: 'preferences-desktop-keyboard-shortcuts-symbolic',
             developer_name: 'barnscott',
-            version: String(this.metadata.version),
+            version: versionName,
             website: 'https://github.com/barnscott/newworkspaceshortcut-barnix.io',
             issue_url: 'https://github.com/barnscott/newworkspaceshortcut-barnix.io/issues',
             license_type: Gtk.License.GPL_2_0,
