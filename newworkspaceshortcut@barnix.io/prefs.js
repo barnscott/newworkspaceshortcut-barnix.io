@@ -22,6 +22,11 @@ function isValidBinding(mask, keycode) {
 
 // Row builder helpers.
 
+// Tracked so the window can disconnect them on close.
+function connectSetting(settings, key, handler) {
+  (settings._prefsHandlers ??= []).push(settings.connect(`changed::${key}`, handler));
+}
+
 function makePage(window, title, icon) {
   const page = new Adw.PreferencesPage({ name: title, title, icon_name: icon });
   window.add(page);
@@ -54,7 +59,7 @@ function addShortcutRow(settings, group, title, subtitle, key) {
     valign: Gtk.Align.CENTER,
     halign: Gtk.Align.CENTER,
   });
-  settings.connect(`changed::${key}`, () => {
+  connectSetting(settings, key, () => {
     label.set_accelerator(_normaliseAccel(settings.get_strv(key)[0]));
   });
 
@@ -109,7 +114,7 @@ function addNumberRow(settings, group, title, subtitle, key) {
   const schemaKey = settings.settings_schema.get_key(key);
   const [, bounds] = schemaKey.get_range().deep_unpack();
   const [min, max] = bounds.deep_unpack();
-  settings.connect(`changed::${key}`, () => {
+  connectSetting(settings, key, () => {
     entry.get_buffer().text = String(settings.get_int(key));
   });
   // Reject non-integers and out-of-range values instead of silently storing 0.
@@ -166,6 +171,10 @@ export default class MyExtensionPreferences extends ExtensionPreferences {
         // EGO overwrites 'version' on upload; 'version-name' is ours.
         const versionName = String(this.metadata['version-name'] ?? this.metadata.version ?? '');
         window._settings = s;
+        window.connect('close-request', () => {
+          (s._prefsHandlers ?? []).splice(0).forEach(id => s.disconnect(id));
+          return false;
+        });
 
         // Page: Main
         const page_main = makePage(window, 'Main', 'window-new-symbolic');

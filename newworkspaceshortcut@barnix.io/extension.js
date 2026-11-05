@@ -67,7 +67,7 @@ function emptyWS(m) {
 function insertWorkspace(index) {
   if (!Meta.prefs_get_dynamic_workspaces()) return false;
   Main.wm.insertWorkspace(index);
-  return global.workspaceManager.get_workspace_by_index(index) !== null;
+  return true;
 }
 
 // LEFT inserts at the current index, RIGHT after it.

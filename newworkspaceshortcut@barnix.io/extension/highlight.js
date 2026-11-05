@@ -15,6 +15,7 @@ export class highlightFocus {
     this._handles_window = [];
     this._watchedWindow = null;
     this._laterId = 0;
+    this._drawnInset = 0;
     this._readSettings();
   }
 
@@ -107,9 +108,10 @@ export class highlightFocus {
     });
   }
 
+  // Uses the drawn inset: the border's CSS keeps its width after a settings change.
   _placeBorder(border, win) {
     const rect = win.get_frame_rect();
-    const inset = this._borderWidth;
+    const inset = this._drawnInset;
     border.set_size(rect.width + inset * 2, rect.height + inset * 2);
     border.set_position(rect.x - inset, rect.y - inset);
   }
@@ -134,6 +136,7 @@ export class highlightFocus {
 
     const border = new St.Bin();
     border.style = `border: ${this._borderWidth}px solid ${this._borderColor}; border-radius: ${this._borderRadius}px;`;
+    this._drawnInset = this._borderWidth;
 
     this._placeBorder(border, win);
 
@@ -149,6 +152,7 @@ export class highlightFocus {
         const idx = this._timeouts.indexOf(id);
         if (idx !== -1) this._timeouts.splice(idx, 1);
         this._removeAllBorders();
+        this._unwatchWindow();
         return GLib.SOURCE_REMOVE;
       });
       this._timeouts.push(id);

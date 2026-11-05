@@ -40,7 +40,8 @@ export class snapRestoreFix {
         global.display.connect('grab-op-end', () => {
           this._grabbed = false;
           // Mid-grab geometry was skipped, so record where the window landed.
-          if (this._trackedWindow) this._cacheIfFloating(this._trackedWindow);
+          // A queued repair still needs the pre-snap cache; it re-caches after.
+          if (this._trackedWindow && !this._laterId) this._cacheIfFloating(this._trackedWindow);
         }),
       );
     } catch (e) {
@@ -121,9 +122,18 @@ export class snapRestoreFix {
     if (cached.monitor !== win.get_monitor()) return;
     this._sideTiled.delete(win);
 
-    const { x, y } = sizeOnly ? win.get_frame_rect() : cached.rect;
+    const { width, height } = cached.rect;
+    let { x, y } = cached.rect;
+    if (sizeOnly) {
+      // Keep the pointer at the same relative spot, as mutter's drag anchor does.
+      // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/compositor/meta-window-drag.c#L1289
+      const cur = win.get_frame_rect();
+      const [px, py] = global.get_pointer();
+      x = Math.round(px - width * (px - cur.x) / cur.width);
+      y = Math.round(py - height * (py - cur.y) / cur.height);
+    }
     this._repairing = true;
-    win.move_resize_frame(false, x, y, cached.rect.width, cached.rect.height);
+    win.move_resize_frame(false, x, y, width, height);
     this._repairing = false;
   }
 }
