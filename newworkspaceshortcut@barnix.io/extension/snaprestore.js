@@ -37,7 +37,12 @@ export class snapRestoreFix {
     try {
       this._handles_display.push(
         global.display.connect('grab-op-begin', () => { this._grabbed = true; }),
-        global.display.connect('grab-op-end', () => { this._grabbed = false; }),
+        global.display.connect('grab-op-end', () => {
+          this._grabbed = false;
+          // Mid-grab geometry was skipped, so record where the window landed.
+          // A queued repair still needs the pre-snap cache; it re-caches after.
+          if (this._trackedWindow && !this._laterId) this._cacheIfFloating(this._trackedWindow);
+        }),
       );
     } catch (e) {
       console.warn(`snapRestore: grab-op signals unavailable: ${e.message}`);
@@ -98,16 +103,18 @@ export class snapRestoreFix {
       this._sideTiled.set(win, !win.maximized_horizontally);
       return;
     }
+    // A grab shake-loose already places the window; fix only its size.
+    const sizeOnly = this._grabbed;
     const laters = global.compositor.get_laters();
     if (this._laterId) laters.remove(this._laterId);
     this._laterId = laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
       this._laterId = 0;
-      this._repair(win);
+      this._repair(win, sizeOnly);
       return GLib.SOURCE_REMOVE;
     });
   }
 
-  _repair(win) {
+  _repair(win, sizeOnly) {
     if (this._trackedWindow !== win || !this._isFloating(win)) return;
 
     const cached = this._floatingRects.get(win);
@@ -115,9 +122,18 @@ export class snapRestoreFix {
     if (cached.monitor !== win.get_monitor()) return;
     this._sideTiled.delete(win);
 
+    const { width, height } = cached.rect;
+    let { x, y } = cached.rect;
+    if (sizeOnly) {
+      // Keep the pointer at the same relative spot, as mutter's drag anchor does.
+      // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/compositor/meta-window-drag.c#L1289
+      const cur = win.get_frame_rect();
+      const [px, py] = global.get_pointer();
+      x = Math.round(px - width * (px - cur.x) / cur.width);
+      y = Math.round(py - height * (py - cur.y) / cur.height);
+    }
     this._repairing = true;
-    win.move_resize_frame(false, cached.rect.x, cached.rect.y,
-                          cached.rect.width, cached.rect.height);
+    win.move_resize_frame(false, x, y, width, height);
     this._repairing = false;
   }
 }

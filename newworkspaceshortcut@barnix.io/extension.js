@@ -34,16 +34,18 @@ function moveWindow(m, settings) {
   let myWin = getFocusWin();
   if (!myWin) return;
 
-  Main.wm.insertWorkspace(newIndex);
+  if (!insertWorkspace(newIndex)) return;
 
   // Stick so the window stays visible during the workspace switch animation.
-  myWin.stick();
+  // Skip if already on all workspaces, or unstick() would drop the user's pin.
+  const wasOnAll = myWin.on_all_workspaces;
+  if (!wasOnAll) myWin.stick();
 
   let myTime = global.get_current_time();
   let ws = global.workspaceManager.get_workspace_by_index(newIndex);
   ws.activate_with_focus(myWin, myTime);
 
-  myWin.unstick();
+  if (!wasOnAll) myWin.unstick();
 
   if (settings.get_boolean('move-window-maximize'))
     myWin.maximize();
@@ -53,11 +55,19 @@ function moveWindow(m, settings) {
 function emptyWS(m) {
   let newIndex = getNewIndex(m);
 
-  Main.wm.insertWorkspace(newIndex);
+  if (!insertWorkspace(newIndex)) return;
 
   let myTime = global.get_current_time();
   let ws = global.workspaceManager.get_workspace_by_index(newIndex);
   ws.activate(myTime);
+}
+
+// insertWorkspace() is a silent no-op with static workspaces.
+// https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/51.1/js/ui/windowManager.js#L1023
+function insertWorkspace(index) {
+  if (!Meta.prefs_get_dynamic_workspaces()) return false;
+  Main.wm.insertWorkspace(index);
+  return true;
 }
 
 // LEFT inserts at the current index, RIGHT after it.
