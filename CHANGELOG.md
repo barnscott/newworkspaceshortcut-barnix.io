@@ -1,7 +1,11 @@
 # 510 (Nov 2026)
 ## CHANGES
-- GNOME 51 support.
-- Read the About version from metadata instead of it being hardcoded in multiple places.
+- GNOME 51 support. Audited against the [GNOME Shell 51 porting guide](https://gjs.guide/extensions/upgrading/gnome-shell-51.html); none of its breaking changes affect this extension.
+- *Restore window size after un-snapping* now also runs on GNOME 51. Release 503 assumed Mutter would fix the snap-restore regression by 51; it did not ([mutter#4918](https://gitlab.gnome.org/GNOME/mutter/-/issues/4918) is still open and the fix, [mutter!5449](https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/5449), is unmerged), so without this change the workaround would have switched itself off on upgrade.
+- Read the About version from metadata instead of it being hardcoded in multiple places. It comes from a new `version-name` field, because extensions.gnome.org overwrites `version` on upload.
+
+## BUG FIXES
+- The About page and About dialog showed version 501 since release 502.
 
 # 503 (Sep 2026)
 ## CORRECTION TO THE 502 NOTE BELOW

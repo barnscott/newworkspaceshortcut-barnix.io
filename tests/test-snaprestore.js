@@ -1,4 +1,4 @@
-// Headless test for the GNOME 49/50 snap-restore workaround. Run: gjs -m tests/test-snaprestore.js
+// Headless test for the GNOME 49–51 snap-restore workaround. Run: gjs -m tests/test-snaprestore.js
 import { isUsableRect, shouldRepair } from '../newworkspaceshortcut@barnix.io/extension/snaprestore-pure.js';
 
 let failures = 0;

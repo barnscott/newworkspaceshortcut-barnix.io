@@ -30,6 +30,16 @@ read_version() {
   printf '%s' "$version"
 }
 
+# About reads version-name; drift there is what showed "501" for two releases.
+check_version_name() {
+  local metadata="$1" version="$2" name
+  name=$(grep -oE '"version-name"[[:space:]]*:[[:space:]]*"[^"]*"' "$metadata" \
+    | grep -oE '"[^"]*"$' | tr -d '"' || true)
+  [[ -n "$name" ]] || die "metadata.json has no \"version-name\" (shown in Preferences → About)"
+  [[ "$name" == "$version" ]] \
+    || die "version-name \"$name\" does not match version $version; bump both"
+}
+
 # Fails before packaging on anything EGO would reject at review.
 preflight() {
   local ext_dir="$1"
@@ -146,6 +156,7 @@ main() {
 
   preflight "$ext_dir"
   version=$(read_version "$ext_dir/metadata.json")
+  check_version_name "$ext_dir/metadata.json" "$version"
   collect_files "$ext_dir"
 
   # An uncommitted build is not reproducible from git.
