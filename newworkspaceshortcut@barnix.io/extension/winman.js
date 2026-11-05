@@ -117,7 +117,7 @@ export class windowManager {
         const window_rect = this.window_rect(myWin);
         let y_axis = (center - buffer) - window_rect.height + y_offset;
         // if new position is above the top of the monitor, clamp inside display
-        if (y_axis < top_bar_height)
+        if (y_axis < y_offset + top_bar_height)
           y_axis = (buffer * BUFFER_SIDES) + y_offset + top_bar_height;
         myWin.move_frame(true, window_rect.x, y_axis);
       });

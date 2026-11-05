@@ -6,6 +6,13 @@
 
 ## BUG FIXES
 - The About page and About dialog showed version 501 since release 502.
+- *Move window to New Workspace* and *New Empty Workspace* no longer misbehave with a fixed number of workspaces. GNOME cannot insert a workspace then, and moving a window from the last workspace left it pinned to every workspace. Both shortcuts now do nothing when dynamic workspaces are off.
+- *Move window to New Workspace* no longer removes *Always on Visible Workspace* from a window that had it.
+- Highlight Focus now clears the border when the focused window is moved or resized. With auto-hide off, the border previously stayed at the old position until focus changed.
+- *Send window up* now clamps correctly on monitors stacked above or below another. It compared a screen position with a monitor-relative one, so windows could spill onto the next monitor or be pushed to the top edge.
+- Snap restore no longer moves a window you are dragging off its tile. Mutter already places it under the pointer, and the repair pulled it back to its old position.
+- Number fields in Preferences reject non-numbers and out-of-range values instead of silently saving 0. The schema now declares valid ranges.
+- Shortcut capture accepts Home, End, Page Up/Down, Tab and Return with a modifier, for example `Super+Return`. They were blocked even with Super, Ctrl or Alt held.
 
 # 503 (Sep 2026)
 ## CORRECTION TO THE 502 NOTE BELOW

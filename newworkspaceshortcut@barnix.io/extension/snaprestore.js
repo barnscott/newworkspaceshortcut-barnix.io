@@ -98,6 +98,11 @@ export class snapRestoreFix {
       this._sideTiled.set(win, !win.maximized_horizontally);
       return;
     }
+    // A drag shake-loose already places the window under the pointer.
+    if (this._grabbed) {
+      this._sideTiled.delete(win);
+      return;
+    }
     const laters = global.compositor.get_laters();
     if (this._laterId) laters.remove(this._laterId);
     this._laterId = laters.add(Meta.LaterType.BEFORE_REDRAW, () => {

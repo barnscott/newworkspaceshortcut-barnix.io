@@ -1,26 +1,22 @@
 import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 import Gdk from 'gi://Gdk';
 import Gtk from 'gi://Gtk';
 import Adw from 'gi://Adw';
 import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 // Keyboard capture helpers (pattern from the focus-changer extension).
-
-const FORBIDDEN_KEYVALS = [
-  Gdk.KEY_Home, Gdk.KEY_Page_Up, Gdk.KEY_Page_Down, Gdk.KEY_End,
-  Gdk.KEY_Tab, Gdk.KEY_KP_Enter, Gdk.KEY_Return, Gdk.KEY_Mode_switch, Gdk.KEY_Space,
-];
+// A non-Shift modifier is required, so GNOME Settings' bare-key blocklist never applies.
 
 function isValidAccel(mask, keyval) {
   return Gtk.accelerator_valid(keyval, mask) || (keyval === Gdk.KEY_Tab && mask !== 0);
 }
 
-function isValidBinding(mask, keycode, keyval) {
+function isValidBinding(mask, keycode) {
   return (
     mask !== 0 &&
     keycode !== 0 &&
-    (mask & ~Gdk.ModifierType.SHIFT_MASK) !== 0 &&
-    !FORBIDDEN_KEYVALS.includes(keyval)
+    (mask & ~Gdk.ModifierType.SHIFT_MASK) !== 0
   );
 }
 
@@ -92,7 +88,7 @@ function addShortcutRow(settings, group, title, subtitle, key) {
         return Gdk.EVENT_STOP;
       }
 
-      if (!isValidBinding(mask, keycode, keyval) || !isValidAccel(mask, keyval))
+      if (!isValidBinding(mask, keycode) || !isValidAccel(mask, keyval))
         return Gdk.EVENT_STOP;
 
       settings.set_strv(key, [Gtk.accelerator_name_with_keycode(null, keyval, keycode, mask)]);
@@ -110,7 +106,17 @@ function addNumberRow(settings, group, title, subtitle, key) {
   const entry = new Gtk.Text({
     buffer: new Gtk.EntryBuffer({ text: String(settings.get_int(key)) }),
   });
-  const save = () => settings.set_int(key, Number(entry.get_buffer().text));
+  // Reject non-integers and out-of-range values instead of silently storing 0.
+  const save = () => {
+    const text = entry.get_buffer().text.trim();
+    const n = Number(text);
+    const ok = /^-?\d+$/.test(text) && n >= -(2 ** 31) && n < 2 ** 31 &&
+      settings.settings_schema.get_key(key).range_check(new GLib.Variant('i', n));
+    if (ok)
+      settings.set_int(key, n);
+    else
+      entry.get_buffer().text = String(settings.get_int(key));
+  };
   entry.connect('activate', save);
   const button = new Gtk.Button({ label: 'OK' });
   button.connect('clicked', save);

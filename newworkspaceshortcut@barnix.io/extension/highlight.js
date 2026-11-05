@@ -84,6 +84,8 @@ export class highlightFocus {
       win.connect('notify::maximized-horizontally', () => this._clearHighlight()),
       win.connect('notify::maximized-vertically', () => this._clearHighlight()),
       win.connect('notify::fullscreen', () => this._clearHighlight()),
+      win.connect('position-changed', () => this._clearHighlight()),
+      win.connect('size-changed', () => this._clearHighlight()),
     ];
   }
 

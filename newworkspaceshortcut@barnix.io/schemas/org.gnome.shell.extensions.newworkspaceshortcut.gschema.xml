@@ -170,6 +170,7 @@
 
     <key name="window-buffer" type="i">
       <default>4</default>
+      <range min="0" max="200"/>
       <summary>Pixel distance away from center axis</summary>
       <description>
         By default, the window will be 4 pixesl offset from center axis.
@@ -183,11 +184,13 @@
 
     <key name="window-height" type="i">
       <default>50</default>
+      <range min="1" max="100"/>
       <summary>Desired window height percentage</summary>
     </key>
 
     <key name="window-width" type="i">
       <default>50</default>
+      <range min="1" max="100"/>
       <summary>Desired window width percentage</summary>
     </key>
 
@@ -198,11 +201,13 @@
 
     <key name="window-height1" type="i">
       <default>50</default>
+      <range min="1" max="100"/>
       <summary>Alternative #1 Desired window height percentage</summary>
     </key>
 
     <key name="window-width1" type="i">
       <default>35</default>
+      <range min="1" max="100"/>
       <summary>Alternative #1 Desired window width percentage</summary>
     </key>
 
@@ -213,11 +218,13 @@
 
     <key name="window-height2" type="i">
       <default>50</default>
+      <range min="1" max="100"/>
       <summary>Alternative #2 Desired window height percentage</summary>
     </key>
 
     <key name="window-width2" type="i">
       <default>25</default>
+      <range min="1" max="100"/>
       <summary>Alternative #2 Desired window width percentage</summary>
     </key>
 
@@ -228,11 +235,13 @@
 
     <key name="window-height3" type="i">
       <default>50</default>
+      <range min="1" max="100"/>
       <summary>Alternative #3 Desired window height percentage</summary>
     </key>
 
     <key name="window-width3" type="i">
       <default>15</default>
+      <range min="1" max="100"/>
       <summary>Alternative #3 Desired window width percentage</summary>
     </key>
 
@@ -262,12 +271,14 @@
 
     <key name="highlight-border-width" type="i">
       <default>4</default>
+      <range min="0" max="50"/>
       <summary>Highlight border width</summary>
       <description>Width in pixels of the focus highlight border.</description>
     </key>
 
     <key name="highlight-border-radius" type="i">
       <default>6</default>
+      <range min="0" max="100"/>
       <summary>Highlight border radius</summary>
       <description>Corner radius in pixels of the focus highlight border.</description>
     </key>
@@ -280,6 +291,7 @@
 
     <key name="highlight-hide-delay" type="i">
       <default>1000</default>
+      <range min="0" max="60000"/>
       <summary>Highlight hide delay (ms)</summary>
       <description>Milliseconds after focus change before the highlight border is hidden.</description>
     </key>
