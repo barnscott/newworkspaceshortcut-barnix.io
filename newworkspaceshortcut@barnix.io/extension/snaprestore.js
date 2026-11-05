@@ -37,7 +37,11 @@ export class snapRestoreFix {
     try {
       this._handles_display.push(
         global.display.connect('grab-op-begin', () => { this._grabbed = true; }),
-        global.display.connect('grab-op-end', () => { this._grabbed = false; }),
+        global.display.connect('grab-op-end', () => {
+          this._grabbed = false;
+          // Mid-grab geometry was skipped, so record where the window landed.
+          if (this._trackedWindow) this._cacheIfFloating(this._trackedWindow);
+        }),
       );
     } catch (e) {
       console.warn(`snapRestore: grab-op signals unavailable: ${e.message}`);
@@ -98,21 +102,18 @@ export class snapRestoreFix {
       this._sideTiled.set(win, !win.maximized_horizontally);
       return;
     }
-    // A drag shake-loose already places the window under the pointer.
-    if (this._grabbed) {
-      this._sideTiled.delete(win);
-      return;
-    }
+    // A grab shake-loose already places the window; fix only its size.
+    const sizeOnly = this._grabbed;
     const laters = global.compositor.get_laters();
     if (this._laterId) laters.remove(this._laterId);
     this._laterId = laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
       this._laterId = 0;
-      this._repair(win);
+      this._repair(win, sizeOnly);
       return GLib.SOURCE_REMOVE;
     });
   }
 
-  _repair(win) {
+  _repair(win, sizeOnly) {
     if (this._trackedWindow !== win || !this._isFloating(win)) return;
 
     const cached = this._floatingRects.get(win);
@@ -120,9 +121,9 @@ export class snapRestoreFix {
     if (cached.monitor !== win.get_monitor()) return;
     this._sideTiled.delete(win);
 
+    const { x, y } = sizeOnly ? win.get_frame_rect() : cached.rect;
     this._repairing = true;
-    win.move_resize_frame(false, cached.rect.x, cached.rect.y,
-                          cached.rect.width, cached.rect.height);
+    win.move_resize_frame(false, x, y, cached.rect.width, cached.rect.height);
     this._repairing = false;
   }
 }

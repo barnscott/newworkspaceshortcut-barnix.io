@@ -88,7 +88,7 @@ export class windowManager {
         // Percentage of the display, less buffer on both sides plus outer padding.
         const newWidth  = (d.width  * (this._settings.get_int(widthKey)  * PERCENT_TO_RATIO)) - (d.buffer * BUFFER_WITH_OUTER);
         const newHeight = ((d.height - this.top_bar(window_rect)) * (this._settings.get_int(heightKey) * PERCENT_TO_RATIO)) - (d.buffer * BUFFER_WITH_OUTER);
-        myWin.move_resize_frame(true, window_rect.x, window_rect.y, newWidth, newHeight);
+        myWin.move_resize_frame(true, window_rect.x, window_rect.y, Math.max(1, newWidth), Math.max(1, newHeight));
       });
     }
 
@@ -117,8 +117,9 @@ export class windowManager {
         const window_rect = this.window_rect(myWin);
         let y_axis = (center - buffer) - window_rect.height + y_offset;
         // if new position is above the top of the monitor, clamp inside display
-        if (y_axis < y_offset + top_bar_height)
-          y_axis = (buffer * BUFFER_SIDES) + y_offset + top_bar_height;
+        const minY = (buffer * BUFFER_SIDES) + y_offset + top_bar_height;
+        if (y_axis < minY)
+          y_axis = minY;
         myWin.move_frame(true, window_rect.x, y_axis);
       });
     }
@@ -129,8 +130,9 @@ export class windowManager {
         const window_rect = this.window_rect(myWin);
         let y_axis = Math.round(center) + buffer + y_offset;
         // if bottom of window falls off the bottom of display, clamp inside display
-        if ((y_axis + window_rect.height) > (height + y_offset - buffer))
-          y_axis = y_axis - ((y_axis + window_rect.height) - height) + y_offset - (buffer * BUFFER_SIDES);
+        const maxY = height + y_offset - (buffer * BUFFER_SIDES) - window_rect.height;
+        if (y_axis > maxY)
+          y_axis = maxY;
         myWin.move_frame(true, window_rect.x, y_axis);
       });
     }

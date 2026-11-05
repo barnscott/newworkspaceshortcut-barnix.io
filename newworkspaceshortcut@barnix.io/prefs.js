@@ -106,16 +106,24 @@ function addNumberRow(settings, group, title, subtitle, key) {
   const entry = new Gtk.Text({
     buffer: new Gtk.EntryBuffer({ text: String(settings.get_int(key)) }),
   });
+  const schemaKey = settings.settings_schema.get_key(key);
+  const [, bounds] = schemaKey.get_range().deep_unpack();
+  const [min, max] = bounds.deep_unpack();
+  settings.connect(`changed::${key}`, () => {
+    entry.get_buffer().text = String(settings.get_int(key));
+  });
   // Reject non-integers and out-of-range values instead of silently storing 0.
   const save = () => {
     const text = entry.get_buffer().text.trim();
     const n = Number(text);
     const ok = /^-?\d+$/.test(text) && n >= -(2 ** 31) && n < 2 ** 31 &&
-      settings.settings_schema.get_key(key).range_check(new GLib.Variant('i', n));
-    if (ok)
+      schemaKey.range_check(new GLib.Variant('i', n));
+    if (ok) {
       settings.set_int(key, n);
-    else
-      entry.get_buffer().text = String(settings.get_int(key));
+      return;
+    }
+    entry.get_buffer().text = String(settings.get_int(key));
+    row.get_root()?.add_toast?.(new Adw.Toast({ title: `${title}: enter a whole number from ${min} to ${max}` }));
   };
   entry.connect('activate', save);
   const button = new Gtk.Button({ label: 'OK' });

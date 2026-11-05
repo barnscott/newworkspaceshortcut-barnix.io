@@ -14,6 +14,7 @@ export class highlightFocus {
     this._handles_settings = [];
     this._handles_window = [];
     this._watchedWindow = null;
+    this._laterId = 0;
     this._readSettings();
   }
 
@@ -26,8 +27,8 @@ export class highlightFocus {
   }
 
   enable() {
-    // Never redraw from a geometry signal: size-change fires mid-transition.
-    // https://gitlab.gnome.org/GNOME/mutter/-/blob/50.4/src/core/window.c#L3324
+    // Never draw inside a geometry signal: size-change fires mid-transition.
+    // Moves are applied from a later instead. https://gitlab.gnome.org/GNOME/mutter/-/blob/50.4/src/core/window.c#L3324
     this._handles_display.push(
       global.display.connect('notify::focus-window', () => this._highlightWindow()),
     );
@@ -84,12 +85,40 @@ export class highlightFocus {
       win.connect('notify::maximized-horizontally', () => this._clearHighlight()),
       win.connect('notify::maximized-vertically', () => this._clearHighlight()),
       win.connect('notify::fullscreen', () => this._clearHighlight()),
-      win.connect('position-changed', () => this._clearHighlight()),
-      win.connect('size-changed', () => this._clearHighlight()),
+      win.connect('position-changed', () => this._queueReposition()),
+      win.connect('size-changed', () => this._queueReposition()),
     ];
   }
 
+  // Follows the window; never re-creates a border that auto-hide removed.
+  _queueReposition() {
+    if (this._laterId || this._borders.length === 0) return;
+    this._laterId = global.compositor.get_laters().add(Meta.LaterType.BEFORE_REDRAW, () => {
+      this._laterId = 0;
+      const win = this._watchedWindow;
+      const border = this._borders[0];
+      if (!win || !border) return GLib.SOURCE_REMOVE;
+      if (this._shouldSkip(win)) {
+        this._clearHighlight();
+        return GLib.SOURCE_REMOVE;
+      }
+      this._placeBorder(border, win);
+      return GLib.SOURCE_REMOVE;
+    });
+  }
+
+  _placeBorder(border, win) {
+    const rect = win.get_frame_rect();
+    const inset = this._borderWidth;
+    border.set_size(rect.width + inset * 2, rect.height + inset * 2);
+    border.set_position(rect.x - inset, rect.y - inset);
+  }
+
   _unwatchWindow() {
+    if (this._laterId) {
+      global.compositor.get_laters().remove(this._laterId);
+      this._laterId = 0;
+    }
     if (this._watchedWindow)
       this._handles_window.splice(0).forEach(h => this._watchedWindow.disconnect(h));
     this._watchedWindow = null;
@@ -106,10 +135,7 @@ export class highlightFocus {
     const border = new St.Bin();
     border.style = `border: ${this._borderWidth}px solid ${this._borderColor}; border-radius: ${this._borderRadius}px;`;
 
-    const rect = win.get_frame_rect();
-    const inset = this._borderWidth;
-    border.set_size(rect.width + inset * 2, rect.height + inset * 2);
-    border.set_position(rect.x - inset, rect.y - inset);
+    this._placeBorder(border, win);
 
     global.window_group.add_child(border);
     border.show();
