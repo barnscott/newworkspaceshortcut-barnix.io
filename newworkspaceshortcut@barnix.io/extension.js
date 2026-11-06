@@ -227,6 +227,8 @@ export default class newWorkspaceShortcuts extends Extension {
     this._snapRestore = new snapRestoreFix(this._settings);
     if (snapRestoreFix.isAffected() && this._settings.get_boolean('snap-restore-fix'))
       this._snapRestore.enable();
+    else
+      snapRestoreFix.forgetRetained();
     this._snapRestoreHandlerId = this._settings.connect('changed::snap-restore-fix', () => {
       if (snapRestoreFix.isAffected() && this._settings.get_boolean('snap-restore-fix'))
         this._snapRestore.enable();

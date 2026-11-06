@@ -44,8 +44,7 @@ export function applyTileMonitor(snap, monitor) {
 export function canRepair(snap, rectMonitorGeoNow, sizeOnly = false) {
   if (!snap || !isUsableRect(snap.rect)) return false;
   if (sizeOnly) return true;
-  return snap.monitorNow === snap.tileMonitor && snap.rectMonitor >= 0 &&
-    sameRect(snap.rectMonitorGeo, rectMonitorGeoNow);
+  return snap.monitorNow === snap.tileMonitor && sameRect(snap.rectMonitorGeo, rectMonitorGeoNow);
 }
 
 // Mutter shrinks an 'almost maximized' restore to 80% of the work area, keeping the aspect.

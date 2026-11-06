@@ -3,7 +3,7 @@ import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { isVertical, rankAdjacentMonitors } from './focus-pure.js';
-import { monitorGeometry } from './utils.js';
+import { isNormalWindow, monitorGeometry } from './utils.js';
 
 const DIRECTIONS = ['focus-changer-up', 'focus-changer-down', 'focus-changer-left', 'focus-changer-right'];
 
@@ -48,9 +48,7 @@ export class focusChanger {
     );
   }
 
-  // `searched` holds monitors already tried, so each is searched once.
-  _getBestCandidate(direction, monitor, activeRect, activeWin, searched = new Set()) {
-    searched.add(monitor);
+  _bestOnMonitor(direction, monitor, activeRect, activeWin) {
     const windows = this._getWindowsOnMonitor(monitor).filter(w => w !== activeWin);
     // Most-recently-used first as a tiebreaker
     windows.sort((a, b) => b.user_time - a.user_time);
@@ -90,19 +88,37 @@ export class focusChanger {
       else if (primaryDist === bestPrimaryDist && secondaryDist < bestSecondaryDist) best = w;
     }
 
+    return best;
+  }
+
+  // This monitor first, then monitors beyond the edge breadth-first, nearest first.
+  _getBestCandidate(direction, monitor, activeRect, activeWin) {
+    const best = this._bestOnMonitor(direction, monitor, activeRect, activeWin);
     if (best) return best;
 
-    // Nothing here: try each monitor beyond this edge, nearest first.
-    const m = monitorGeometry(monitor);
-    if (!m) return null;
-    // Measure along travel from this monitor, across it from the window.
-    const ref = vertical
-      ? { x: activeRect.x, width: activeRect.width, y: m.y, height: m.height }
-      : { x: m.x, width: m.width, y: activeRect.y, height: activeRect.height };
-    for (const next of this._getAdjacentMonitors(direction, monitor, activeRect)) {
-      if (searched.has(next)) continue;
-      const found = this._getBestCandidate(direction, next, ref, activeWin, searched);
-      if (found) return found;
+    const vertical = isVertical(direction);
+    const searched = new Set([monitor]);
+    let frontier = [monitor];
+    while (frontier.length) {
+      const level = [];
+      for (const from of frontier) {
+        const m = monitorGeometry(from);
+        if (!m) continue;
+        // Measure along travel from the monitor before, across it from the window.
+        const ref = vertical
+          ? { x: activeRect.x, width: activeRect.width, y: m.y, height: m.height }
+          : { x: m.x, width: m.width, y: activeRect.y, height: activeRect.height };
+        for (const next of this._getAdjacentMonitors(direction, from, activeRect)) {
+          if (searched.has(next)) continue;
+          searched.add(next);
+          level.push({ next, ref });
+        }
+      }
+      for (const { next, ref } of level) {
+        const found = this._bestOnMonitor(direction, next, ref, activeWin);
+        if (found) return found;
+      }
+      frontier = level.map(l => l.next);
     }
     return null;
   }
@@ -118,10 +134,9 @@ export class focusChanger {
 // so only a normal window's counts.
 // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/core/window.c#L6030
 const CANDIDATE_TYPES = new Set([
-  Meta.WindowType.NORMAL, Meta.WindowType.DIALOG, Meta.WindowType.MODAL_DIALOG, Meta.WindowType.UTILITY,
+  Meta.WindowType.DIALOG, Meta.WindowType.MODAL_DIALOG, Meta.WindowType.UTILITY,
 ]);
 
 function isCandidate(win) {
-  if (!CANDIDATE_TYPES.has(win.window_type)) return false;
-  return win.window_type !== Meta.WindowType.NORMAL || !win.skip_taskbar;
+  return isNormalWindow(win) ? !win.skip_taskbar : CANDIDATE_TYPES.has(win.window_type);
 }
