@@ -15,6 +15,12 @@ export function plainRect(r) {
   return { x: r.x, y: r.y, width: r.width, height: r.height };
 }
 
+// A monitor's geometry as a plain rect, or null for an invalid index.
+export function monitorGeometry(index) {
+  if (index < 0 || index >= global.display.get_n_monitors()) return null;
+  return plainRect(global.display.get_monitor_geometry(index));
+}
+
 // Fullscreen or maximized on either axis; mutter reports a side snap as vertical-only.
 // https://gitlab.gnome.org/GNOME/mutter/-/issues/225
 export function isEdgeFlush(win) {

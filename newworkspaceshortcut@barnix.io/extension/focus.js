@@ -3,7 +3,7 @@ import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { isVertical, pickAdjacentMonitor } from './focus-pure.js';
-import { plainRect } from './utils.js';
+import { monitorGeometry } from './utils.js';
 
 const DIRECTIONS = ['focus-changer-up', 'focus-changer-down', 'focus-changer-left', 'focus-changer-right'];
 
@@ -105,8 +105,7 @@ export class focusChanger {
   }
 
   _getAdjacentMonitor(direction, activeMonitorId, activeRect, display) {
-    const monitors = Array.from({ length: display.get_n_monitors() },
-      (_, i) => plainRect(display.get_monitor_geometry(i)));
+    const monitors = Array.from({ length: display.get_n_monitors() }, (_, i) => monitorGeometry(i));
     const along = isVertical(direction) ? this._centerX(activeRect) : this._centerY(activeRect);
     return pickAdjacentMonitor(direction, activeMonitorId, monitors, along);
   }

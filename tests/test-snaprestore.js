@@ -18,11 +18,11 @@ check('moved',            sameRect(r(0, 0, 10, 10), r(1, 0, 10, 10)), false);
 check('null side',        sameRect(r(0, 0, 10, 10), null), false);
 
 print('\n=== takesSnapshot: only a side snap from floating ===');
-check('side snap from floating',          takesSnapshot(false, true, false), true);
-check('full maximize from floating',      takesSnapshot(true, true, false), false);
+check('side snap from floating',          takesSnapshot(false, false, true), true);
+check('full maximize from floating',      takesSnapshot(true, false, true), false);
 check('maximize while snapped keeps it',  takesSnapshot(true, true, true), false);
 check('repeat snap notify keeps it',      takesSnapshot(false, true, true), false);
-check('not maximized',                    takesSnapshot(false, false, false), false);
+check('no floating rect seen yet',        takesSnapshot(false, false, false), false);
 
 print('\n=== canRepair: same monitor, unchanged layout ===');
 const mon = r(0, 0, 1920, 1080);
@@ -34,5 +34,7 @@ check('moved to another monitor',      canRepair(snap({ tileMonitor: 1 }), mon),
 check('window was off every monitor',  canRepair(snap({ monitor: -1, tileMonitor: -1 }), mon), false);
 check('monitor rearranged',            canRepair(snap(), r(1920, 0, 1920, 1080)), false);
 check('monitor gone',                  canRepair(snap(), null), false);
+check('size-only ignores the monitor', canRepair(snap({ tileMonitor: 1 }), r(1920, 0, 1920, 1080), true), true);
+check('size-only still needs a size',  canRepair(snap({ rect: r(0, 0, 0, 0) }), mon, true), false);
 
 finish();

@@ -7,7 +7,7 @@ import Meta from 'gi://Meta';
 import Mtk from 'gi://Mtk';
 import * as Config from 'resource:///org/gnome/shell/misc/config.js';
 import { canRepair, takesSnapshot } from './snaprestore-pure.js';
-import { isEdgeFlush, isNormalWindow, plainRect } from './utils.js';
+import { isEdgeFlush, isNormalWindow, monitorGeometry, plainRect } from './utils.js';
 
 // Bump or delete when mutter ships a fix. Unfixed in 51.1: tile_window() still
 // sets tile mode before save_rect(). https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/5449
@@ -20,6 +20,8 @@ export class snapRestoreFix {
     this._handles_display = [];
     // win -> { handles, rect: last floating rect, snap: pre-snap snapshot, laterId }
     this._windows = new Map();
+    // New windows, until first shown: win -> cancel()
+    this._pending = new Map();
     this._grabbedWindow = null;
   }
 
@@ -30,19 +32,21 @@ export class snapRestoreFix {
 
   enable() {
     this._handles_display.push(
-      global.display.connect('window-created', (_display, win) => this._watch(win)));
+      global.display.connect('window-created', (_display, win) => this._watchWhenShown(win)));
     // Mutter saves the drag-start rect, so ignore the grabbed window's geometry mid-drag.
+    let beginId = 0;
     try {
-      this._handles_display.push(
-        global.display.connect('grab-op-begin', (_display, win) => { this._grabbedWindow = win; }));
-      this._handles_display.push(
-        global.display.connect('grab-op-end', (_display, win) => {
-          this._grabbedWindow = null;
-          // Mid-grab geometry was skipped, so record where the window landed.
-          const state = this._windows.get(win);
-          if (state) this._cacheIfFloating(win, state);
-        }));
+      beginId = global.display.connect('grab-op-begin', (_display, win) => { this._grabbedWindow = win; });
+      const endId = global.display.connect('grab-op-end', (_display, win) => {
+        this._grabbedWindow = null;
+        // Mid-grab geometry was skipped, so record where the window landed.
+        const state = this._windows.get(win);
+        if (state) this._cacheIfFloating(win, state);
+      });
+      this._handles_display.push(beginId, endId);
     } catch (e) {
+      // Both or neither: a begin without an end would block caching for good.
+      if (beginId) global.display.disconnect(beginId);
       console.warn(`snapRestore: grab-op signals unavailable: ${e.message}`);
     }
     global.display.list_all_windows().forEach(win => this._watch(win));
@@ -51,8 +55,23 @@ export class snapRestoreFix {
   // Drops all state, so re-enabling never replays pre-toggle geometry.
   disable() {
     this._handles_display.splice(0).forEach(h => global.display.disconnect(h));
+    [...this._pending.values()].forEach(cancel => cancel());
     [...this._windows.keys()].forEach(win => this._unwatch(win));
     this._grabbedWindow = null;
+  }
+
+  // A new window's rect counts once mutter has placed it and applied its initial state.
+  // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/core/window.c#L8746
+  _watchWhenShown(win) {
+    if (!isNormalWindow(win) || this._pending.has(win)) return;
+    const ids = [];
+    const cancel = () => {
+      ids.splice(0).forEach(id => win.disconnect(id));
+      this._pending.delete(win);
+    };
+    ids.push(win.connect('shown', () => { cancel(); this._watch(win); }));
+    ids.push(win.connect('unmanaged', cancel));
+    this._pending.set(win, cancel);
   }
 
   _watch(win) {
@@ -91,13 +110,13 @@ export class snapRestoreFix {
 
   _onMaximizedChanged(win, state) {
     if (win.maximized_vertically) {
-      if (!state.rect || !takesSnapshot(win.maximized_horizontally, true, state.snap !== null)) return;
+      if (!takesSnapshot(win.maximized_horizontally, state.snap !== null, state.rect !== null)) return;
       // Flags change before geometry, so the cache still holds the floating rect.
       const monitor = monitorOf(new Mtk.Rectangle(state.rect));
       state.snap = {
         rect: state.rect,
         monitor,
-        monitorGeo: monitorGeo(monitor),
+        monitorGeo: monitorGeometry(monitor),
         tileMonitor: monitorOf(win.get_frame_rect()),
       };
       return;
@@ -122,7 +141,7 @@ export class snapRestoreFix {
 
   // Its geometry signals re-cache the repaired rect.
   _repair(win, snap, sizeOnly) {
-    if (isEdgeFlush(win) || !canRepair(snap, monitorGeo(snap.monitor))) return;
+    if (isEdgeFlush(win) || !canRepair(snap, monitorGeometry(snap.monitor), sizeOnly)) return;
 
     const { width, height } = snap.rect;
     let { x, y } = snap.rect;
@@ -142,9 +161,4 @@ export class snapRestoreFix {
 // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/core/window.c#L4507
 function monitorOf(rect) {
   return global.display.get_monitor_index_for_rect(rect);
-}
-
-function monitorGeo(index) {
-  if (index < 0 || index >= global.display.get_n_monitors()) return null;
-  return plainRect(global.display.get_monitor_geometry(index));
 }

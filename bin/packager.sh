@@ -111,6 +111,15 @@ collect_files() {
   done
 }
 
+# Removes a failed archive, and the destination too if this run created it.
+discard_archive() {
+  local zip_path="$1" dest_dir="$2" created="$3"
+  rm -f "$zip_path"
+  if (( created )); then
+    rmdir -- "$dest_dir" 2>/dev/null || true
+  fi
+}
+
 # Last check on the artifact actually uploaded. Returns 1 so main can delete it.
 verify_archive() {
   local zip_path="$1"
@@ -144,7 +153,7 @@ verify_archive() {
 }
 
 main() {
-  local script_dir repo_root ext_dir dest_dir version zip_name zip_path
+  local script_dir repo_root ext_dir dest_dir version zip_name zip_path created_dest=0
 
   script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
   repo_root=$(dirname "$script_dir")
@@ -165,6 +174,7 @@ main() {
     warn "extension has uncommitted changes — packaging the working tree"
   fi
 
+  [[ -d "$dest_dir" ]] || created_dest=1
   mkdir -p "$dest_dir"
   # zip runs from $ext_dir, so a relative destination must be resolved first.
   dest_dir=$(CDPATH='' cd -- "$dest_dir" && pwd)
@@ -176,12 +186,12 @@ main() {
   # Zip from the extension root so paths are relative. Info-ZIP reports errors on stdout.
   local zip_out
   if ! zip_out=$(cd "$ext_dir" && zip -q -X "$zip_path" "${SHIP_FILES[@]}" 2>&1); then
-    rm -f "$zip_path"
+    discard_archive "$zip_path" "$dest_dir" "$created_dest"
     die "zip failed writing $zip_path:"$'\n'"$zip_out"
   fi
 
   if ! verify_archive "$zip_path"; then
-    rm -f "$zip_path"
+    discard_archive "$zip_path" "$dest_dir" "$created_dest"
     die "rejected archive deleted; nothing written to $dest_dir"
   fi
 

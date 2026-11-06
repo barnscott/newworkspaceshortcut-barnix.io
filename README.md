@@ -77,7 +77,7 @@ Draws a temporary border around the focused window whenever focus changes, makin
 - Border color, width, and corner radius are configurable.
 - The border auto-hides after a configurable delay (default 1000 ms). Auto-hide can be disabled to keep the border permanently visible.
 - A manual keybinding (`Super + B` by default) re-triggers the highlight on demand.
-- **Snapped, maximized and fullscreen windows are not highlighted.** These sit flush against the screen edges, where a border drawn outside the window frame falls off-screen and clips. Mutter reports a side snap as a vertical-only maximize and offers no public way to distinguish the two, so any window maximized on either axis is skipped. If a window is snapped, maximized or made fullscreen while a border is showing, the border is hidden rather than left at stale coordinates. It comes back when the window is restored, unless auto-hide has removed it by then.
+- **Snapped, maximized and fullscreen windows are not highlighted.** These sit flush against the screen edges, where a border drawn outside the window frame falls off-screen and clips. Mutter reports a side snap as a vertical-only maximize and offers no public way to distinguish the two, so any window maximized on either axis is skipped. If a window is snapped, maximized or made fullscreen while a border is showing, the border is hidden rather than left at stale coordinates. It comes back once the window is restored to a smaller size and GNOME's restore animation has finished, unless auto-hide has removed it by then.
 
 ---
 

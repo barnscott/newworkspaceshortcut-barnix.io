@@ -6,6 +6,9 @@ import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { isEdgeFlush, isNormalWindow } from './utils.js';
 
+// How often to re-check a window that GNOME Shell is still animating.
+const ANIMATION_POLL_MS = 100;
+
 export class highlightFocus {
   constructor(settings) {
     this._settings = settings;
@@ -16,6 +19,7 @@ export class highlightFocus {
     this._handles_window = [];
     this._watchedWindow = null;
     this._laterId = 0;
+    this._animationPollId = 0;
     this._drawnInset = 0;
     this._readSettings();
   }
@@ -110,8 +114,24 @@ export class highlightFocus {
         border.hide();
         return GLib.SOURCE_REMOVE;
       }
+      // Shell animates (un)maximize from the old rect; show once the actor gets there.
+      // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/51.1/js/ui/windowManager.js#L1332
+      if (win.get_compositor_private()?.__animationInfo) {
+        border.hide();
+        this._pollAnimation();
+        return GLib.SOURCE_REMOVE;
+      }
       this._placeBorder(border, win);
       border.show();
+      return GLib.SOURCE_REMOVE;
+    });
+  }
+
+  _pollAnimation() {
+    if (this._animationPollId) return;
+    this._animationPollId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, ANIMATION_POLL_MS, () => {
+      this._animationPollId = 0;
+      this._queueReposition();
       return GLib.SOURCE_REMOVE;
     });
   }
@@ -133,6 +153,8 @@ export class highlightFocus {
       this._handles_window.splice(0).forEach(h => this._watchedWindow.disconnect(h));
     this._watchedWindow = null;
     this._handles_window = [];
+    if (this._animationPollId) GLib.Source.remove(this._animationPollId);
+    this._animationPollId = 0;
   }
 
   _highlightWindow() {

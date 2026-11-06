@@ -10,15 +10,16 @@ export function sameRect(a, b) {
     a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 }
 
-// A side snap from floating only. Later notifies keep the snapshot:
-// mutter saves no rect from a tile.
-export function takesSnapshot(maximizedH, maximizedV, hasSnapshot) {
-  return maximizedV && !maximizedH && !hasSnapshot;
+// On a vertical maximize: only a side snap from a known floating rect. Later
+// notifies keep the snapshot; mutter saves no rect from a tile.
+export function takesSnapshot(maximizedH, hasSnapshot, hasRect) {
+  return !maximizedH && !hasSnapshot && hasRect;
 }
 
-// Replay only onto the monitor it was taken on, if that monitor has not moved.
-export function canRepair(preSnap, monitorGeoNow) {
-  return !!preSnap && isUsableRect(preSnap.rect) &&
-    preSnap.monitor >= 0 && preSnap.monitor === preSnap.tileMonitor &&
-    sameRect(preSnap.monitorGeo, monitorGeoNow);
+// A position replays only onto its own, unmoved monitor. A size-only repair
+// takes its position from the pointer, so needs just the size.
+export function canRepair(preSnap, monitorGeoNow, sizeOnly = false) {
+  if (!preSnap || !isUsableRect(preSnap.rect)) return false;
+  return sizeOnly || (preSnap.monitor >= 0 && preSnap.monitor === preSnap.tileMonitor &&
+    sameRect(preSnap.monitorGeo, monitorGeoNow));
 }
