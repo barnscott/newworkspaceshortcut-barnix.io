@@ -1,5 +1,4 @@
-// Monitor choice for Focus Changer, on plain {x, y, width, height} rects.
-// No Shell imports, so tests/test-focus.js can load it.
+// Focus Changer's monitor choice on plain rects. No Shell imports, so tests can load it.
 
 export function isVertical(direction) {
   return direction === 'focus-changer-up' || direction === 'focus-changer-down';
@@ -17,8 +16,8 @@ function gapBeyond(direction, a, g) {
   return d >= 0 ? d : -1;
 }
 
-// Index into monitors, or null. Prefers Mutter's neighbours (shared edge,
-// overlapping span), then the rest beyond that edge; nearest `along` first.
+// Index or null. Mutter's neighbours first, then any monitor beyond that edge;
+// nearest `along` wins.
 // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/backends/meta-logical-monitor.c#L319
 export function pickAdjacentMonitor(direction, activeIndex, monitors, along) {
   const a = monitors[activeIndex];
