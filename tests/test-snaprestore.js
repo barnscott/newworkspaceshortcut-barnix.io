@@ -18,11 +18,12 @@ check('moved',            sameRect(r(0, 0, 10, 10), r(1, 0, 10, 10)), false);
 check('null side',        sameRect(r(0, 0, 10, 10), null), false);
 
 print('\n=== takesSnapshot: only a side snap from floating ===');
-check('side snap from floating',          takesSnapshot(false, false, true), true);
-check('full maximize from floating',      takesSnapshot(true, false, true), false);
-check('maximize while snapped keeps it',  takesSnapshot(true, true, true), false);
-check('repeat snap notify keeps it',      takesSnapshot(false, true, true), false);
-check('no floating rect seen yet',        takesSnapshot(false, false, false), false);
+check('side snap from floating',          takesSnapshot(false, false, true, false), true);
+check('full maximize from floating',      takesSnapshot(true, false, true, false), false);
+check('maximize while snapped keeps it',  takesSnapshot(true, true, true, false), false);
+check('repeat snap notify keeps it',      takesSnapshot(false, true, true, false), false);
+check('no floating rect seen yet',        takesSnapshot(false, false, false, false), false);
+check('snap from a full maximize',        takesSnapshot(false, false, true, true), false);
 
 print('\n=== canRepair: same monitor, unchanged layout ===');
 const mon = r(0, 0, 1920, 1080);

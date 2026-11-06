@@ -90,10 +90,10 @@ export class focusChanger {
 
     // If nothing found on this monitor, try the nearest monitor in that direction
     if (!best) {
-      const nextMonitor = this._getAdjacentMonitor(direction, monitor, activeRect, activeWin.get_display());
+      const nextMonitor = this._getAdjacentMonitor(direction, monitor, activeRect);
       if (nextMonitor !== null) {
         // Measure along travel from this monitor, across it from the window.
-        const m = activeWin.get_display().get_monitor_geometry(monitor);
+        const m = monitorGeometry(monitor);
         const ref = isVertical(direction)
           ? { x: activeRect.x, width: activeRect.width, y: m.y, height: m.height }
           : { x: m.x, width: m.width, y: activeRect.y, height: activeRect.height };
@@ -104,8 +104,8 @@ export class focusChanger {
     return best;
   }
 
-  _getAdjacentMonitor(direction, activeMonitorId, activeRect, display) {
-    const monitors = Array.from({ length: display.get_n_monitors() }, (_, i) => monitorGeometry(i));
+  _getAdjacentMonitor(direction, activeMonitorId, activeRect) {
+    const monitors = Array.from({ length: global.display.get_n_monitors() }, (_, i) => monitorGeometry(i));
     const along = isVertical(direction) ? this._centerX(activeRect) : this._centerY(activeRect);
     return pickAdjacentMonitor(direction, activeMonitorId, monitors, along);
   }
