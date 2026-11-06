@@ -17,8 +17,8 @@ import { isEdgeFlush, isNormalWindow, monitorGeometry } from './utils.js';
 // sets tile mode before save_rect(). https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/5449
 const AFFECTED_MAJORS = [49, 50, 51];
 
-// Window state kept across the disable() Shell runs on screen lock, for the
-// next enable() only. Weak keys let closed windows drop out.
+// State kept from a screen-lock disable() for the next enable() only.
+// Weak keys let closed windows drop out.
 let retained = new WeakMap();
 
 // Watches every normal window, so no snap or unsnap goes unseen.
