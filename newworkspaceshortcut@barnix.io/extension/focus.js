@@ -5,13 +5,6 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 const DIRECTIONS = ['focus-changer-up', 'focus-changer-down', 'focus-changer-left', 'focus-changer-right'];
 
-const MONITOR_DIRECTIONS = {
-  'focus-changer-up':    Meta.DisplayDirection.UP,
-  'focus-changer-down':  Meta.DisplayDirection.DOWN,
-  'focus-changer-left':  Meta.DisplayDirection.LEFT,
-  'focus-changer-right': Meta.DisplayDirection.RIGHT,
-};
-
 export class focusChanger {
   constructor(settings) {
     this._settings = settings;
@@ -95,7 +88,7 @@ export class focusChanger {
 
     // If nothing found on this monitor, try the nearest monitor in that direction
     if (!best) {
-      const nextMonitor = this._getAdjacentMonitor(direction, monitor, activeWin);
+      const nextMonitor = this._getAdjacentMonitor(direction, monitor, activeRect, activeWin.get_display());
       if (nextMonitor !== null) {
         const monitorRect = activeWin.get_display().get_monitor_geometry(monitor);
         return this._getBestCandidate(direction, nextMonitor, monitorRect, activeWin);
@@ -105,13 +98,36 @@ export class focusChanger {
     return best;
   }
 
-  // Mutter's own adjacency: shares an edge and overlaps on the other axis.
+  // Mutter's adjacency rule (shared edge, overlap on the other axis), but picks
+  // the neighbour nearest the window, not the first listed.
   // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/backends/meta-logical-monitor.c#L319
-  _getAdjacentMonitor(direction, activeMonitorId, activeWin) {
-    const display = activeWin.get_display();
-    // An invalid index makes mutter dereference NULL and crash the shell.
-    if (activeMonitorId < 0 || activeMonitorId >= display.get_n_monitors()) return null;
-    const index = display.get_monitor_neighbor_index(activeMonitorId, MONITOR_DIRECTIONS[direction]);
-    return index < 0 ? null : index;
+  _getAdjacentMonitor(direction, activeMonitorId, activeRect, display) {
+    const n = display.get_n_monitors();
+    if (activeMonitorId < 0 || activeMonitorId >= n) return null;
+    const a = display.get_monitor_geometry(activeMonitorId);
+    const vertical = direction === 'focus-changer-up' || direction === 'focus-changer-down';
+    const along = vertical ? this._centerX(activeRect) : this._centerY(activeRect);
+    let best = null;
+    let bestDist = Infinity;
+
+    for (let i = 0; i < n; i++) {
+      if (i === activeMonitorId) continue;
+      const g = display.get_monitor_geometry(i);
+      const touches = {
+        'focus-changer-up':    g.y + g.height === a.y,
+        'focus-changer-down':  g.y === a.y + a.height,
+        'focus-changer-left':  g.x + g.width === a.x,
+        'focus-changer-right': g.x === a.x + a.width,
+      }[direction];
+      const lo = vertical ? g.x : g.y;
+      const hi = lo + (vertical ? g.width : g.height);
+      const aLo = vertical ? a.x : a.y;
+      const aHi = aLo + (vertical ? a.width : a.height);
+      if (!touches || hi <= aLo || lo >= aHi) continue;
+
+      const dist = along < lo ? lo - along : along > hi ? along - hi : 0;
+      if (dist < bestDist) { best = i; bestDist = dist; }
+    }
+    return best;
   }
 }

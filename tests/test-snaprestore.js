@@ -1,12 +1,7 @@
 // Headless test for the GNOME 49–51 snap-restore workaround. Run: gjs -m tests/test-snaprestore.js
 import { isUsableRect, shouldRepair } from '../newworkspaceshortcut@barnix.io/extension/snaprestore-pure.js';
+import { check, finish } from './harness.js';
 
-let failures = 0;
-function check(label, actual, expected) {
-  const ok = String(actual) === String(expected);
-  if (!ok) failures++;
-  print(`   ${ok ? 'PASS' : 'FAIL'}  ${label}: ${actual}${ok ? '' : `  (expected ${expected})`}`);
-}
 const r = (x, y, width, height) => ({ x, y, width, height });
 
 print('\n=== isUsableRect ===');
@@ -24,5 +19,4 @@ check('no tile state recorded',   shouldRepair(undefined, r(724, 500, 708, 452))
 check('side-tiled, no cache',     shouldRepair(true, null), false);
 check('side-tiled, degenerate',   shouldRepair(true, r(0, 0, 0, 0)), false);
 
-print(`\n${failures === 0 ? 'ALL CHECKS PASSED' : failures + ' CHECK(S) FAILED'}\n`);
-if (failures) imports.system.exit(1);
+finish();

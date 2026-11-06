@@ -1,15 +1,16 @@
 // Tests extension/migrate.js, the code the extension runs, against a keyfile
-// GSettings backend, so dconf is never touched. Run: gjs -m bin/test-migration.js
+// GSettings backend, so dconf is never touched. Run: gjs -m tests/test-migration.js
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import { exit } from 'system';
+import { check, fail, finish } from './harness.js';
 import { migrateLegacySettings as migrate } from '../newworkspaceshortcut@barnix.io/extension/migrate.js';
 
 const SCHEMA_ID = 'org.gnome.shell.extensions.newworkspaceshortcut';
 const PATH      = '/org/gnome/shell/extensions/newworkspaceshortcut/';
 
-const binDir     = GLib.path_get_dirname(GLib.filename_from_uri(import.meta.url)[0]);
-const schemaSrc  = GLib.build_filenamev([binDir, '..', 'newworkspaceshortcut@barnix.io', 'schemas']);
+const testDir    = GLib.path_get_dirname(GLib.filename_from_uri(import.meta.url)[0]);
+const schemaSrc  = GLib.build_filenamev([testDir, '..', 'newworkspaceshortcut@barnix.io', 'schemas']);
 const tmpDir     = GLib.dir_make_tmp('nws-migration-XXXXXX');
 const compiled   = GLib.build_filenamev([tmpDir, 'gschemas.compiled']);
 const KF         = GLib.build_filenamev([tmpDir, 'test-settings.keyfile']);
@@ -55,12 +56,6 @@ function fresh() {
   return s;
 }
 
-let failures = 0;
-function check(label, actual, expected) {
-  const ok = String(actual) === String(expected);
-  if (!ok) failures++;
-  print(`   ${ok ? 'PASS' : 'FAIL'}  ${label}: ${actual}${ok ? '' : `  (expected ${expected})`}`);
-}
 const userVal = (s, key) => s.get_user_value(key) === null ? 'null' : 'set';
 
 try {
@@ -123,11 +118,9 @@ try {
     check('winman-toggle stays false', s.get_boolean('winman-toggle'), false);
   }
 } catch (e) {
-  failures++;
-  printerr(`ERROR: ${e.message}`);
+  fail(e.message);
 } finally {
   cleanup();
 }
 
-print(`\n${failures === 0 ? 'ALL CHECKS PASSED' : `${failures} CHECK(S) FAILED`}\n`);
-if (failures) exit(1);
+finish();

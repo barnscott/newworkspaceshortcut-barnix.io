@@ -46,7 +46,7 @@ Repositions and resizes floating windows along the center axes of the display.
 
 **Move to display edge** (`Control + Super + Alt + Arrow`):
 
-These work like GNOME's native `move-to-side-*` shortcuts, but respect the configurable window gap. GNOME's own shortcuts are left untouched.
+These work like GNOME's native `move-to-side-*` shortcuts, but respect the configurable window gap. GNOME's own shortcuts are left untouched, so don't bind them to the same keys: only one of the two would work.
 
 | Shortcut | Result |
 |---|---|
@@ -165,7 +165,7 @@ Before submitting a PR:
 - Update `CHANGELOG.md` with a summary of the changes.
 - Update `metadata.json` to reflect the supported GNOME versions, and bump its `version` and `version-name` together (the packager refuses a mismatch).
 - Recompile the schema if you changed it: `glib-compile-schemas newworkspaceshortcut@barnix.io/schemas/`. The output is gitignored and must not be committed.
-- If you changed `extension/migrate.js`, run `gjs -m bin/test-migration.js`. It uses a throwaway settings file and never touches your real settings.
+- If you changed `extension/migrate.js`, run `gjs -m tests/test-migration.js`. It uses a throwaway settings file and never touches your real settings.
 - Build the upload archive with `bin/packager.sh` (see [Packaging a release](#packaging-a-release)).
 
 ### Build and debugging

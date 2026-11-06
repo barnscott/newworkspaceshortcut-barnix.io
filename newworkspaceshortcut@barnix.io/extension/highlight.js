@@ -15,6 +15,7 @@ export class highlightFocus {
     this._handles_window = [];
     this._watchedWindow = null;
     this._laterId = 0;
+    this._settling = false;
     this._drawnInset = 0;
     this._readSettings();
   }
@@ -79,15 +80,18 @@ export class highlightFocus {
       win.maximized_vertically;
   }
 
-  // Never draw here. A state change only hides the border; the geometry change
-  // that follows re-shows it once the rect has settled.
+  // Never draw here. A state change only hides the border; the next geometry
+  // change re-shows it. Not shown from notify: on Wayland the rect is stale then.
   _watchWindow(win) {
     this._watchedWindow = win;
-    const hide = () => this._borders.forEach(b => b.hide());
+    const onStateChanged = () => {
+      this._borders.forEach(b => b.hide());
+      this._settling = true;
+    };
     this._handles_window = [
-      win.connect('notify::maximized-horizontally', hide),
-      win.connect('notify::maximized-vertically', hide),
-      win.connect('notify::fullscreen', hide),
+      win.connect('notify::maximized-horizontally', onStateChanged),
+      win.connect('notify::maximized-vertically', onStateChanged),
+      win.connect('notify::fullscreen', onStateChanged),
       win.connect('position-changed', () => this._queueReposition()),
       win.connect('size-changed', () => this._queueReposition()),
     ];
@@ -103,6 +107,13 @@ export class highlightFocus {
       if (!win || !border) return GLib.SOURCE_REMOVE;
       if (this._shouldSkip(win)) {
         border.hide();
+        return GLib.SOURCE_REMOVE;
+      }
+      // Wait one frame after a state change: snap restore repairs in this one.
+      // Laters queued now run next frame. https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/compositor/meta-later.c#L148
+      if (this._settling) {
+        this._settling = false;
+        this._queueReposition();
         return GLib.SOURCE_REMOVE;
       }
       this._placeBorder(border, win);
@@ -128,6 +139,7 @@ export class highlightFocus {
       this._handles_window.splice(0).forEach(h => this._watchedWindow.disconnect(h));
     this._watchedWindow = null;
     this._handles_window = [];
+    this._settling = false;
   }
 
   _highlightWindow() {
@@ -135,7 +147,7 @@ export class highlightFocus {
     this._unwatchWindow();
 
     const win = global.display.focus_window;
-    if (this._shouldSkip(win)) return;
+    if (win === null || win.window_type !== Meta.WindowType.NORMAL) return;
 
     const border = new St.Bin();
     border.style = `border: ${this._borderWidth}px solid ${this._borderColor}; border-radius: ${this._borderRadius}px;`;
@@ -144,7 +156,9 @@ export class highlightFocus {
     this._placeBorder(border, win);
 
     global.window_group.add_child(border);
-    border.show();
+    // Created hidden on an edge-flush window, so restoring it shows the border.
+    if (this._shouldSkip(win)) border.hide();
+    else border.show();
     this._borders.push(border);
 
     this._watchWindow(win);

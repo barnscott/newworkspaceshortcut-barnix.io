@@ -18,9 +18,8 @@ export class snapRestoreFix {
     this._handles_window = [];
     this._trackedWindow = null;
     this._floatingRects = new WeakMap();
-    this._sideTiled = new WeakMap();
+    this._preSnapRects = new WeakMap();
     this._laterId = 0;
-    this._repairing = false;
     this._grabbed = false;
   }
 
@@ -40,8 +39,7 @@ export class snapRestoreFix {
         global.display.connect('grab-op-end', () => {
           this._grabbed = false;
           // Mid-grab geometry was skipped, so record where the window landed.
-          // A queued repair still needs the pre-snap cache; it re-caches after.
-          if (this._trackedWindow && !this._laterId) this._cacheIfFloating(this._trackedWindow);
+          if (this._trackedWindow) this._cacheIfFloating(this._trackedWindow);
         }),
       );
     } catch (e) {
@@ -58,6 +56,9 @@ export class snapRestoreFix {
       this._laterId = 0;
     }
     this._grabbed = false;
+    // Toggling the setting reuses this instance; never replay pre-toggle geometry.
+    this._floatingRects = new WeakMap();
+    this._preSnapRects = new WeakMap();
   }
 
   _untrack() {
@@ -79,8 +80,8 @@ export class snapRestoreFix {
       win.connect('notify::maximized-vertically', () => this._onMaximizedChanged(win)),
       win.connect('unmanaged', () => this._untrack()),
     ];
-    // An unsnap while unfocused leaves a stale flag that would block caching.
-    if (this._isFloating(win)) this._sideTiled.delete(win);
+    // A floating window is not snapped; drop a snapshot left by an unseen unsnap.
+    if (this._isFloating(win)) this._preSnapRects.delete(win);
     this._cacheIfFloating(win);
   }
 
@@ -91,10 +92,7 @@ export class snapRestoreFix {
   }
 
   _cacheIfFloating(win) {
-    if (this._repairing || this._grabbed || !this._isFloating(win)) return;
-    // X11 applies mutter's stale restore rect before notify::maximized-vertically.
-    // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/core/window.c#L3662
-    if (this._sideTiled.get(win) === true) return;
+    if (this._grabbed || !this._isFloating(win)) return;
     const r = win.get_frame_rect();
     this._floatingRects.set(win, {
       rect: { x: r.x, y: r.y, width: r.width, height: r.height },
@@ -105,32 +103,35 @@ export class snapRestoreFix {
   _onMaximizedChanged(win) {
     if (win.maximized_vertically) {
       // A side snap maximizes vertically only; a full maximize sets both.
-      this._sideTiled.set(win, !win.maximized_horizontally);
+      // Flags change before geometry, so the cache still holds the floating rect.
+      if (win.maximized_horizontally) this._preSnapRects.delete(win);
+      else this._preSnapRects.set(win, this._floatingRects.get(win));
       return;
     }
+    // Read the snapshot, not the cache: X11 has already cached mutter's stale
+    // restore rect by now. https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/core/window.c#L3662
+    const wasSideTiled = this._preSnapRects.has(win);
+    const preSnap = this._preSnapRects.get(win);
+    this._preSnapRects.delete(win);
     // A grab shake-loose already places the window; fix only its size.
     const sizeOnly = this._grabbed;
-    const wasSideTiled = this._sideTiled.get(win);
     const laters = global.compositor.get_laters();
     if (this._laterId) laters.remove(this._laterId);
     this._laterId = laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
       this._laterId = 0;
-      this._repair(win, wasSideTiled, sizeOnly);
-      // Kept until now so caching stays blocked; unless it was re-snapped since.
-      if (this._isFloating(win)) this._sideTiled.delete(win);
+      this._repair(win, wasSideTiled, preSnap, sizeOnly);
       return GLib.SOURCE_REMOVE;
     });
   }
 
-  _repair(win, wasSideTiled, sizeOnly) {
+  // The geometry signals this triggers re-cache the repaired rect.
+  _repair(win, wasSideTiled, preSnap, sizeOnly) {
     if (this._trackedWindow !== win || !this._isFloating(win)) return;
+    if (!shouldRepair(wasSideTiled, preSnap?.rect)) return;
+    if (preSnap.monitor !== win.get_monitor()) return;
 
-    const cached = this._floatingRects.get(win);
-    if (!shouldRepair(wasSideTiled, cached?.rect)) return;
-    if (cached.monitor !== win.get_monitor()) return;
-
-    const { width, height } = cached.rect;
-    let { x, y } = cached.rect;
+    const { width, height } = preSnap.rect;
+    let { x, y } = preSnap.rect;
     if (sizeOnly) {
       // Keep the pointer at the same relative spot, as mutter's drag anchor does.
       // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/compositor/meta-window-drag.c#L1289
@@ -139,8 +140,6 @@ export class snapRestoreFix {
       x = Math.round(px - width * (px - cur.x) / cur.width);
       y = Math.round(py - height * (py - cur.y) / cur.height);
     }
-    this._repairing = true;
     win.move_resize_frame(false, x, y, width, height);
-    this._repairing = false;
   }
 }
