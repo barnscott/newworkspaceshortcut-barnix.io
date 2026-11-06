@@ -12,6 +12,15 @@ readonly UUID="newworkspaceshortcut@barnix.io"
 
 # Populated by collect_files(); consumed by main().
 SHIP_FILES=()
+# Build directory and in-flight copy, removed on exit.
+TMP_DIR=""
+PARTIAL=""
+
+cleanup() {
+  if [[ -n "$PARTIAL" ]]; then rm -f -- "$PARTIAL"; fi
+  if [[ -n "$TMP_DIR" ]]; then rm -rf -- "$TMP_DIR"; fi
+}
+trap cleanup EXIT
 
 die() {
   echo "ERROR: $*" >&2
@@ -111,7 +120,7 @@ collect_files() {
   done
 }
 
-# Last check on the artifact actually uploaded. Returns 1 so main can delete it.
+# Last check on the artifact actually uploaded. Returns 1 so main can discard it.
 verify_archive() {
   local zip_path="$1"
   local -a entries=()
@@ -144,7 +153,7 @@ verify_archive() {
 }
 
 main() {
-  local script_dir repo_root ext_dir dest_dir version zip_name zip_path
+  local script_dir repo_root ext_dir dest_dir version zip_name zip_path tmp_zip zip_out
 
   script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
   repo_root=$(dirname "$script_dir")
@@ -165,22 +174,29 @@ main() {
     warn "extension has uncommitted changes — packaging the working tree"
   fi
 
-  mkdir -p "$dest_dir"
+  # realpath, not cd: cd treats "-" as $OLDPWD.
+  dest_dir=$(realpath -m -- "$dest_dir")
   zip_name="newworkspaceshortcut${version}.zip"
   zip_path="$dest_dir/$zip_name"
-  [[ -e "$zip_path" ]] && warn "overwriting existing $zip_name"
-  rm -f "$zip_path"
 
-  # cd so paths are stored relative to the extension root.
-  (
-    cd "$ext_dir"
-    zip -X "$zip_path" "${SHIP_FILES[@]}" >/dev/null
-  )
-
-  if ! verify_archive "$zip_path"; then
-    rm -f "$zip_path"
-    die "rejected archive deleted; nothing written to $dest_dir"
+  # Build and verify in a temp dir, so a failure leaves the destination untouched.
+  TMP_DIR=$(mktemp -d)
+  tmp_zip="$TMP_DIR/$zip_name"
+  # Zip from the extension root so paths are relative. Info-ZIP reports errors on stdout.
+  if ! zip_out=$(cd "$ext_dir" && zip -q -X "$tmp_zip" "${SHIP_FILES[@]}" 2>&1); then
+    die "zip failed:"$'\n'"$zip_out"
   fi
+  verify_archive "$tmp_zip" || die "archive rejected; nothing written to $dest_dir"
+
+  mkdir -p -- "$dest_dir"
+  [[ -d "$zip_path" ]] && die "a directory is in the way: $zip_path"
+  [[ -e "$zip_path" ]] && warn "overwriting existing $zip_name"
+  # Copy beside the target, then rename atomically: an earlier archive survives
+  # a failed copy, even across filesystems.
+  PARTIAL="$dest_dir/.$zip_name.partial.$$"
+  cp -- "$tmp_zip" "$PARTIAL" || die "could not write to $dest_dir"
+  mv -fT -- "$PARTIAL" "$zip_path"
+  PARTIAL=""
 
   echo "Packaged v${version} -> $zip_path"
   echo

@@ -4,6 +4,8 @@ import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import { plainRect, sameRect } from './rect.js';
+import { isEdgeFlush, isNormalWindow } from './utils.js';
 
 export class highlightFocus {
   constructor(settings) {
@@ -15,8 +17,10 @@ export class highlightFocus {
     this._handles_window = [];
     this._watchedWindow = null;
     this._laterId = 0;
+    this._animatingActor = null;
+    // The floating rect the border last framed.
+    this._framedRect = null;
     this._drawnInset = 0;
-    this._readSettings();
   }
 
   _readSettings() {
@@ -28,17 +32,27 @@ export class highlightFocus {
   }
 
   enable() {
+    // Settings may have changed while disabled, with no handlers connected.
+    this._readSettings();
     // Never draw inside a geometry signal: size-change fires mid-transition.
     // Moves are applied from a later instead. https://gitlab.gnome.org/GNOME/mutter/-/blob/50.4/src/core/window.c#L3324
     this._handles_display.push(
       global.display.connect('notify::focus-window', () => this._highlightWindow()),
     );
 
-    for (const key of ['highlight-border-color', 'highlight-border-width', 'highlight-border-radius', 'highlight-hide-delay', 'highlight-disable-hiding']) {
+    for (const key of ['highlight-border-color', 'highlight-border-width', 'highlight-border-radius', 'highlight-hide-delay']) {
       this._handles_settings.push(
         this._settings.connect(`changed::${key}`, () => this._readSettings()),
       );
     }
+    // Redraw so the current border gains, or drops, its hide timer.
+    this._handles_settings.push(
+      // Off: draw the permanent border now. On: only re-arm one already showing.
+      this._settings.connect('changed::highlight-disable-hiding', () => {
+        this._readSettings();
+        if (this._disableHiding || this._borders.length) this._highlightWindow();
+      }),
+    );
 
     const flag = Meta.KeyBindingFlags.IGNORE_AUTOREPEAT;
     const mode = Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW;
@@ -69,26 +83,27 @@ export class highlightFocus {
     this._removeAllTimeouts();
   }
 
-  // Skip edge-flush windows: a snap reads as a vertical-only maximize.
-  // https://gitlab.gnome.org/GNOME/mutter/-/issues/225
-  _shouldSkip(win) {
-    return win === null ||
-      win.window_type !== Meta.WindowType.NORMAL ||
-      win.is_fullscreen() ||
-      win.maximized_horizontally ||
-      win.maximized_vertically;
-  }
-
-  // Teardown only — never draw here.
   _watchWindow(win) {
     this._watchedWindow = win;
     this._handles_window = [
-      win.connect('notify::maximized-horizontally', () => this._clearHighlight()),
-      win.connect('notify::maximized-vertically', () => this._clearHighlight()),
-      win.connect('notify::fullscreen', () => this._clearHighlight()),
+      win.connect('notify::maximized-horizontally', () => this._onStateChanged()),
+      win.connect('notify::maximized-vertically', () => this._onStateChanged()),
+      win.connect('notify::fullscreen', () => this._onStateChanged()),
       win.connect('position-changed', () => this._queueReposition()),
       win.connect('size-changed', () => this._queueReposition()),
     ];
+  }
+
+  // Wayland rects lag the ack, so a geometry change normally re-shows the border.
+  _onStateChanged() {
+    const win = this._watchedWindow;
+    if (!win) return;
+    if (isEdgeFlush(win)) {
+      this._borders.forEach(b => b.hide());
+      return;
+    }
+    // Floating again at the rect it last framed: no geometry change will follow.
+    if (sameRect(this._framedRect, win.get_frame_rect())) this._queueReposition();
   }
 
   // Follows the window; never re-creates a border that auto-hide removed.
@@ -99,13 +114,39 @@ export class highlightFocus {
       const win = this._watchedWindow;
       const border = this._borders[0];
       if (!win || !border) return GLib.SOURCE_REMOVE;
-      if (this._shouldSkip(win)) {
-        this._clearHighlight();
+      if (isEdgeFlush(win)) {
+        border.hide();
+        return GLib.SOURCE_REMOVE;
+      }
+      // Shell animates (un)maximize from the old rect; show once the actor gets there.
+      // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/51.1/js/ui/windowManager.js#L1332
+      const actor = win.get_compositor_private();
+      if (actor?.__animationInfo) {
+        border.hide();
+        this._waitForAnimation(actor);
         return GLib.SOURCE_REMOVE;
       }
       this._placeBorder(border, win);
+      border.show();
+      this._framedRect = plainRect(win.get_frame_rect());
       return GLib.SOURCE_REMOVE;
     });
+  }
+
+  // Mutter emits this once Shell completes the size change.
+  _waitForAnimation(actor) {
+    if (this._animatingActor === actor) return;
+    this._stopWaiting();
+    this._animatingActor = actor;
+    actor.connectObject('effects-completed', () => {
+      this._stopWaiting();
+      this._queueReposition();
+    }, this);
+  }
+
+  _stopWaiting() {
+    this._animatingActor?.disconnectObject(this);
+    this._animatingActor = null;
   }
 
   // Uses the drawn inset: the border's CSS keeps its width after a settings change.
@@ -125,6 +166,8 @@ export class highlightFocus {
       this._handles_window.splice(0).forEach(h => this._watchedWindow.disconnect(h));
     this._watchedWindow = null;
     this._handles_window = [];
+    this._framedRect = null;
+    this._stopWaiting();
   }
 
   _highlightWindow() {
@@ -132,7 +175,10 @@ export class highlightFocus {
     this._unwatchWindow();
 
     const win = global.display.focus_window;
-    if (this._shouldSkip(win)) return;
+    if (!isNormalWindow(win)) return;
+    // With auto-hide off, an edge-flush window gets a hidden border to show on restore.
+    const edgeFlush = isEdgeFlush(win);
+    if (edgeFlush && !this._disableHiding) return;
 
     const border = new St.Bin();
     border.style = `border: ${this._borderWidth}px solid ${this._borderColor}; border-radius: ${this._borderRadius}px;`;
@@ -141,8 +187,10 @@ export class highlightFocus {
     this._placeBorder(border, win);
 
     global.window_group.add_child(border);
-    border.show();
+    if (edgeFlush) border.hide();
+    else border.show();
     this._borders.push(border);
+    if (!edgeFlush) this._framedRect = plainRect(win.get_frame_rect());
 
     this._watchWindow(win);
 

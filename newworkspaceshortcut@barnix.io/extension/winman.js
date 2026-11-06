@@ -1,6 +1,6 @@
 // Window Management
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import { getFocusWin } from './utils.js';
+import { getFocusWin, monitorGeometry } from './utils.js';
 
 // Buffer multipliers: SIDES accounts for both sides, WITH_OUTER adds one extra for even outer-edge gaps
 const BUFFER_SIDES = 2;
@@ -14,12 +14,13 @@ export class windowManager {
 
     _withFocusedWindow(fn) {
       const win = getFocusWin();
-      if (!win) return;
+      // A window on no monitor has no geometry to lay out against.
+      if (!win || !monitorGeometry(win.get_monitor())) return;
       fn(win);
     }
 
     get_display_info(myWin) {
-      const geo = myWin.get_display().get_monitor_geometry(myWin.get_monitor());
+      const geo = monitorGeometry(myWin.get_monitor());
       return {
         width: geo.width,
         height: geo.height,
@@ -31,7 +32,7 @@ export class windowManager {
 
     get_height_center(myWin) {
       const d = this.get_display_info(myWin);
-      const top_bar_height = this.top_bar(this.window_rect(myWin));
+      const top_bar_height = this.top_bar(myWin);
       return {
         center: top_bar_height + (d.height - top_bar_height) * 0.5,
         buffer: d.buffer,
@@ -55,7 +56,7 @@ export class windowManager {
       return myWin.get_frame_rect();
     }
 
-    top_bar(window_rect) {
+    top_bar(myWin) {
       const panelActor = Main.panel.get_actor();
       let panelheight = 0;
       let topBarPref = this._settings.get_string('top-bar-pref') || 'primary';
@@ -63,7 +64,7 @@ export class windowManager {
       if (!['always', 'primary', 'never'].includes(topBarPref))
         topBarPref = 'primary';
 
-      if (topBarPref === 'primary' && this.isActiveWindowOnPrimaryMonitor(window_rect))
+      if (topBarPref === 'primary' && this.isOnPrimaryMonitor(myWin))
         panelheight += panelActor.get_height();
       else if (topBarPref === 'always')
         panelheight += panelActor.get_height();
@@ -71,14 +72,9 @@ export class windowManager {
       return panelheight;
     }
 
-    isActiveWindowOnPrimaryMonitor(window_rect) {
-      const p = Main.layoutManager.primaryMonitor;
-      return (
-        window_rect.x >= p.x &&
-        window_rect.x + window_rect.width  <= p.x + p.width &&
-        window_rect.y >= p.y &&
-        window_rect.y + window_rect.height <= p.y + p.height
-      );
+    // Same monitor the layout math uses, so a window hanging off an edge still counts.
+    isOnPrimaryMonitor(myWin) {
+      return myWin.get_monitor() === Main.layoutManager.primaryIndex;
     }
 
     resize_window(heightKey, widthKey) {
@@ -87,7 +83,7 @@ export class windowManager {
         const d = this.get_display_info(myWin);
         // Percentage of the display, less buffer on both sides plus outer padding.
         const newWidth  = (d.width  * (this._settings.get_int(widthKey)  * PERCENT_TO_RATIO)) - (d.buffer * BUFFER_WITH_OUTER);
-        const newHeight = ((d.height - this.top_bar(window_rect)) * (this._settings.get_int(heightKey) * PERCENT_TO_RATIO)) - (d.buffer * BUFFER_WITH_OUTER);
+        const newHeight = ((d.height - this.top_bar(myWin)) * (this._settings.get_int(heightKey) * PERCENT_TO_RATIO)) - (d.buffer * BUFFER_WITH_OUTER);
         myWin.move_resize_frame(true, window_rect.x, window_rect.y, Math.max(1, newWidth), Math.max(1, newHeight));
       });
     }
@@ -159,7 +155,7 @@ export class windowManager {
       this._withFocusedWindow(myWin => {
         const { buffer, y } = this.get_display_info(myWin);
         const window_rect = this.window_rect(myWin);
-        const top_bar_height = this.top_bar(window_rect);
+        const top_bar_height = this.top_bar(myWin);
         const y_axis = (buffer * BUFFER_SIDES) + top_bar_height + y;
         myWin.move_frame(true, window_rect.x, y_axis);
       });

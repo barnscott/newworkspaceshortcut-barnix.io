@@ -2,6 +2,8 @@
 import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import { isVertical, rankAdjacentMonitors } from './focus-pure.js';
+import { isNormalWindow, monitorGeometry } from './utils.js';
 
 const DIRECTIONS = ['focus-changer-up', 'focus-changer-down', 'focus-changer-left', 'focus-changer-right'];
 
@@ -42,17 +44,18 @@ export class focusChanger {
 
   _getWindowsOnMonitor(monitor) {
     return this._wm.get_active_workspace().list_windows().filter(
-      w => w.get_monitor() === monitor && !w.is_hidden()
+      w => isCandidate(w) && w.get_monitor() === monitor && !w.is_hidden()
     );
   }
 
-  _getBestCandidate(direction, monitor, activeRect, activeWin) {
+  _bestOnMonitor(direction, monitor, activeRect, activeWin) {
     const windows = this._getWindowsOnMonitor(monitor).filter(w => w !== activeWin);
     // Most-recently-used first as a tiebreaker
     windows.sort((a, b) => b.user_time - a.user_time);
 
     const ax = this._centerX(activeRect);
     const ay = this._centerY(activeRect);
+    const vertical = isVertical(direction);
     let best = null;
 
     for (const w of windows) {
@@ -76,49 +79,50 @@ export class focusChanger {
 
       // Primary axis: closer along the movement direction
       // Secondary axis: closer along the perpendicular, prefer same perpendicular position
-      const isVertical = direction === 'focus-changer-up' || direction === 'focus-changer-down';
-      const primaryDist   = isVertical ? Math.abs(cy - ay) : Math.abs(cx - ax);
-      const bestPrimaryDist = isVertical ? Math.abs(by - ay) : Math.abs(bx - ax);
-      const secondaryDist  = isVertical ? Math.abs(cx - ax) : Math.abs(cy - ay);
-      const bestSecondaryDist = isVertical ? Math.abs(bx - ax) : Math.abs(by - ay);
+      const primaryDist   = vertical ? Math.abs(cy - ay) : Math.abs(cx - ax);
+      const bestPrimaryDist = vertical ? Math.abs(by - ay) : Math.abs(bx - ax);
+      const secondaryDist  = vertical ? Math.abs(cx - ax) : Math.abs(cy - ay);
+      const bestSecondaryDist = vertical ? Math.abs(bx - ax) : Math.abs(by - ay);
 
       if (primaryDist < bestPrimaryDist) best = w;
       else if (primaryDist === bestPrimaryDist && secondaryDist < bestSecondaryDist) best = w;
     }
 
-    // If nothing found on this monitor, try the nearest monitor in that direction
-    if (!best) {
-      const nextMonitor = this._getAdjacentMonitor(direction, monitor, activeWin);
-      if (nextMonitor !== null) {
-        const monitorRect = activeWin.get_display().get_monitor_geometry(monitor);
-        return this._getBestCandidate(direction, nextMonitor, monitorRect, activeWin);
-      }
-    }
-
     return best;
   }
 
-  _getAdjacentMonitor(direction, activeMonitorId, activeWin) {
-    const display = activeWin.get_display();
-    const n = display.get_n_monitors();
-    const activeGeo = display.get_monitor_geometry(activeMonitorId);
-    let best = null;
-    let bestDist = Infinity;
+  // This monitor first, then every monitor wholly beyond that edge, in rank order.
+  _getBestCandidate(direction, monitor, activeRect, activeWin) {
+    const best = this._bestOnMonitor(direction, monitor, activeRect, activeWin);
+    if (best) return best;
 
-    for (let i = 0; i < n; i++) {
-      if (i === activeMonitorId) continue;
-      const geo = display.get_monitor_geometry(i);
-      let qualifies = false;
-      let dist = 0;
-
-      if (direction === 'focus-changer-up'    && geo.y < activeGeo.y) { qualifies = true; dist = activeGeo.y - geo.y; }
-      if (direction === 'focus-changer-down'  && geo.y > activeGeo.y) { qualifies = true; dist = geo.y - activeGeo.y; }
-      if (direction === 'focus-changer-left'  && geo.x < activeGeo.x) { qualifies = true; dist = activeGeo.x - geo.x; }
-      if (direction === 'focus-changer-right' && geo.x > activeGeo.x) { qualifies = true; dist = geo.x - activeGeo.x; }
-
-      if (qualifies && dist < bestDist) { best = i; bestDist = dist; }
+    const m = monitorGeometry(monitor);
+    if (!m) return null;
+    // Measure along travel from this monitor, across it from the window.
+    const ref = isVertical(direction)
+      ? { x: activeRect.x, width: activeRect.width, y: m.y, height: m.height }
+      : { x: m.x, width: m.width, y: activeRect.y, height: activeRect.height };
+    for (const next of this._getAdjacentMonitors(direction, monitor, activeRect)) {
+      const found = this._bestOnMonitor(direction, next, ref, activeWin);
+      if (found) return found;
     }
-
-    return best;
+    return null;
   }
+
+  _getAdjacentMonitors(direction, activeMonitorId, activeRect) {
+    const monitors = Array.from({ length: global.display.get_n_monitors() }, (_, i) => monitorGeometry(i));
+    const along = isVertical(direction) ? this._centerX(activeRect) : this._centerY(activeRect);
+    return rankAdjacentMonitors(direction, activeMonitorId, monitors, along);
+  }
+}
+
+// Apps, dialogs and tool windows. Mutter forces skip_taskbar on the latter two,
+// so only a normal window's counts.
+// https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/core/window.c#L6030
+const CANDIDATE_TYPES = new Set([
+  Meta.WindowType.DIALOG, Meta.WindowType.MODAL_DIALOG, Meta.WindowType.UTILITY,
+]);
+
+function isCandidate(win) {
+  return isNormalWindow(win) ? !win.skip_taskbar : CANDIDATE_TYPES.has(win.window_type);
 }

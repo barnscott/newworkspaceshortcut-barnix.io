@@ -1,5 +1,5 @@
-<!-- Recompile this schema with `glib-compile-schemas schemas/` -->
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Recompile this schema with `glib-compile-schemas schemas/` -->
 <schemalist>
 
   <enum id="org.gnome.shell.extensions.newworkspaceshortcut.TopBarPref">
@@ -98,9 +98,9 @@
       <summary>Deprecated: superseded by winman-toggle</summary>
       <description>
         Legacy key, renamed to winman-toggle in release 471 (PR #25). Retained
-        only so _migrateLegacySettings() in extension.js can read a value written
-        before that release. Never written by the extension and not exposed in
-        Preferences. Safe to delete after release 520.
+        only so migrateLegacySettings() in extension/migrate.js can read a value
+        written before that release. The extension only ever resets it, during that
+        migration, and it is not exposed in Preferences. Safe to delete after release 520.
       </description>
     </key>
 
