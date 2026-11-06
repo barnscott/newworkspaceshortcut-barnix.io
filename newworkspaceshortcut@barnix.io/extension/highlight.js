@@ -29,6 +29,8 @@ export class highlightFocus {
   }
 
   enable() {
+    // Settings may have changed while disabled, with no handlers connected.
+    this._readSettings();
     // Never draw inside a geometry signal: size-change fires mid-transition.
     // Moves are applied from a later instead. https://gitlab.gnome.org/GNOME/mutter/-/blob/50.4/src/core/window.c#L3324
     this._handles_display.push(
@@ -92,10 +94,8 @@ export class highlightFocus {
   // the border; without one, it would clip.
   _onStateChanged() {
     const win = this._watchedWindow;
-    const border = this._borders[0];
-    // Mutter notifies even when nothing changed; a shown border on a floating window stays.
-    if (!win || !border || (border.visible && !isEdgeFlush(win))) return;
-    border.hide();
+    // Mutter notifies even when nothing changed, so check the state itself.
+    if (win && isEdgeFlush(win)) this._borders.forEach(b => b.hide());
   }
 
   // Follows the window; never re-creates a border that auto-hide removed.

@@ -11,6 +11,10 @@ export function isNormalWindow(win) {
   return !!win && win.window_type === Meta.WindowType.NORMAL;
 }
 
+export function plainRect(r) {
+  return { x: r.x, y: r.y, width: r.width, height: r.height };
+}
+
 // Fullscreen or maximized on either axis; mutter reports a side snap as vertical-only.
 // https://gitlab.gnome.org/GNOME/mutter/-/issues/225
 export function isEdgeFlush(win) {

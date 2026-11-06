@@ -1,5 +1,5 @@
 // Headless test for the GNOME 49–51 snap-restore workaround. Run: gjs -m tests/test-snaprestore.js
-import { canRepair, isUsableRect, sameRect } from '../newworkspaceshortcut@barnix.io/extension/snaprestore-pure.js';
+import { canRepair, isUsableRect, sameRect, takesSnapshot } from '../newworkspaceshortcut@barnix.io/extension/snaprestore-pure.js';
 import { check, finish } from './harness.js';
 
 const r = (x, y, width, height) => ({ x, y, width, height });
@@ -16,6 +16,13 @@ print('\n=== sameRect ===');
 check('equal',            sameRect(r(0, 0, 10, 10), r(0, 0, 10, 10)), true);
 check('moved',            sameRect(r(0, 0, 10, 10), r(1, 0, 10, 10)), false);
 check('null side',        sameRect(r(0, 0, 10, 10), null), false);
+
+print('\n=== takesSnapshot: only a side snap from floating ===');
+check('side snap from floating',          takesSnapshot(false, true, false), true);
+check('full maximize from floating',      takesSnapshot(true, true, false), false);
+check('maximize while snapped keeps it',  takesSnapshot(true, true, true), false);
+check('repeat snap notify keeps it',      takesSnapshot(false, true, true), false);
+check('not maximized',                    takesSnapshot(false, false, false), false);
 
 print('\n=== canRepair: same monitor, unchanged layout ===');
 const mon = r(0, 0, 1920, 1080);

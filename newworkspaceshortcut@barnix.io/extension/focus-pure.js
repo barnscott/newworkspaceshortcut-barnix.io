@@ -1,7 +1,9 @@
 // Monitor choice for Focus Changer, on plain {x, y, width, height} rects.
 // No Shell imports, so tests/test-focus.js can load it.
 
-const VERTICAL = new Set(['focus-changer-up', 'focus-changer-down']);
+export function isVertical(direction) {
+  return direction === 'focus-changer-up' || direction === 'focus-changer-down';
+}
 
 // Gap from the active monitor's edge to g, or -1 when g is not wholly beyond it.
 function gapBeyond(direction, a, g) {
@@ -21,7 +23,7 @@ function gapBeyond(direction, a, g) {
 export function pickAdjacentMonitor(direction, activeIndex, monitors, along) {
   const a = monitors[activeIndex];
   if (!a) return null;
-  const vertical = VERTICAL.has(direction);
+  const vertical = isVertical(direction);
   const lo = g => vertical ? g.x : g.y;
   const hi = g => vertical ? g.x + g.width : g.y + g.height;
   let best = null;

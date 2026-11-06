@@ -2,7 +2,8 @@
 import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import { pickAdjacentMonitor } from './focus-pure.js';
+import { isVertical, pickAdjacentMonitor } from './focus-pure.js';
+import { plainRect } from './utils.js';
 
 const DIRECTIONS = ['focus-changer-up', 'focus-changer-down', 'focus-changer-left', 'focus-changer-right'];
 
@@ -41,11 +42,9 @@ export class focusChanger {
   _centerX(rect) { return rect.x + rect.width  / 2; }
   _centerY(rect) { return rect.y + rect.height / 2; }
 
-  // The Alt+Tab list leaves out desktop, dock and skip-taskbar windows.
   _getWindowsOnMonitor(monitor) {
-    const ws = this._wm.get_active_workspace();
-    return global.display.get_tab_list(Meta.TabList.NORMAL, ws).filter(
-      w => w.located_on_workspace(ws) && w.get_monitor() === monitor && !w.is_hidden()
+    return this._wm.get_active_workspace().list_windows().filter(
+      w => isCandidate(w) && w.get_monitor() === monitor && !w.is_hidden()
     );
   }
 
@@ -79,11 +78,11 @@ export class focusChanger {
 
       // Primary axis: closer along the movement direction
       // Secondary axis: closer along the perpendicular, prefer same perpendicular position
-      const isVertical = this._isVertical(direction);
-      const primaryDist   = isVertical ? Math.abs(cy - ay) : Math.abs(cx - ax);
-      const bestPrimaryDist = isVertical ? Math.abs(by - ay) : Math.abs(bx - ax);
-      const secondaryDist  = isVertical ? Math.abs(cx - ax) : Math.abs(cy - ay);
-      const bestSecondaryDist = isVertical ? Math.abs(bx - ax) : Math.abs(by - ay);
+      const vertical = isVertical(direction);
+      const primaryDist   = vertical ? Math.abs(cy - ay) : Math.abs(cx - ax);
+      const bestPrimaryDist = vertical ? Math.abs(by - ay) : Math.abs(bx - ax);
+      const secondaryDist  = vertical ? Math.abs(cx - ax) : Math.abs(cy - ay);
+      const bestSecondaryDist = vertical ? Math.abs(bx - ax) : Math.abs(by - ay);
 
       if (primaryDist < bestPrimaryDist) best = w;
       else if (primaryDist === bestPrimaryDist && secondaryDist < bestSecondaryDist) best = w;
@@ -95,7 +94,7 @@ export class focusChanger {
       if (nextMonitor !== null) {
         // Measure along travel from this monitor, across it from the window.
         const m = activeWin.get_display().get_monitor_geometry(monitor);
-        const ref = this._isVertical(direction)
+        const ref = isVertical(direction)
           ? { x: activeRect.x, width: activeRect.width, y: m.y, height: m.height }
           : { x: m.x, width: m.width, y: activeRect.y, height: activeRect.height };
         return this._getBestCandidate(direction, nextMonitor, ref, activeWin);
@@ -105,16 +104,22 @@ export class focusChanger {
     return best;
   }
 
-  _isVertical(direction) {
-    return direction === 'focus-changer-up' || direction === 'focus-changer-down';
-  }
-
   _getAdjacentMonitor(direction, activeMonitorId, activeRect, display) {
-    const monitors = Array.from({ length: display.get_n_monitors() }, (_, i) => {
-      const g = display.get_monitor_geometry(i);
-      return { x: g.x, y: g.y, width: g.width, height: g.height };
-    });
-    const along = this._isVertical(direction) ? this._centerX(activeRect) : this._centerY(activeRect);
+    const monitors = Array.from({ length: display.get_n_monitors() },
+      (_, i) => plainRect(display.get_monitor_geometry(i)));
+    const along = isVertical(direction) ? this._centerX(activeRect) : this._centerY(activeRect);
     return pickAdjacentMonitor(direction, activeMonitorId, monitors, along);
   }
+}
+
+// Apps, dialogs and tool windows. Mutter forces skip_taskbar on the latter two,
+// so only a normal window's counts.
+// https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/core/window.c#L6030
+const CANDIDATE_TYPES = new Set([
+  Meta.WindowType.NORMAL, Meta.WindowType.DIALOG, Meta.WindowType.MODAL_DIALOG, Meta.WindowType.UTILITY,
+]);
+
+function isCandidate(win) {
+  if (!CANDIDATE_TYPES.has(win.window_type)) return false;
+  return win.window_type !== Meta.WindowType.NORMAL || !win.skip_taskbar;
 }
