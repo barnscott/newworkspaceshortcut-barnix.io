@@ -211,7 +211,7 @@ Before building, the script fails on anything EGO would reject at review:
 | JavaScript | any `.js` file has a syntax error (skipped if `node` is not installed) |
 | Required files | `metadata.json` or `extension.js` is missing |
 
-After building, it re-opens the archive and asserts that `metadata.json` and `extension.js` are at the root, a `.gschema.xml` is present, and no `gschemas.compiled`, dotfile, or editor leftover (`*.orig`, `*.bak`, `*~`, `*.swp`) crept in. A rejected archive is deleted rather than left on disk, so a bad build cannot be uploaded by mistake. It warns without stopping if the extension has uncommitted changes, or if it is overwriting an existing archive for the same version.
+After building, it re-opens the archive and asserts that `metadata.json` and `extension.js` are at the root, a `.gschema.xml` is present, and no `gschemas.compiled`, dotfile, or editor leftover (`*.orig`, `*.bak`, `*~`, `*.swp`) crept in. The archive is built and checked in a temporary folder and only then moved into place, so a rejected or failed build never reaches the destination and an earlier archive is kept. It warns without stopping if the extension has uncommitted changes, or if it is overwriting an existing archive for the same version.
 
 Files under `extension/` are enumerated explicitly rather than recursed, so a stray file left in that directory is never packaged.
 

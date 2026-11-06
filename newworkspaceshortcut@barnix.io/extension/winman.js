@@ -1,6 +1,6 @@
 // Window Management
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import { getFocusWin } from './utils.js';
+import { getFocusWin, monitorGeometry } from './utils.js';
 
 // Buffer multipliers: SIDES accounts for both sides, WITH_OUTER adds one extra for even outer-edge gaps
 const BUFFER_SIDES = 2;
@@ -14,12 +14,13 @@ export class windowManager {
 
     _withFocusedWindow(fn) {
       const win = getFocusWin();
-      if (!win) return;
+      // A window on no monitor has no geometry to lay out against.
+      if (!win || !monitorGeometry(win.get_monitor())) return;
       fn(win);
     }
 
     get_display_info(myWin) {
-      const geo = myWin.get_display().get_monitor_geometry(myWin.get_monitor());
+      const geo = monitorGeometry(myWin.get_monitor());
       return {
         width: geo.width,
         height: geo.height,

@@ -12,6 +12,13 @@ readonly UUID="newworkspaceshortcut@barnix.io"
 
 # Populated by collect_files(); consumed by main().
 SHIP_FILES=()
+# Build directory, removed on exit.
+TMP_DIR=""
+
+cleanup() {
+  if [[ -n "$TMP_DIR" ]]; then rm -rf -- "$TMP_DIR"; fi
+}
+trap cleanup EXIT
 
 die() {
   echo "ERROR: $*" >&2
@@ -111,27 +118,7 @@ collect_files() {
   done
 }
 
-# Prints the topmost directory `mkdir -p` would create for an absolute path, or nothing.
-first_missing_dir() {
-  local dir="$1" missing=""
-  while [[ ! -e "$dir" ]]; do
-    missing="$dir"
-    dir=$(dirname -- "$dir")
-  done
-  printf '%s' "$missing"
-}
-
-# Removes a failed archive, then the directories this run created, leaf first.
-discard_archive() {
-  local zip_path="$1" dir="$2" created_root="$3"
-  rm -f "$zip_path"
-  [[ -n "$created_root" ]] || return 0
-  while rmdir -- "$dir" 2>/dev/null && [[ "$dir" != "$created_root" ]]; do
-    dir=$(dirname -- "$dir")
-  done
-}
-
-# Last check on the artifact actually uploaded. Returns 1 so main can delete it.
+# Last check on the artifact actually uploaded. Returns 1 so main can discard it.
 verify_archive() {
   local zip_path="$1"
   local -a entries=()
@@ -164,7 +151,7 @@ verify_archive() {
 }
 
 main() {
-  local script_dir repo_root ext_dir dest_dir version zip_name zip_path created_root
+  local script_dir repo_root ext_dir dest_dir version zip_name zip_path tmp_zip zip_out
 
   script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
   repo_root=$(dirname "$script_dir")
@@ -185,26 +172,23 @@ main() {
     warn "extension has uncommitted changes — packaging the working tree"
   fi
 
-  # zip runs from $ext_dir, so resolve first. realpath, not cd: cd treats "-" as $OLDPWD.
+  # realpath, not cd: cd treats "-" as $OLDPWD.
   dest_dir=$(realpath -m -- "$dest_dir")
-  created_root=$(first_missing_dir "$dest_dir")
-  mkdir -p -- "$dest_dir"
   zip_name="newworkspaceshortcut${version}.zip"
   zip_path="$dest_dir/$zip_name"
-  [[ -e "$zip_path" ]] && warn "overwriting existing $zip_name"
-  rm -f "$zip_path"
 
+  # Build and verify in a temp dir, so a failure leaves the destination untouched.
+  TMP_DIR=$(mktemp -d)
+  tmp_zip="$TMP_DIR/$zip_name"
   # Zip from the extension root so paths are relative. Info-ZIP reports errors on stdout.
-  local zip_out
-  if ! zip_out=$(cd "$ext_dir" && zip -q -X "$zip_path" "${SHIP_FILES[@]}" 2>&1); then
-    discard_archive "$zip_path" "$dest_dir" "$created_root"
-    die "zip failed writing $zip_path:"$'\n'"$zip_out"
+  if ! zip_out=$(cd "$ext_dir" && zip -q -X "$tmp_zip" "${SHIP_FILES[@]}" 2>&1); then
+    die "zip failed:"$'\n'"$zip_out"
   fi
+  verify_archive "$tmp_zip" || die "archive rejected; nothing written to $dest_dir"
 
-  if ! verify_archive "$zip_path"; then
-    discard_archive "$zip_path" "$dest_dir" "$created_root"
-    die "rejected archive deleted; nothing written to $dest_dir"
-  fi
+  mkdir -p -- "$dest_dir"
+  [[ -e "$zip_path" ]] && warn "overwriting existing $zip_name"
+  mv -f -- "$tmp_zip" "$zip_path"
 
   echo "Packaged v${version} -> $zip_path"
   echo

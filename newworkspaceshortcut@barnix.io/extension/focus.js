@@ -2,7 +2,7 @@
 import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import { isVertical, pickAdjacentMonitor } from './focus-pure.js';
+import { isVertical, rankAdjacentMonitors } from './focus-pure.js';
 import { monitorGeometry } from './utils.js';
 
 const DIRECTIONS = ['focus-changer-up', 'focus-changer-down', 'focus-changer-left', 'focus-changer-right'];
@@ -55,6 +55,7 @@ export class focusChanger {
 
     const ax = this._centerX(activeRect);
     const ay = this._centerY(activeRect);
+    const vertical = isVertical(direction);
     let best = null;
 
     for (const w of windows) {
@@ -78,7 +79,6 @@ export class focusChanger {
 
       // Primary axis: closer along the movement direction
       // Secondary axis: closer along the perpendicular, prefer same perpendicular position
-      const vertical = isVertical(direction);
       const primaryDist   = vertical ? Math.abs(cy - ay) : Math.abs(cx - ax);
       const bestPrimaryDist = vertical ? Math.abs(by - ay) : Math.abs(bx - ax);
       const secondaryDist  = vertical ? Math.abs(cx - ax) : Math.abs(cy - ay);
@@ -88,26 +88,26 @@ export class focusChanger {
       else if (primaryDist === bestPrimaryDist && secondaryDist < bestSecondaryDist) best = w;
     }
 
-    // If nothing found on this monitor, try the nearest monitor in that direction
-    if (!best) {
-      const nextMonitor = this._getAdjacentMonitor(direction, monitor, activeRect);
-      if (nextMonitor !== null) {
-        // Measure along travel from this monitor, across it from the window.
-        const m = monitorGeometry(monitor);
-        const ref = isVertical(direction)
-          ? { x: activeRect.x, width: activeRect.width, y: m.y, height: m.height }
-          : { x: m.x, width: m.width, y: activeRect.y, height: activeRect.height };
-        return this._getBestCandidate(direction, nextMonitor, ref, activeWin);
-      }
-    }
+    if (best) return best;
 
-    return best;
+    // Nothing here: try each monitor beyond this edge, nearest first.
+    const m = monitorGeometry(monitor);
+    if (!m) return null;
+    // Measure along travel from this monitor, across it from the window.
+    const ref = vertical
+      ? { x: activeRect.x, width: activeRect.width, y: m.y, height: m.height }
+      : { x: m.x, width: m.width, y: activeRect.y, height: activeRect.height };
+    for (const next of this._getAdjacentMonitors(direction, monitor, activeRect)) {
+      const found = this._getBestCandidate(direction, next, ref, activeWin);
+      if (found) return found;
+    }
+    return null;
   }
 
-  _getAdjacentMonitor(direction, activeMonitorId, activeRect) {
+  _getAdjacentMonitors(direction, activeMonitorId, activeRect) {
     const monitors = Array.from({ length: global.display.get_n_monitors() }, (_, i) => monitorGeometry(i));
     const along = isVertical(direction) ? this._centerX(activeRect) : this._centerY(activeRect);
-    return pickAdjacentMonitor(direction, activeMonitorId, monitors, along);
+    return rankAdjacentMonitors(direction, activeMonitorId, monitors, along);
   }
 }
 

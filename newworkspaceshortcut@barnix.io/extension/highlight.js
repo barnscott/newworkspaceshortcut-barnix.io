@@ -4,6 +4,7 @@ import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import { plainRect, sameRect } from './rect.js';
 import { isEdgeFlush, isNormalWindow } from './utils.js';
 
 export class highlightFocus {
@@ -17,6 +18,8 @@ export class highlightFocus {
     this._watchedWindow = null;
     this._laterId = 0;
     this._animatingActor = null;
+    // The floating rect the border last framed.
+    this._framedRect = null;
     this._drawnInset = 0;
   }
 
@@ -90,12 +93,16 @@ export class highlightFocus {
     ];
   }
 
-  // Never draw here: Wayland rects lag the ack. The next geometry change
-  // re-shows it, or it would clip.
+  // Wayland rects lag the ack, so a geometry change normally re-shows the border.
   _onStateChanged() {
     const win = this._watchedWindow;
-    // Mutter notifies even when nothing changed, so check the state itself.
-    if (win && isEdgeFlush(win)) this._borders.forEach(b => b.hide());
+    if (!win) return;
+    if (isEdgeFlush(win)) {
+      this._borders.forEach(b => b.hide());
+      return;
+    }
+    // Floating again at the rect it last framed: no geometry change will follow.
+    if (sameRect(this._framedRect, win.get_frame_rect())) this._queueReposition();
   }
 
   // Follows the window; never re-creates a border that auto-hide removed.
@@ -120,6 +127,7 @@ export class highlightFocus {
       }
       this._placeBorder(border, win);
       border.show();
+      this._framedRect = plainRect(win.get_frame_rect());
       return GLib.SOURCE_REMOVE;
     });
   }
@@ -157,6 +165,7 @@ export class highlightFocus {
       this._handles_window.splice(0).forEach(h => this._watchedWindow.disconnect(h));
     this._watchedWindow = null;
     this._handles_window = [];
+    this._framedRect = null;
     this._stopWaiting();
   }
 
@@ -180,6 +189,7 @@ export class highlightFocus {
     if (edgeFlush) border.hide();
     else border.show();
     this._borders.push(border);
+    if (!edgeFlush) this._framedRect = plainRect(win.get_frame_rect());
 
     this._watchWindow(win);
 

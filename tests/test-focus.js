@@ -1,8 +1,9 @@
 // Tests Focus Changer's monitor choice. Run: gjs -m tests/test-focus.js
-import { pickAdjacentMonitor as pick } from '../newworkspaceshortcut@barnix.io/extension/focus-pure.js';
+import { rankAdjacentMonitors as rank } from '../newworkspaceshortcut@barnix.io/extension/focus-pure.js';
 import { check, finish } from './harness.js';
 
 const m = (x, y, width = 1280, height = 800) => ({ x, y, width, height });
+const pick = (...args) => rank(...args)[0] ?? null;
 
 print('\n=== side by side at different heights (the original bug) ===');
 {
@@ -17,6 +18,7 @@ print('\n=== two monitors share the right edge: nearest the window wins ===');
   const mons = [m(0, 400), m(1280, 0), m(1280, 800)];
   check('window low',  pick('focus-changer-right', 0, mons, 1000), 2);
   check('window high', pick('focus-changer-right', 0, mons, 500), 1);
+  check('both ranked, nearest first', rank('focus-changer-right', 0, mons, 1000).join(','), '2,1');
 }
 
 print('\n=== L-shaped layout: only a diagonal monitor below ===');

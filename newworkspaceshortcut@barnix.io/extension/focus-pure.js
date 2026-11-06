@@ -16,28 +16,24 @@ function gapBeyond(direction, a, g) {
   return d >= 0 ? d : -1;
 }
 
-// Index or null. Mutter's neighbours first, then any monitor beyond that edge;
-// nearest `along` wins.
+// Indexes of monitors beyond that edge. Mutter's neighbours first, then nearest `along`.
 // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/backends/meta-logical-monitor.c#L319
-export function pickAdjacentMonitor(direction, activeIndex, monitors, along) {
+export function rankAdjacentMonitors(direction, activeIndex, monitors, along) {
   const a = monitors[activeIndex];
-  if (!a) return null;
+  if (!a) return [];
   const vertical = isVertical(direction);
   const lo = g => vertical ? g.x : g.y;
   const hi = g => vertical ? g.x + g.width : g.y + g.height;
-  let best = null;
-  let bestKey = null;
-
+  const ranked = [];
   monitors.forEach((g, i) => {
-    if (i === activeIndex) return;
+    if (i === activeIndex || !g) return;
     const gap = gapBeyond(direction, a, g);
     if (gap < 0) return;
     const neighbour = gap === 0 && hi(g) > lo(a) && lo(g) < hi(a);
     const offset = along < lo(g) ? lo(g) - along : along > hi(g) ? along - hi(g) : 0;
-    const key = [neighbour ? 0 : 1, offset, gap];
-    if (!bestKey || compareKeys(key, bestKey) < 0) { best = i; bestKey = key; }
+    ranked.push({ i, key: [neighbour ? 0 : 1, offset, gap] });
   });
-  return best;
+  return ranked.sort((p, q) => compareKeys(p.key, q.key)).map(p => p.i);
 }
 
 function compareKeys(a, b) {

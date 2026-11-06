@@ -1,5 +1,6 @@
 // Shared utilities for newworkspaceshortcut@barnix.io
 import Meta from 'gi://Meta';
+import { plainRect } from './rect.js';
 
 // Returns the focused window, or null.
 export function getFocusWin() {
@@ -9,10 +10,6 @@ export function getFocusWin() {
 // Only normal application windows are tracked or highlighted.
 export function isNormalWindow(win) {
   return !!win && win.window_type === Meta.WindowType.NORMAL;
-}
-
-export function plainRect(r) {
-  return { x: r.x, y: r.y, width: r.width, height: r.height };
 }
 
 // A monitor's geometry as a plain rect, or null for an invalid index.

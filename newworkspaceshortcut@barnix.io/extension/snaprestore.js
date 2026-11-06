@@ -4,13 +4,19 @@
 
 import GLib from 'gi://GLib';
 import Meta from 'gi://Meta';
+import Mtk from 'gi://Mtk';
 import * as Config from 'resource:///org/gnome/shell/misc/config.js';
-import { canRepair, takesSnapshot } from './snaprestore-pure.js';
-import { isEdgeFlush, isNormalWindow, monitorGeometry, plainRect } from './utils.js';
+import { plainRect, sameRect } from './rect.js';
+import { canRepair, clampUnmaximized, onMaximizeNotify } from './snaprestore-pure.js';
+import { isEdgeFlush, isNormalWindow, monitorGeometry } from './utils.js';
 
 // Bump or delete when mutter ships a fix. Unfixed in 51.1: tile_window() still
 // sets tile mode before save_rect(). https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/5449
 const AFFECTED_MAJORS = [49, 50, 51];
+
+// Window state kept across disable(), which Shell runs on every screen lock.
+// Weak keys let closed windows drop out.
+const retained = new WeakMap();
 
 // Watches every normal window, so no snap or unsnap goes unseen.
 export class snapRestoreFix {
@@ -52,11 +58,14 @@ export class snapRestoreFix {
     global.display.list_all_windows().forEach(win => this._watch(win));
   }
 
-  // Drops all state, so re-enabling never replays pre-toggle geometry.
   disable() {
     this._handles_display.splice(0).forEach(h => global.display.disconnect(h));
     [...this._pending.values()].forEach(cancel => cancel());
-    [...this._windows.keys()].forEach(win => this._unwatch(win));
+    for (const [win, state] of this._windows) {
+      const { rect, snap, mutterSaved } = state;
+      retained.set(win, { rect, snap, mutterSaved, frame: plainRect(win.get_frame_rect()), flags: flagsOf(win) });
+      this._unwatch(win);
+    }
     this._grabbedWindow = null;
   }
 
@@ -77,6 +86,11 @@ export class snapRestoreFix {
   _watch(win) {
     if (!isNormalWindow(win) || this._windows.has(win)) return;
     const state = { handles: [], rect: null, snap: null, mutterSaved: false, laterId: 0 };
+    // Reuse state from before disable() only if the window has not changed since.
+    const kept = retained.get(win);
+    retained.delete(win);
+    if (kept && kept.flags === flagsOf(win) && sameRect(kept.frame, win.get_frame_rect()))
+      Object.assign(state, { rect: kept.rect, snap: kept.snap, mutterSaved: kept.mutterSaved });
     this._windows.set(win, state);
     state.handles = [
       win.connect('size-changed', () => this._onGeometryChanged(win, state)),
@@ -110,29 +124,27 @@ export class snapRestoreFix {
   }
 
   _onMaximizedChanged(win, state) {
-    if (win.maximized_vertically) {
-      // Mutter saves the rect correctly when maximizing a floating window.
-      if (win.maximized_horizontally && state.snap === null) state.mutterSaved = true;
-      if (!takesSnapshot(win.maximized_horizontally, state.snap !== null,
-        state.rect !== null, state.mutterSaved)) return;
+    const step = onMaximizeNotify(
+      { maximizedH: win.maximized_horizontally, maximizedV: win.maximized_vertically },
+      { hasRect: state.rect !== null, hasSnapshot: state.snap !== null, mutterSaved: state.mutterSaved });
+    state.mutterSaved = step.mutterSaved;
+    if (step.snapshot) {
       // Mutter tiles onto get_monitor(), which is settled outside geometry signals.
       const monitor = win.get_monitor();
+      const rectMonitor = monitorOf(state.rect);
       state.snap = {
         rect: state.rect,
         monitor,
-        monitorGeo: monitorGeometry(monitor),
         tileMonitor: monitor,
+        rectMonitor,
+        rectMonitorGeo: monitorGeometry(rectMonitor),
       };
-      return;
     }
-    // Still maximized horizontally: keep the snapshot for the final unmaximize.
-    if (win.maximized_horizontally) return;
-    state.mutterSaved = false;
+    if (!step.repair) return;
     // Not the cache: X11 has already cached mutter's stale restore rect.
     // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/core/window.c#L3662
     const snap = state.snap;
     state.snap = null;
-    if (!snap) return;
     // A grab shake-loose already places the window; fix only its size.
     const sizeOnly = win === this._grabbedWindow;
     const laters = global.compositor.get_laters();
@@ -148,9 +160,9 @@ export class snapRestoreFix {
 
   // Its geometry signals re-cache the repaired rect.
   _repair(win, snap, sizeOnly) {
-    if (isEdgeFlush(win) || !canRepair(snap, monitorGeometry(snap.monitor), sizeOnly)) return;
+    if (isEdgeFlush(win) || !canRepair(snap, monitorGeometry(snap.rectMonitor), sizeOnly)) return;
 
-    const { width, height } = snap.rect;
+    const { width, height } = clampUnmaximized(snap.rect, win.get_work_area_current_monitor());
     let { x, y } = snap.rect;
     if (sizeOnly) {
       // Keep the pointer at the same relative spot, as mutter's drag anchor does.
@@ -167,5 +179,10 @@ export class snapRestoreFix {
 // From the rect: geometry signals fire before mutter updates get_monitor().
 // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/core/window.c#L4507
 function monitorOf(rect) {
-  return global.display.get_monitor_index_for_rect(rect);
+  return global.display.get_monitor_index_for_rect(new Mtk.Rectangle(plainRect(rect)));
+}
+
+function flagsOf(win) {
+  return (win.maximized_horizontally ? 1 : 0) | (win.maximized_vertically ? 2 : 0) |
+    (win.is_fullscreen() ? 4 : 0);
 }
