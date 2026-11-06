@@ -79,6 +79,8 @@ export class snapRestoreFix {
       win.connect('notify::maximized-vertically', () => this._onMaximizedChanged(win)),
       win.connect('unmanaged', () => this._untrack()),
     ];
+    // An unsnap while unfocused leaves a stale flag that would block caching.
+    if (this._isFloating(win)) this._sideTiled.delete(win);
     this._cacheIfFloating(win);
   }
 
@@ -90,6 +92,9 @@ export class snapRestoreFix {
 
   _cacheIfFloating(win) {
     if (this._repairing || this._grabbed || !this._isFloating(win)) return;
+    // X11 applies mutter's stale restore rect before notify::maximized-vertically.
+    // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/core/window.c#L3662
+    if (this._sideTiled.get(win) === true) return;
     const r = win.get_frame_rect();
     this._floatingRects.set(win, {
       rect: { x: r.x, y: r.y, width: r.width, height: r.height },
@@ -105,22 +110,24 @@ export class snapRestoreFix {
     }
     // A grab shake-loose already places the window; fix only its size.
     const sizeOnly = this._grabbed;
+    const wasSideTiled = this._sideTiled.get(win);
     const laters = global.compositor.get_laters();
     if (this._laterId) laters.remove(this._laterId);
     this._laterId = laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
       this._laterId = 0;
-      this._repair(win, sizeOnly);
+      this._repair(win, wasSideTiled, sizeOnly);
+      // Kept until now so caching stays blocked; unless it was re-snapped since.
+      if (this._isFloating(win)) this._sideTiled.delete(win);
       return GLib.SOURCE_REMOVE;
     });
   }
 
-  _repair(win, sizeOnly) {
+  _repair(win, wasSideTiled, sizeOnly) {
     if (this._trackedWindow !== win || !this._isFloating(win)) return;
 
     const cached = this._floatingRects.get(win);
-    if (!shouldRepair(this._sideTiled.get(win), cached?.rect)) return;
+    if (!shouldRepair(wasSideTiled, cached?.rect)) return;
     if (cached.monitor !== win.get_monitor()) return;
-    this._sideTiled.delete(win);
 
     const { width, height } = cached.rect;
     let { x, y } = cached.rect;

@@ -166,16 +166,19 @@ main() {
   fi
 
   mkdir -p "$dest_dir"
+  # zip runs from $ext_dir, so a relative destination must be resolved first.
+  dest_dir=$(CDPATH='' cd -- "$dest_dir" && pwd)
   zip_name="newworkspaceshortcut${version}.zip"
   zip_path="$dest_dir/$zip_name"
   [[ -e "$zip_path" ]] && warn "overwriting existing $zip_name"
   rm -f "$zip_path"
 
-  # cd so paths are stored relative to the extension root.
-  (
-    cd "$ext_dir"
-    zip -X "$zip_path" "${SHIP_FILES[@]}" >/dev/null
-  )
+  # cd so paths are stored relative to the extension root. set -e is off in a
+  # || list, hence the explicit &&.
+  if ! (cd "$ext_dir" && zip -X "$zip_path" "${SHIP_FILES[@]}" >/dev/null); then
+    rm -f "$zip_path"
+    die "zip failed writing $zip_path"
+  fi
 
   if ! verify_archive "$zip_path"; then
     rm -f "$zip_path"

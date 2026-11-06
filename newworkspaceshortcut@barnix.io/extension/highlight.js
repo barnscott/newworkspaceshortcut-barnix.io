@@ -79,13 +79,15 @@ export class highlightFocus {
       win.maximized_vertically;
   }
 
-  // Teardown only — never draw here.
+  // Never draw here. A state change only hides the border; the geometry change
+  // that follows re-shows it once the rect has settled.
   _watchWindow(win) {
     this._watchedWindow = win;
+    const hide = () => this._borders.forEach(b => b.hide());
     this._handles_window = [
-      win.connect('notify::maximized-horizontally', () => this._clearHighlight()),
-      win.connect('notify::maximized-vertically', () => this._clearHighlight()),
-      win.connect('notify::fullscreen', () => this._clearHighlight()),
+      win.connect('notify::maximized-horizontally', hide),
+      win.connect('notify::maximized-vertically', hide),
+      win.connect('notify::fullscreen', hide),
       win.connect('position-changed', () => this._queueReposition()),
       win.connect('size-changed', () => this._queueReposition()),
     ];
@@ -100,10 +102,11 @@ export class highlightFocus {
       const border = this._borders[0];
       if (!win || !border) return GLib.SOURCE_REMOVE;
       if (this._shouldSkip(win)) {
-        this._clearHighlight();
+        border.hide();
         return GLib.SOURCE_REMOVE;
       }
       this._placeBorder(border, win);
+      border.show();
       return GLib.SOURCE_REMOVE;
     });
   }

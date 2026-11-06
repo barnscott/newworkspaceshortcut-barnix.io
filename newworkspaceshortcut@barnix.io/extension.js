@@ -17,13 +17,13 @@
 
 import Shell from 'gi://Shell';
 import Meta from 'gi://Meta';
-import Gio from 'gi://Gio';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as WinMan from './extension/winman.js';
 import { getFocusWin } from './extension/utils.js';
 import { highlightFocus } from './extension/highlight.js';
 import { focusChanger } from './extension/focus.js';
+import { migrateLegacySettings } from './extension/migrate.js';
 // snapRestore: remove with extension/snaprestore.js
 import { snapRestoreFix } from './extension/snaprestore.js';
 
@@ -103,18 +103,9 @@ class winManToggle {
         this.disable();
     }
 
+    // Leaves GNOME's move-to-side-* alone: Shell skips disable() at logout, so
+    // clearing them lost the user's bindings for good.
     enable () {
-      // Disable the native shortcuts we re-implement; restored in disable().
-      this._keybindingSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
-      this._savedNativeKeybindings = {};
-      for (const key of ['move-to-side-e', 'move-to-side-n', 'move-to-side-s', 'move-to-side-w']) {
-        const current = this._keybindingSettings.get_strv(key);
-        // Never save []: an unclean shutdown would make the loss permanent.
-        if (current.length === 0) continue;
-        this._savedNativeKeybindings[key] = current;
-        this._keybindingSettings.set_strv(key, []);
-      }
-
       this.winManEvent = new WinMan.windowManager(this._settings);
       Main.wm.addKeybinding("resize-win", this._settings, this.flag, this.mode, () => {
         this.winManEvent.resize_window('window-height','window-width');
@@ -170,28 +161,10 @@ class winManToggle {
       Main.wm.removeKeybinding("window-up-edge");
       Main.wm.removeKeybinding("window-down-edge");
       this.winManEvent = null;
-      if (this._savedNativeKeybindings) {
-        for (const [key, value] of Object.entries(this._savedNativeKeybindings)) {
-          this._keybindingSettings.set_strv(key, value);
-        }
-        this._savedNativeKeybindings = null;
-        this._keybindingSettings = null;
-      }
     }
   }
 
 export default class newWorkspaceShortcuts extends Extension {
-
-  // Restores 'tiler-toggle', renamed to 'winman-toggle' in 471 with no migration.
-  // https://github.com/barnscott/newworkspaceshortcut-barnix.io/commit/a51294c
-  _migrateLegacySettings() {
-    if (this._settings.get_user_value('winman-toggle') !== null)
-      return;
-    if (!this._settings.get_boolean('tiler-toggle'))
-      return;
-    this._settings.set_boolean('winman-toggle', true);
-    this._settings.reset('tiler-toggle');
-  }
 
   enable() {
     let mode = Shell.ActionMode.ALL;
@@ -199,7 +172,7 @@ export default class newWorkspaceShortcuts extends Extension {
     this._settings = this.getSettings();
 
     // Must run before winManToggle reads 'winman-toggle'.
-    this._migrateLegacySettings();
+    migrateLegacySettings(this._settings);
 
     // Shortcuts for moving a window
     Main.wm.addKeybinding("move-window-to-right-workspace", this._settings, flag, mode, () => {

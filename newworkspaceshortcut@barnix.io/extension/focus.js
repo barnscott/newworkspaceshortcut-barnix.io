@@ -5,6 +5,13 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 const DIRECTIONS = ['focus-changer-up', 'focus-changer-down', 'focus-changer-left', 'focus-changer-right'];
 
+const MONITOR_DIRECTIONS = {
+  'focus-changer-up':    Meta.DisplayDirection.UP,
+  'focus-changer-down':  Meta.DisplayDirection.DOWN,
+  'focus-changer-left':  Meta.DisplayDirection.LEFT,
+  'focus-changer-right': Meta.DisplayDirection.RIGHT,
+};
+
 export class focusChanger {
   constructor(settings) {
     this._settings = settings;
@@ -98,27 +105,13 @@ export class focusChanger {
     return best;
   }
 
+  // Mutter's own adjacency: shares an edge and overlaps on the other axis.
+  // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/backends/meta-logical-monitor.c#L319
   _getAdjacentMonitor(direction, activeMonitorId, activeWin) {
     const display = activeWin.get_display();
-    const n = display.get_n_monitors();
-    const activeGeo = display.get_monitor_geometry(activeMonitorId);
-    let best = null;
-    let bestDist = Infinity;
-
-    for (let i = 0; i < n; i++) {
-      if (i === activeMonitorId) continue;
-      const geo = display.get_monitor_geometry(i);
-      let qualifies = false;
-      let dist = 0;
-
-      if (direction === 'focus-changer-up'    && geo.y < activeGeo.y) { qualifies = true; dist = activeGeo.y - geo.y; }
-      if (direction === 'focus-changer-down'  && geo.y > activeGeo.y) { qualifies = true; dist = geo.y - activeGeo.y; }
-      if (direction === 'focus-changer-left'  && geo.x < activeGeo.x) { qualifies = true; dist = activeGeo.x - geo.x; }
-      if (direction === 'focus-changer-right' && geo.x > activeGeo.x) { qualifies = true; dist = geo.x - activeGeo.x; }
-
-      if (qualifies && dist < bestDist) { best = i; bestDist = dist; }
-    }
-
-    return best;
+    // An invalid index makes mutter dereference NULL and crash the shell.
+    if (activeMonitorId < 0 || activeMonitorId >= display.get_n_monitors()) return null;
+    const index = display.get_monitor_neighbor_index(activeMonitorId, MONITOR_DIRECTIONS[direction]);
+    return index < 0 ? null : index;
   }
 }

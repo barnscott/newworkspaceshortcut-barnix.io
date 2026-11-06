@@ -46,7 +46,7 @@ Repositions and resizes floating windows along the center axes of the display.
 
 **Move to display edge** (`Control + Super + Alt + Arrow`):
 
-These re-implement GNOME's native `move-to-side-*` shortcuts so they respect the configurable window gap.
+These work like GNOME's native `move-to-side-*` shortcuts, but respect the configurable window gap. GNOME's own shortcuts are left untouched.
 
 | Shortcut | Result |
 |---|---|
@@ -77,7 +77,7 @@ Draws a temporary border around the focused window whenever focus changes, makin
 - Border color, width, and corner radius are configurable.
 - The border auto-hides after a configurable delay (default 1000 ms). Auto-hide can be disabled to keep the border permanently visible.
 - A manual keybinding (`Super + B` by default) re-triggers the highlight on demand.
-- **Snapped, maximized and fullscreen windows are not highlighted.** These sit flush against the screen edges, where a border drawn outside the window frame falls off-screen and clips. Mutter reports a side snap as a vertical-only maximize and offers no public way to distinguish the two, so any window maximized on either axis is skipped. If a window is snapped while a border is already showing, the border is removed rather than left at stale coordinates.
+- **Snapped, maximized and fullscreen windows are not highlighted.** These sit flush against the screen edges, where a border drawn outside the window frame falls off-screen and clips. Mutter reports a side snap as a vertical-only maximize and offers no public way to distinguish the two, so any window maximized on either axis is skipped. If a window is snapped, maximized or made fullscreen while a border is showing, the border is hidden rather than left at stale coordinates. It comes back when the window is restored, unless auto-hide has removed it by then.
 
 ---
 
@@ -115,7 +115,7 @@ Moves keyboard focus between windows by geometric direction — without cycling 
 | `Shift + Control + Alt + Left` | Focus window to the left |
 | `Shift + Control + Alt + Right` | Focus window to the right |
 
-Focus selection prefers the window closest along the direction of travel, using perpendicular distance as a tiebreaker. When no window exists on the current monitor in the given direction, focus moves to the nearest monitor in that direction.
+Focus selection prefers the window closest along the direction of travel, using perpendicular distance as a tiebreaker. When no window exists on the current monitor in the given direction, focus moves to the monitor bordering it on that side.
 
 ---
 
@@ -165,6 +165,7 @@ Before submitting a PR:
 - Update `CHANGELOG.md` with a summary of the changes.
 - Update `metadata.json` to reflect the supported GNOME versions, and bump its `version` and `version-name` together (the packager refuses a mismatch).
 - Recompile the schema if you changed it: `glib-compile-schemas newworkspaceshortcut@barnix.io/schemas/`. The output is gitignored and must not be committed.
+- If you changed `extension/migrate.js`, run `gjs -m bin/test-migration.js`. It uses a throwaway settings file and never touches your real settings.
 - Build the upload archive with `bin/packager.sh` (see [Packaging a release](#packaging-a-release)).
 
 ### Build and debugging

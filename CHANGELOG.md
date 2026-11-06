@@ -15,6 +15,14 @@
 - Snap restore now records where a window lands after it is dragged. Before, un-snapping it later returned it to where it was before the drag.
 - Number fields in Preferences reject non-numbers and out-of-range values instead of silently saving 0, and show the allowed range. The schema now declares valid ranges; a previously stored value outside them falls back to the default. The fields also update when a setting is changed elsewhere.
 - Shortcut capture accepts Home, End, Page Up/Down, Tab and Return with a modifier, for example `Super+Return`. They were blocked even with Super, Ctrl or Alt held.
+- Snap restore now works for X11 apps running under XWayland. Mutter applies its stale restore size to an X11 window before it reports the un-snap, and the extension recorded that size as the window's own, so the repair re-applied the wrong size.
+- The Window Manager feature no longer clears GNOME's own `move-to-side-*` shortcuts. GNOME Shell does not run extension cleanup at logout, so any of those shortcuts you had set were lost after the first logout with the feature on. Shortcuts already lost this way cannot be recovered and must be set again.
+- Window Manager shortcuts now leave room for the top bar when a window hangs partly off the primary monitor. The top bar only counted when the whole window was on the primary monitor, so *Send window to top edge* put such a window under the bar and *Resize window* made it too tall.
+- Highlight Focus with auto-hide off now shows the border again after a window is un-maximized, un-snapped or leaves fullscreen. Before, the border disappeared until focus changed.
+- Focus Changer now moves to another monitor only if it borders the current one on that side. It compared only the monitors' top-left corners, so with two side-by-side monitors at different heights, *Focus window below* could jump to the monitor on the right.
+- `bin/packager.sh` with a relative destination, for example `bin/packager.sh out`, exited with code 15, printed nothing and left an empty folder. Relative destinations now work, and a zip failure is reported.
+- The schema is now well-formed XML. A comment came before the `<?xml?>` declaration, which strict XML parsers reject; GLib accepted it.
+- `bin/test-migration.js` now tests the migration code the extension runs, moved to `extension/migrate.js`, instead of a hand-copied version, and no longer depends on one developer's home directory. Run it with `gjs -m bin/test-migration.js`.
 
 # 503 (Sep 2026)
 ## CORRECTION TO THE 502 NOTE BELOW
