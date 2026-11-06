@@ -48,7 +48,9 @@ export class focusChanger {
     );
   }
 
-  _getBestCandidate(direction, monitor, activeRect, activeWin) {
+  // `searched` holds monitors already tried, so each is searched once.
+  _getBestCandidate(direction, monitor, activeRect, activeWin, searched = new Set()) {
+    searched.add(monitor);
     const windows = this._getWindowsOnMonitor(monitor).filter(w => w !== activeWin);
     // Most-recently-used first as a tiebreaker
     windows.sort((a, b) => b.user_time - a.user_time);
@@ -98,7 +100,8 @@ export class focusChanger {
       ? { x: activeRect.x, width: activeRect.width, y: m.y, height: m.height }
       : { x: m.x, width: m.width, y: activeRect.y, height: activeRect.height };
     for (const next of this._getAdjacentMonitors(direction, monitor, activeRect)) {
-      const found = this._getBestCandidate(direction, next, ref, activeWin);
+      if (searched.has(next)) continue;
+      const found = this._getBestCandidate(direction, next, ref, activeWin, searched);
       if (found) return found;
     }
     return null;

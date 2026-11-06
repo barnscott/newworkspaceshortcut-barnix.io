@@ -6,15 +6,18 @@ import GLib from 'gi://GLib';
 import Meta from 'gi://Meta';
 import Mtk from 'gi://Mtk';
 import * as Config from 'resource:///org/gnome/shell/misc/config.js';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { plainRect, sameRect } from './rect.js';
-import { canRepair, clampUnmaximized, onMaximizeNotify } from './snaprestore-pure.js';
+import {
+  applyFloatingRect, applyMaximizeNotify, applyTileMonitor, canRepair, clampUnmaximized,
+} from './snaprestore-pure.js';
 import { isEdgeFlush, isNormalWindow, monitorGeometry } from './utils.js';
 
 // Bump or delete when mutter ships a fix. Unfixed in 51.1: tile_window() still
 // sets tile mode before save_rect(). https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/5449
 const AFFECTED_MAJORS = [49, 50, 51];
 
-// Window state kept across disable(), which Shell runs on every screen lock.
+// Window state kept across the disable() Shell runs on screen lock.
 // Weak keys let closed windows drop out.
 const retained = new WeakMap();
 
@@ -61,9 +64,14 @@ export class snapRestoreFix {
   disable() {
     this._handles_display.splice(0).forEach(h => global.display.disconnect(h));
     [...this._pending.values()].forEach(cancel => cancel());
+    // Only a lock: after a settings toggle, changes made meanwhile went unseen.
+    // isLocked is set before Shell disables extensions.
+    const keep = Main.sessionMode.isLocked;
     for (const [win, state] of this._windows) {
-      const { rect, snap, mutterSaved } = state;
-      retained.set(win, { rect, snap, mutterSaved, frame: plainRect(win.get_frame_rect()), flags: flagsOf(win) });
+      if (keep) {
+        const { rect, snap, mutterSaved } = state;
+        retained.set(win, { rect, snap, mutterSaved, frame: plainRect(win.get_frame_rect()), flags: flagsOf(win) });
+      }
       this._unwatch(win);
     }
     this._grabbedWindow = null;
@@ -113,38 +121,21 @@ export class snapRestoreFix {
   // X11 moves the window before an unsnap is seen, so track the tile's monitor here.
   _onGeometryChanged(win, state) {
     if (state.snap && win.maximized_vertically)
-      state.snap.tileMonitor = monitorOf(win.get_frame_rect());
+      applyTileMonitor(state.snap, global.display.get_monitor_index_for_rect(win.get_frame_rect()));
     this._cacheIfFloating(win, state);
   }
 
   _cacheIfFloating(win, state) {
     if (win === this._grabbedWindow || isEdgeFlush(win)) return;
-    state.rect = plainRect(win.get_frame_rect());
-    state.mutterSaved = false;
+    applyFloatingRect(state, plainRect(win.get_frame_rect()));
   }
 
   _onMaximizedChanged(win, state) {
-    const step = onMaximizeNotify(
-      { maximizedH: win.maximized_horizontally, maximizedV: win.maximized_vertically },
-      { hasRect: state.rect !== null, hasSnapshot: state.snap !== null, mutterSaved: state.mutterSaved });
-    state.mutterSaved = step.mutterSaved;
-    if (step.snapshot) {
-      // Mutter tiles onto get_monitor(), which is settled outside geometry signals.
-      const monitor = win.get_monitor();
-      const rectMonitor = monitorOf(state.rect);
-      state.snap = {
-        rect: state.rect,
-        monitor,
-        tileMonitor: monitor,
-        rectMonitor,
-        rectMonitorGeo: monitorGeometry(rectMonitor),
-      };
-    }
-    if (!step.repair) return;
-    // Not the cache: X11 has already cached mutter's stale restore rect.
+    // Not the cache on unsnap: X11 has already cached mutter's stale restore rect.
     // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/core/window.c#L3662
-    const snap = state.snap;
-    state.snap = null;
+    const snap = applyMaximizeNotify(state, win.maximized_horizontally, win.maximized_vertically,
+      () => this._takeSnapshot(win, state));
+    if (!snap) return;
     // A grab shake-loose already places the window; fix only its size.
     const sizeOnly = win === this._grabbedWindow;
     const laters = global.compositor.get_laters();
@@ -158,11 +149,29 @@ export class snapRestoreFix {
     });
   }
 
+  _takeSnapshot(win, state) {
+    // The tile's monitor is known once its geometry lands; drag tiling picks the pointer's.
+    const frame = win.get_frame_rect();
+    const tileMonitor = sameRect(state.rect, frame) ? null : global.display.get_monitor_index_for_rect(frame);
+    const rectMonitor = monitorOf(state.rect);
+    return {
+      rect: state.rect,
+      tileMonitor,
+      monitorNow: tileMonitor,
+      rectMonitor,
+      rectMonitorGeo: monitorGeometry(rectMonitor),
+    };
+  }
+
   // Its geometry signals re-cache the repaired rect.
   _repair(win, snap, sizeOnly) {
     if (isEdgeFlush(win) || !canRepair(snap, monitorGeometry(snap.rectMonitor), sizeOnly)) return;
 
-    const { width, height } = clampUnmaximized(snap.rect, win.get_work_area_current_monitor());
+    // Clamp against the monitor the rect lands on, as mutter clamps on its own.
+    const workArea = sizeOnly
+      ? win.get_work_area_current_monitor()
+      : win.get_work_area_for_monitor(snap.rectMonitor);
+    const { width, height } = clampUnmaximized(snap.rect, workArea);
     let { x, y } = snap.rect;
     if (sizeOnly) {
       // Keep the pointer at the same relative spot, as mutter's drag anchor does.

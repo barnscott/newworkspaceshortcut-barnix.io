@@ -9,25 +9,42 @@ export function isUsableRect(rect) {
   return !!rect && rect.width > 0 && rect.height > 0;
 }
 
-// What one notify::maximized-vertically means. Only a side snap from floating
-// loses mutter's saved rect.
-export function onMaximizeNotify({ maximizedH, maximizedV }, { hasRect, hasSnapshot, mutterSaved }) {
-  if (maximizedV) {
-    // Mutter saves the rect correctly when maximizing a floating window.
-    const saved = mutterSaved || (maximizedH && !hasSnapshot);
-    return { snapshot: !maximizedH && !hasSnapshot && hasRect && !saved, repair: false, mutterSaved: saved };
-  }
-  // Still maximized horizontally: keep the snapshot for the final unmaximize.
-  if (maximizedH) return { snapshot: false, repair: false, mutterSaved };
-  return { snapshot: false, repair: hasSnapshot, mutterSaved: false };
+// Records a floating rect in state { rect, snap, mutterSaved }.
+export function applyFloatingRect(state, rect) {
+  state.rect = rect;
+  state.mutterSaved = false;
 }
 
-// Not if moved to another monitor while snapped, or the rect's monitor changed.
+// Applies one notify::maximized-vertically; returns the snapshot to repair, or null.
+// Only side snaps from floating lose mutter's saved rect.
+export function applyMaximizeNotify(state, maximizedH, maximizedV, takeSnapshot) {
+  if (maximizedV) {
+    // Mutter saves the rect correctly when maximizing a floating window.
+    if (maximizedH && state.snap === null) state.mutterSaved = true;
+    if (!maximizedH && state.snap === null && state.rect !== null && !state.mutterSaved)
+      state.snap = takeSnapshot();
+    return null;
+  }
+  // Still maximized horizontally: keep the snapshot for the final unmaximize.
+  if (maximizedH) return null;
+  state.mutterSaved = false;
+  const snap = state.snap;
+  state.snap = null;
+  return snap;
+}
+
+// On each geometry change while snapped. The first sets the tile's monitor.
+export function applyTileMonitor(snap, monitor) {
+  if (snap.tileMonitor === null) snap.tileMonitor = monitor;
+  snap.monitorNow = monitor;
+}
+
+// Not if snapped onto another monitor since, or the rect's monitor changed.
 // Size-only repairs need just the size.
 export function canRepair(snap, rectMonitorGeoNow, sizeOnly = false) {
   if (!snap || !isUsableRect(snap.rect)) return false;
   if (sizeOnly) return true;
-  return snap.monitor === snap.tileMonitor && snap.rectMonitor >= 0 &&
+  return snap.monitorNow === snap.tileMonitor && snap.rectMonitor >= 0 &&
     sameRect(snap.rectMonitorGeo, rectMonitorGeoNow);
 }
 

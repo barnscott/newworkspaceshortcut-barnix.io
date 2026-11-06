@@ -49,7 +49,7 @@ export class highlightFocus {
     this._handles_settings.push(
       this._settings.connect('changed::highlight-disable-hiding', () => {
         this._readSettings();
-        this._highlightWindow();
+        if (this._borders.length) this._highlightWindow();
       }),
     );
 

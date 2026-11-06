@@ -1,5 +1,7 @@
 // Headless test for the GNOME 49–51 snap-restore workaround. Run: gjs -m tests/test-snaprestore.js
-import { canRepair, clampUnmaximized, isUsableRect, onMaximizeNotify } from '../newworkspaceshortcut@barnix.io/extension/snaprestore-pure.js';
+import {
+  applyFloatingRect, applyMaximizeNotify, applyTileMonitor, canRepair, clampUnmaximized, isUsableRect,
+} from '../newworkspaceshortcut@barnix.io/extension/snaprestore-pure.js';
 import { sameRect } from '../newworkspaceshortcut@barnix.io/extension/rect.js';
 import { check, finish } from './harness.js';
 
@@ -18,22 +20,27 @@ check('equal',            sameRect(r(0, 0, 10, 10), r(0, 0, 10, 10)), true);
 check('moved',            sameRect(r(0, 0, 10, 10), r(1, 0, 10, 10)), false);
 check('null side',        sameRect(r(0, 0, 10, 10), null), false);
 
-// Replays a sequence of maximize states through onMaximizeNotify, as the extension does.
+// Drives the extension's own state functions through a sequence of events.
 const NONE = [false, false], SNAP = [false, true], MAX = [true, true], H_ONLY = [true, false];
-function run(steps) {
-  const s = { hasRect: true, hasSnapshot: false, mutterSaved: false };
+const FLOAT = 'float';
+function run(events) {
+  const state = { rect: null, snap: null, mutterSaved: false };
+  applyFloatingRect(state, r(10, 10, 400, 300));
   const log = [];
-  for (const [maximizedH, maximizedV] of steps) {
-    const step = onMaximizeNotify({ maximizedH, maximizedV }, s);
-    s.mutterSaved = step.mutterSaved;
-    if (step.snapshot) s.hasSnapshot = true;
-    if (step.repair) s.hasSnapshot = false;
-    log.push(step.snapshot ? 'snap' : step.repair ? 'repair' : '-');
+  for (const ev of events) {
+    if (ev === FLOAT) {
+      applyFloatingRect(state, r(20, 20, 400, 300));
+      log.push('f');
+      continue;
+    }
+    let took = false;
+    const repair = applyMaximizeNotify(state, ev[0], ev[1], () => { took = true; return { rect: state.rect }; });
+    log.push(took ? 'snap' : repair ? 'repair' : '-');
   }
   return log.join(' ');
 }
 
-print('\n=== onMaximizeNotify: which flows snapshot and repair ===');
+print('\n=== applyMaximizeNotify: which flows snapshot and repair ===');
 check('snap, restore',                       run([SNAP, NONE]), 'snap repair');
 check('maximize, restore',                   run([MAX, NONE]), '- -');
 check('snap, maximize, restore',             run([SNAP, MAX, NONE]), 'snap - repair');
@@ -42,21 +49,34 @@ check('maximize, snap, restore',             run([MAX, SNAP, NONE]), '- - -');
 check('snap, maximize, H only, restore',     run([SNAP, MAX, H_ONLY, NONE]), 'snap - - repair');
 check('repeat snap notify keeps one',        run([SNAP, SNAP, NONE]), 'snap - repair');
 check('maximize, restore, snap, restore',    run([MAX, NONE, SNAP, NONE]), '- - snap repair');
-check('no floating rect seen yet',
-  onMaximizeNotify({ maximizedH: false, maximizedV: true }, { hasRect: false, hasSnapshot: false, mutterSaved: false }).snapshot, false);
+check('floating rect clears mutterSaved',    run([MAX, H_ONLY, FLOAT, SNAP, NONE]), '- - f snap repair');
+{
+  const state = { rect: null, snap: null, mutterSaved: false };
+  check('no floating rect seen yet', applyMaximizeNotify(state, false, true, () => ({})) === null && state.snap === null, true);
+}
+
+print('\n=== applyTileMonitor ===');
+{
+  const snap = { tileMonitor: null, monitorNow: null };
+  applyTileMonitor(snap, 1);
+  check('first geometry sets the tile monitor', `${snap.tileMonitor},${snap.monitorNow}`, '1,1');
+  applyTileMonitor(snap, 0);
+  check('a later move is tracked', `${snap.tileMonitor},${snap.monitorNow}`, '1,0');
+}
 
 print('\n=== canRepair: same monitor, unchanged layout ===');
 const mon = r(0, 0, 1920, 1080);
-const snap = (over = {}) => ({ rect: r(724, 500, 708, 452), monitor: 0, tileMonitor: 0, rectMonitor: 0, rectMonitorGeo: mon, ...over });
+const snap = (over = {}) => ({ rect: r(724, 500, 708, 452), tileMonitor: 0, monitorNow: 0, rectMonitor: 0, rectMonitorGeo: mon, ...over });
 check('snapped and restored in place',  canRepair(snap(), mon), true);
 check('no snapshot',                    canRepair(undefined, mon), false);
 check('degenerate rect',                canRepair(snap({ rect: r(0, 0, 0, 0) }), mon), false);
-check('moved to another monitor',       canRepair(snap({ tileMonitor: 1 }), mon), false);
+check('moved to another monitor',       canRepair(snap({ monitorNow: 1 }), mon), false);
+check('tile monitor not landed yet',     canRepair(snap({ tileMonitor: null, monitorNow: null }), mon), true);
 check('rect was off every monitor',     canRepair(snap({ rectMonitor: -1 }), null), false);
 check('rect monitor rearranged',        canRepair(snap(), r(1920, 0, 1920, 1080)), false);
 check('rect monitor gone',              canRepair(snap(), null), false);
-check('rect on another, unchanged monitor', canRepair(snap({ monitor: 1, tileMonitor: 1 }), mon), true);
-check('size-only ignores the monitor',  canRepair(snap({ tileMonitor: 1 }), r(1920, 0, 1920, 1080), true), true);
+check('rect on another, unchanged monitor', canRepair(snap({ tileMonitor: 1, monitorNow: 1 }), mon), true);
+check('size-only ignores the monitor',  canRepair(snap({ monitorNow: 1 }), r(1920, 0, 1920, 1080), true), true);
 check('size-only still needs a size',   canRepair(snap({ rect: r(0, 0, 0, 0) }), mon, true), false);
 
 print('\n=== clampUnmaximized: mutter\'s 80% guard ===');

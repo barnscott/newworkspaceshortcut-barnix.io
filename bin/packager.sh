@@ -12,10 +12,12 @@ readonly UUID="newworkspaceshortcut@barnix.io"
 
 # Populated by collect_files(); consumed by main().
 SHIP_FILES=()
-# Build directory, removed on exit.
+# Build directory and in-flight copy, removed on exit.
 TMP_DIR=""
+PARTIAL=""
 
 cleanup() {
+  if [[ -n "$PARTIAL" ]]; then rm -f -- "$PARTIAL"; fi
   if [[ -n "$TMP_DIR" ]]; then rm -rf -- "$TMP_DIR"; fi
 }
 trap cleanup EXIT
@@ -187,8 +189,14 @@ main() {
   verify_archive "$tmp_zip" || die "archive rejected; nothing written to $dest_dir"
 
   mkdir -p -- "$dest_dir"
+  [[ -d "$zip_path" ]] && die "a directory is in the way: $zip_path"
   [[ -e "$zip_path" ]] && warn "overwriting existing $zip_name"
-  mv -f -- "$tmp_zip" "$zip_path"
+  # Copy beside the target, then rename atomically: an earlier archive survives
+  # a failed copy, even across filesystems.
+  PARTIAL="$dest_dir/.$zip_name.partial.$$"
+  cp -- "$tmp_zip" "$PARTIAL" || die "could not write to $dest_dir"
+  mv -fT -- "$PARTIAL" "$zip_path"
+  PARTIAL=""
 
   echo "Packaged v${version} -> $zip_path"
   echo
