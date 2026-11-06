@@ -115,7 +115,7 @@ Moves keyboard focus between windows by geometric direction — without cycling 
 | `Shift + Control + Alt + Left` | Focus window to the left |
 | `Shift + Control + Alt + Right` | Focus window to the right |
 
-Focus selection prefers the window closest along the direction of travel, using perpendicular distance as a tiebreaker. When no window exists on the current monitor in the given direction, focus moves to the monitor bordering it on that side.
+Focus selection prefers the window closest along the direction of travel, using perpendicular distance as a tiebreaker. When no window exists on the current monitor in the given direction, focus moves to the nearest monitor on that side, preferring one that shares the edge. Desktop-icon, dock and other windows that Alt+Tab skips are never focused.
 
 ---
 

@@ -4,10 +4,10 @@ import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import { isNormalWindow } from './utils.js';
+import { isEdgeFlush, isNormalWindow } from './utils.js';
 
-// Fallback for a state change that moves nothing, so sends no geometry signal.
-const SETTLE_FALLBACK_MS = 250;
+// Re-shows the border after a state change that moved nothing. Outlasts a client's resize ack.
+const STATE_FALLBACK_MS = 1000;
 
 export class highlightFocus {
   constructor(settings) {
@@ -19,8 +19,7 @@ export class highlightFocus {
     this._handles_window = [];
     this._watchedWindow = null;
     this._laterId = 0;
-    this._settling = false;
-    this._settleTimeoutId = 0;
+    this._fallbackId = 0;
     this._drawnInset = 0;
     this._readSettings();
   }
@@ -45,6 +44,10 @@ export class highlightFocus {
         this._settings.connect(`changed::${key}`, () => this._readSettings()),
       );
     }
+    // Redraw so the current border gains, or drops, its hide timer.
+    this._handles_settings.push(
+      this._settings.connect('changed::highlight-disable-hiding', () => this._highlightWindow()),
+    );
 
     const flag = Meta.KeyBindingFlags.IGNORE_AUTOREPEAT;
     const mode = Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW;
@@ -75,37 +78,41 @@ export class highlightFocus {
     this._removeAllTimeouts();
   }
 
-  // Skip edge-flush windows: a snap reads as a vertical-only maximize.
-  // https://gitlab.gnome.org/GNOME/mutter/-/issues/225
-  _shouldSkip(win) {
-    return !isNormalWindow(win) ||
-      win.is_fullscreen() ||
-      win.maximized_horizontally ||
-      win.maximized_vertically;
-  }
-
   _watchWindow(win) {
     this._watchedWindow = win;
     this._handles_window = [
       win.connect('notify::maximized-horizontally', () => this._onStateChanged()),
       win.connect('notify::maximized-vertically', () => this._onStateChanged()),
       win.connect('notify::fullscreen', () => this._onStateChanged()),
-      win.connect('position-changed', () => this._queueReposition()),
-      win.connect('size-changed', () => this._queueReposition()),
+      win.connect('position-changed', () => this._onGeometryChanged()),
+      win.connect('size-changed', () => this._onGeometryChanged()),
     ];
   }
 
-  // Never draw here: a Wayland rect is stale until the client acks.
-  // Geometry changes, or the fallback, re-show it.
+  // Never draw here: a Wayland rect is stale until the client acks the resize.
   _onStateChanged() {
-    this._borders.forEach(b => b.hide());
-    this._settling = true;
-    if (this._settleTimeoutId) GLib.Source.remove(this._settleTimeoutId);
-    this._settleTimeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, SETTLE_FALLBACK_MS, () => {
-      this._settleTimeoutId = 0;
+    const win = this._watchedWindow;
+    const border = this._borders[0];
+    // Mutter notifies even when nothing changed; a shown border on a floating window stays.
+    if (!win || !border || (border.visible && !isEdgeFlush(win))) return;
+    border.hide();
+    this._cancelFallback();
+    if (isEdgeFlush(win)) return;
+    this._fallbackId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, STATE_FALLBACK_MS, () => {
+      this._fallbackId = 0;
       this._queueReposition();
       return GLib.SOURCE_REMOVE;
     });
+  }
+
+  _onGeometryChanged() {
+    this._cancelFallback();
+    this._queueReposition();
+  }
+
+  _cancelFallback() {
+    if (this._fallbackId) GLib.Source.remove(this._fallbackId);
+    this._fallbackId = 0;
   }
 
   // Follows the window; never re-creates a border that auto-hide removed.
@@ -116,15 +123,8 @@ export class highlightFocus {
       const win = this._watchedWindow;
       const border = this._borders[0];
       if (!win || !border) return GLib.SOURCE_REMOVE;
-      if (this._shouldSkip(win)) {
+      if (isEdgeFlush(win)) {
         border.hide();
-        return GLib.SOURCE_REMOVE;
-      }
-      // Skip a frame after a state change; snap restore repairs in this one.
-      // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/compositor/meta-later.c#L148
-      if (this._settling) {
-        this._settling = false;
-        this._queueReposition();
         return GLib.SOURCE_REMOVE;
       }
       this._placeBorder(border, win);
@@ -150,11 +150,7 @@ export class highlightFocus {
       this._handles_window.splice(0).forEach(h => this._watchedWindow.disconnect(h));
     this._watchedWindow = null;
     this._handles_window = [];
-    this._settling = false;
-    if (this._settleTimeoutId) {
-      GLib.Source.remove(this._settleTimeoutId);
-      this._settleTimeoutId = 0;
-    }
+    this._cancelFallback();
   }
 
   _highlightWindow() {
@@ -164,7 +160,7 @@ export class highlightFocus {
     const win = global.display.focus_window;
     if (!isNormalWindow(win)) return;
     // With auto-hide off, an edge-flush window gets a hidden border to show on restore.
-    const edgeFlush = this._shouldSkip(win);
+    const edgeFlush = isEdgeFlush(win);
     if (edgeFlush && !this._disableHiding) return;
 
     const border = new St.Bin();

@@ -10,3 +10,9 @@ export function getFocusWin() {
 export function isNormalWindow(win) {
   return !!win && win.window_type === Meta.WindowType.NORMAL;
 }
+
+// Fullscreen or maximized on either axis; mutter reports a side snap as vertical-only.
+// https://gitlab.gnome.org/GNOME/mutter/-/issues/225
+export function isEdgeFlush(win) {
+  return win.is_fullscreen() || win.maximized_horizontally || win.maximized_vertically;
+}

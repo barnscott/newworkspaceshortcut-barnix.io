@@ -4,3 +4,15 @@
 export function isUsableRect(rect) {
   return !!rect && rect.width > 0 && rect.height > 0;
 }
+
+export function sameRect(a, b) {
+  return !!a && !!b &&
+    a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
+}
+
+// Replay only onto the monitor it was taken on, if that monitor has not moved.
+export function canRepair(preSnap, monitorGeoNow) {
+  return !!preSnap && isUsableRect(preSnap.rect) &&
+    preSnap.monitor >= 0 && preSnap.monitor === preSnap.tileMonitor &&
+    sameRect(preSnap.monitorGeo, monitorGeoNow);
+}

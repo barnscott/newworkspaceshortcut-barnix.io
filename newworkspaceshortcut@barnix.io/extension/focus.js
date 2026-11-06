@@ -40,9 +40,11 @@ export class focusChanger {
   _centerX(rect) { return rect.x + rect.width  / 2; }
   _centerY(rect) { return rect.y + rect.height / 2; }
 
+  // The Alt+Tab list leaves out desktop, dock and skip-taskbar windows.
   _getWindowsOnMonitor(monitor) {
-    return this._wm.get_active_workspace().list_windows().filter(
-      w => w.get_monitor() === monitor && !w.is_hidden()
+    const ws = this._wm.get_active_workspace();
+    return global.display.get_tab_list(Meta.TabList.NORMAL, ws).filter(
+      w => w.located_on_workspace(ws) && w.get_monitor() === monitor && !w.is_hidden()
     );
   }
 
@@ -98,37 +100,46 @@ export class focusChanger {
     return best;
   }
 
-  // Mutter's adjacency rule, but picks the neighbour nearest the window, not the first.
-  // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/backends/meta-logical-monitor.c#L319
+  // Prefers Mutter's neighbours (shared edge, overlapping span), then any monitor beyond
+  // that edge; nearest the window first. https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/backends/meta-logical-monitor.c#L319
   _getAdjacentMonitor(direction, activeMonitorId, winRect, display) {
     const n = display.get_n_monitors();
     if (activeMonitorId < 0 || activeMonitorId >= n) return null;
     const a = display.get_monitor_geometry(activeMonitorId);
     const vertical = direction === 'focus-changer-up' || direction === 'focus-changer-down';
-    const touches = g => {
+    // Gap from the active monitor's edge, or -1 when not wholly beyond it.
+    const gap = g => {
+      let d;
       switch (direction) {
-        case 'focus-changer-up':   return g.y + g.height === a.y;
-        case 'focus-changer-down': return g.y === a.y + a.height;
-        case 'focus-changer-left': return g.x + g.width === a.x;
-        default:                   return g.x === a.x + a.width;
+        case 'focus-changer-up':   d = a.y - (g.y + g.height); break;
+        case 'focus-changer-down': d = g.y - (a.y + a.height); break;
+        case 'focus-changer-left': d = a.x - (g.x + g.width); break;
+        default:                   d = g.x - (a.x + a.width); break;
       }
+      return d >= 0 ? d : -1;
     };
-    // Span on the axis perpendicular to travel.
-    const span = g => vertical ? [g.x, g.x + g.width] : [g.y, g.y + g.height];
-    const [aLo, aHi] = span(a);
+    const lo = g => vertical ? g.x : g.y;
+    const hi = g => vertical ? g.x + g.width : g.y + g.height;
     const centre = vertical ? this._centerX(winRect) : this._centerY(winRect);
     let best = null;
-    let bestDist = Infinity;
+    let bestKey = null;
 
     for (let i = 0; i < n; i++) {
       if (i === activeMonitorId) continue;
       const g = display.get_monitor_geometry(i);
-      const [lo, hi] = span(g);
-      if (!touches(g) || hi <= aLo || lo >= aHi) continue;
-
-      const dist = centre < lo ? lo - centre : centre > hi ? centre - hi : 0;
-      if (dist < bestDist) { best = i; bestDist = dist; }
+      const d = gap(g);
+      if (d < 0) continue;
+      const neighbour = d === 0 && hi(g) > lo(a) && lo(g) < hi(a);
+      const offset = centre < lo(g) ? lo(g) - centre : centre > hi(g) ? centre - hi(g) : 0;
+      const key = [neighbour ? 0 : 1, offset, d];
+      if (!bestKey || compareKeys(key, bestKey) < 0) { best = i; bestKey = key; }
     }
     return best;
   }
+}
+
+function compareKeys(a, b) {
+  for (let i = 0; i < a.length; i++)
+    if (a[i] !== b[i]) return a[i] - b[i];
+  return 0;
 }
