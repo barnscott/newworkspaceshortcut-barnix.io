@@ -48,21 +48,14 @@ export class snapRestoreFix {
     this._handles_display.push(
       global.display.connect('window-created', (_display, win) => this._watchWhenShown(win)));
     // Mutter saves the drag-start rect, so ignore the grabbed window's geometry mid-drag.
-    let beginId = 0;
-    try {
-      beginId = global.display.connect('grab-op-begin', (_display, win) => { this._grabbedWindow = win; });
-      const endId = global.display.connect('grab-op-end', (_display, win) => {
+    this._handles_display.push(
+      global.display.connect('grab-op-begin', (_display, win) => { this._grabbedWindow = win; }),
+      global.display.connect('grab-op-end', (_display, win) => {
         this._grabbedWindow = null;
         // Mid-grab geometry was skipped, so record where the window landed.
         const state = this._windows.get(win);
         if (state) this._cacheIfFloating(win, state);
-      });
-      this._handles_display.push(beginId, endId);
-    } catch (e) {
-      // Both or neither: a begin without an end would block caching for good.
-      if (beginId) global.display.disconnect(beginId);
-      console.warn(`snapRestore: grab-op signals unavailable: ${e.message}`);
-    }
+      }));
     global.display.list_all_windows().forEach(win => this._watch(win));
     retained = new WeakMap();
   }
@@ -127,7 +120,8 @@ export class snapRestoreFix {
 
   // X11 moves the window before an unsnap is seen, so track the tile's monitor here.
   _onGeometryChanged(win, state) {
-    if (state.snap && win.maximized_vertically)
+    // Any edge-flush state the snapshot survives, including horizontal-only.
+    if (state.snap && isEdgeFlush(win))
       applyTileMonitor(state.snap, global.display.get_monitor_index_for_rect(win.get_frame_rect()));
     this._cacheIfFloating(win, state);
   }

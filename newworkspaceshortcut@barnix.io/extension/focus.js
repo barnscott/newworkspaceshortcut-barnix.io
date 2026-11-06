@@ -91,34 +91,20 @@ export class focusChanger {
     return best;
   }
 
-  // This monitor first, then monitors beyond the edge breadth-first, nearest first.
+  // This monitor first, then every monitor wholly beyond that edge, in rank order.
   _getBestCandidate(direction, monitor, activeRect, activeWin) {
     const best = this._bestOnMonitor(direction, monitor, activeRect, activeWin);
     if (best) return best;
 
-    const vertical = isVertical(direction);
-    const searched = new Set([monitor]);
-    let frontier = [monitor];
-    while (frontier.length) {
-      const level = [];
-      for (const from of frontier) {
-        const m = monitorGeometry(from);
-        if (!m) continue;
-        // Measure along travel from the monitor before, across it from the window.
-        const ref = vertical
-          ? { x: activeRect.x, width: activeRect.width, y: m.y, height: m.height }
-          : { x: m.x, width: m.width, y: activeRect.y, height: activeRect.height };
-        for (const next of this._getAdjacentMonitors(direction, from, activeRect)) {
-          if (searched.has(next)) continue;
-          searched.add(next);
-          level.push({ next, ref });
-        }
-      }
-      for (const { next, ref } of level) {
-        const found = this._bestOnMonitor(direction, next, ref, activeWin);
-        if (found) return found;
-      }
-      frontier = level.map(l => l.next);
+    const m = monitorGeometry(monitor);
+    if (!m) return null;
+    // Measure along travel from this monitor, across it from the window.
+    const ref = isVertical(direction)
+      ? { x: activeRect.x, width: activeRect.width, y: m.y, height: m.height }
+      : { x: m.x, width: m.width, y: activeRect.y, height: activeRect.height };
+    for (const next of this._getAdjacentMonitors(direction, monitor, activeRect)) {
+      const found = this._bestOnMonitor(direction, next, ref, activeWin);
+      if (found) return found;
     }
     return null;
   }

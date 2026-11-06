@@ -47,9 +47,10 @@ export class highlightFocus {
     }
     // Redraw so the current border gains, or drops, its hide timer.
     this._handles_settings.push(
+      // Off: draw the permanent border now. On: only re-arm one already showing.
       this._settings.connect('changed::highlight-disable-hiding', () => {
         this._readSettings();
-        if (this._borders.length) this._highlightWindow();
+        if (this._disableHiding || this._borders.length) this._highlightWindow();
       }),
     );
 
