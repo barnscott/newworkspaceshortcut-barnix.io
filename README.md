@@ -165,7 +165,7 @@ Before submitting a PR:
 - Update `CHANGELOG.md` with a summary of the changes.
 - Update `metadata.json` to reflect the supported GNOME versions, and bump its `version` and `version-name` together (the packager refuses a mismatch).
 - Recompile the schema if you changed it: `glib-compile-schemas newworkspaceshortcut@barnix.io/schemas/`. The output is gitignored and must not be committed.
-- If you changed `extension/migrate.js`, run `gjs -m tests/test-migration.js`. It uses a throwaway settings file and never touches your real settings.
+- Run the tests in `tests/` with `gjs -m tests/<name>.js`: `test-migration.js`, `test-snaprestore.js` and `test-focus.js`. They need no running session and never touch your real settings.
 - Build the upload archive with `bin/packager.sh` (see [Packaging a release](#packaging-a-release)).
 
 ### Build and debugging

@@ -2,6 +2,7 @@
 import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import { pickAdjacentMonitor } from './focus-pure.js';
 
 const DIRECTIONS = ['focus-changer-up', 'focus-changer-down', 'focus-changer-left', 'focus-changer-right'];
 
@@ -78,7 +79,7 @@ export class focusChanger {
 
       // Primary axis: closer along the movement direction
       // Secondary axis: closer along the perpendicular, prefer same perpendicular position
-      const isVertical = direction === 'focus-changer-up' || direction === 'focus-changer-down';
+      const isVertical = this._isVertical(direction);
       const primaryDist   = isVertical ? Math.abs(cy - ay) : Math.abs(cx - ax);
       const bestPrimaryDist = isVertical ? Math.abs(by - ay) : Math.abs(bx - ax);
       const secondaryDist  = isVertical ? Math.abs(cx - ax) : Math.abs(cy - ay);
@@ -90,56 +91,30 @@ export class focusChanger {
 
     // If nothing found on this monitor, try the nearest monitor in that direction
     if (!best) {
-      const nextMonitor = this._getAdjacentMonitor(direction, monitor, activeWin.get_frame_rect(), activeWin.get_display());
+      const nextMonitor = this._getAdjacentMonitor(direction, monitor, activeRect, activeWin.get_display());
       if (nextMonitor !== null) {
-        const monitorRect = activeWin.get_display().get_monitor_geometry(monitor);
-        return this._getBestCandidate(direction, nextMonitor, monitorRect, activeWin);
+        // Measure along travel from this monitor, across it from the window.
+        const m = activeWin.get_display().get_monitor_geometry(monitor);
+        const ref = this._isVertical(direction)
+          ? { x: activeRect.x, width: activeRect.width, y: m.y, height: m.height }
+          : { x: m.x, width: m.width, y: activeRect.y, height: activeRect.height };
+        return this._getBestCandidate(direction, nextMonitor, ref, activeWin);
       }
     }
 
     return best;
   }
 
-  // Prefers Mutter's neighbours (shared edge, overlapping span), then any monitor beyond
-  // that edge; nearest the window first. https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/backends/meta-logical-monitor.c#L319
-  _getAdjacentMonitor(direction, activeMonitorId, winRect, display) {
-    const n = display.get_n_monitors();
-    if (activeMonitorId < 0 || activeMonitorId >= n) return null;
-    const a = display.get_monitor_geometry(activeMonitorId);
-    const vertical = direction === 'focus-changer-up' || direction === 'focus-changer-down';
-    // Gap from the active monitor's edge, or -1 when not wholly beyond it.
-    const gap = g => {
-      let d;
-      switch (direction) {
-        case 'focus-changer-up':   d = a.y - (g.y + g.height); break;
-        case 'focus-changer-down': d = g.y - (a.y + a.height); break;
-        case 'focus-changer-left': d = a.x - (g.x + g.width); break;
-        default:                   d = g.x - (a.x + a.width); break;
-      }
-      return d >= 0 ? d : -1;
-    };
-    const lo = g => vertical ? g.x : g.y;
-    const hi = g => vertical ? g.x + g.width : g.y + g.height;
-    const centre = vertical ? this._centerX(winRect) : this._centerY(winRect);
-    let best = null;
-    let bestKey = null;
+  _isVertical(direction) {
+    return direction === 'focus-changer-up' || direction === 'focus-changer-down';
+  }
 
-    for (let i = 0; i < n; i++) {
-      if (i === activeMonitorId) continue;
+  _getAdjacentMonitor(direction, activeMonitorId, activeRect, display) {
+    const monitors = Array.from({ length: display.get_n_monitors() }, (_, i) => {
       const g = display.get_monitor_geometry(i);
-      const d = gap(g);
-      if (d < 0) continue;
-      const neighbour = d === 0 && hi(g) > lo(a) && lo(g) < hi(a);
-      const offset = centre < lo(g) ? lo(g) - centre : centre > hi(g) ? centre - hi(g) : 0;
-      const key = [neighbour ? 0 : 1, offset, d];
-      if (!bestKey || compareKeys(key, bestKey) < 0) { best = i; bestKey = key; }
-    }
-    return best;
+      return { x: g.x, y: g.y, width: g.width, height: g.height };
+    });
+    const along = this._isVertical(direction) ? this._centerX(activeRect) : this._centerY(activeRect);
+    return pickAdjacentMonitor(direction, activeMonitorId, monitors, along);
   }
-}
-
-function compareKeys(a, b) {
-  for (let i = 0; i < a.length; i++)
-    if (a[i] !== b[i]) return a[i] - b[i];
-  return 0;
 }

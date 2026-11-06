@@ -6,9 +6,6 @@ import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { isEdgeFlush, isNormalWindow } from './utils.js';
 
-// Re-shows the border after a state change that moved nothing. Outlasts a client's resize ack.
-const STATE_FALLBACK_MS = 1000;
-
 export class highlightFocus {
   constructor(settings) {
     this._settings = settings;
@@ -19,7 +16,6 @@ export class highlightFocus {
     this._handles_window = [];
     this._watchedWindow = null;
     this._laterId = 0;
-    this._fallbackId = 0;
     this._drawnInset = 0;
     this._readSettings();
   }
@@ -39,14 +35,17 @@ export class highlightFocus {
       global.display.connect('notify::focus-window', () => this._highlightWindow()),
     );
 
-    for (const key of ['highlight-border-color', 'highlight-border-width', 'highlight-border-radius', 'highlight-hide-delay', 'highlight-disable-hiding']) {
+    for (const key of ['highlight-border-color', 'highlight-border-width', 'highlight-border-radius', 'highlight-hide-delay']) {
       this._handles_settings.push(
         this._settings.connect(`changed::${key}`, () => this._readSettings()),
       );
     }
     // Redraw so the current border gains, or drops, its hide timer.
     this._handles_settings.push(
-      this._settings.connect('changed::highlight-disable-hiding', () => this._highlightWindow()),
+      this._settings.connect('changed::highlight-disable-hiding', () => {
+        this._readSettings();
+        this._highlightWindow();
+      }),
     );
 
     const flag = Meta.KeyBindingFlags.IGNORE_AUTOREPEAT;
@@ -84,35 +83,19 @@ export class highlightFocus {
       win.connect('notify::maximized-horizontally', () => this._onStateChanged()),
       win.connect('notify::maximized-vertically', () => this._onStateChanged()),
       win.connect('notify::fullscreen', () => this._onStateChanged()),
-      win.connect('position-changed', () => this._onGeometryChanged()),
-      win.connect('size-changed', () => this._onGeometryChanged()),
+      win.connect('position-changed', () => this._queueReposition()),
+      win.connect('size-changed', () => this._queueReposition()),
     ];
   }
 
-  // Never draw here: a Wayland rect is stale until the client acks the resize.
+  // Never draw here: Wayland rects lag the ack. The next geometry change re-shows
+  // the border; without one, it would clip.
   _onStateChanged() {
     const win = this._watchedWindow;
     const border = this._borders[0];
     // Mutter notifies even when nothing changed; a shown border on a floating window stays.
     if (!win || !border || (border.visible && !isEdgeFlush(win))) return;
     border.hide();
-    this._cancelFallback();
-    if (isEdgeFlush(win)) return;
-    this._fallbackId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, STATE_FALLBACK_MS, () => {
-      this._fallbackId = 0;
-      this._queueReposition();
-      return GLib.SOURCE_REMOVE;
-    });
-  }
-
-  _onGeometryChanged() {
-    this._cancelFallback();
-    this._queueReposition();
-  }
-
-  _cancelFallback() {
-    if (this._fallbackId) GLib.Source.remove(this._fallbackId);
-    this._fallbackId = 0;
   }
 
   // Follows the window; never re-creates a border that auto-hide removed.
@@ -150,7 +133,6 @@ export class highlightFocus {
       this._handles_window.splice(0).forEach(h => this._watchedWindow.disconnect(h));
     this._watchedWindow = null;
     this._handles_window = [];
-    this._cancelFallback();
   }
 
   _highlightWindow() {
