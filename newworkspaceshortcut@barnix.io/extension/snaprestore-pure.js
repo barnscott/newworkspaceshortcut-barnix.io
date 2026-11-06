@@ -10,8 +10,8 @@ export function sameRect(a, b) {
     a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 }
 
-// Only a side snap (vertical only) from floating. Later notifies keep the
-// snapshot: mutter saves no rect from a tile.
+// A side snap from floating only. Later notifies keep the snapshot:
+// mutter saves no rect from a tile.
 export function takesSnapshot(maximizedH, maximizedV, hasSnapshot) {
   return maximizedV && !maximizedH && !hasSnapshot;
 }

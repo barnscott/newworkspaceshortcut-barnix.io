@@ -90,8 +90,8 @@ export class highlightFocus {
     ];
   }
 
-  // Never draw here: Wayland rects lag the ack. The next geometry change re-shows
-  // it; no change means it would clip.
+  // Never draw here: Wayland rects lag the ack. The next geometry change
+  // re-shows it, or it would clip.
   _onStateChanged() {
     const win = this._watchedWindow;
     // Mutter notifies even when nothing changed, so check the state itself.
