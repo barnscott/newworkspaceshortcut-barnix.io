@@ -5,7 +5,8 @@
 import GLib from 'gi://GLib';
 import Meta from 'gi://Meta';
 import * as Config from 'resource:///org/gnome/shell/misc/config.js';
-import { shouldRepair } from './snaprestore-pure.js';
+import { isUsableRect } from './snaprestore-pure.js';
+import { isNormalWindow } from './utils.js';
 
 // Bump or delete when mutter ships a fix. Unfixed in 51.1: tile_window() still
 // sets tile mode before save_rect(). https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/5449
@@ -71,12 +72,12 @@ export class snapRestoreFix {
   _trackFocused() {
     this._untrack();
     const win = global.display.focus_window;
-    if (win === null || win.window_type !== Meta.WindowType.NORMAL) return;
+    if (!isNormalWindow(win)) return;
 
     this._trackedWindow = win;
     this._handles_window = [
-      win.connect('size-changed', () => this._cacheIfFloating(win)),
-      win.connect('position-changed', () => this._cacheIfFloating(win)),
+      win.connect('size-changed', () => this._onGeometryChanged(win)),
+      win.connect('position-changed', () => this._onGeometryChanged(win)),
       win.connect('notify::maximized-vertically', () => this._onMaximizedChanged(win)),
       win.connect('unmanaged', () => this._untrack()),
     ];
@@ -91,26 +92,43 @@ export class snapRestoreFix {
            !win.maximized_vertically;
   }
 
+  // From the rect: geometry signals fire before mutter updates get_monitor().
+  // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/core/window.c#L4507
+  _monitorOf(win) {
+    return global.display.get_monitor_index_for_rect(win.get_frame_rect());
+  }
+
+  // X11 moves the window before an unsnap is seen, so track the tile's monitor here.
+  _onGeometryChanged(win) {
+    const snap = this._preSnapRects.get(win);
+    if (snap && win.maximized_vertically) snap.tileMonitor = this._monitorOf(win);
+    this._cacheIfFloating(win);
+  }
+
   _cacheIfFloating(win) {
     if (this._grabbed || !this._isFloating(win)) return;
     const r = win.get_frame_rect();
     this._floatingRects.set(win, {
       rect: { x: r.x, y: r.y, width: r.width, height: r.height },
-      monitor: win.get_monitor(),
+      monitor: this._monitorOf(win),
     });
   }
 
   _onMaximizedChanged(win) {
     if (win.maximized_vertically) {
-      // A side snap maximizes vertically only; a full maximize sets both.
+      // Only a side snap (vertical only) loses its rect. A full maximize restores
+      // fine, with mutter's deliberate 80% clamp.
+      const cached = this._floatingRects.get(win);
+      if (win.maximized_horizontally || !cached) {
+        this._preSnapRects.delete(win);
+        return;
+      }
       // Flags change before geometry, so the cache still holds the floating rect.
-      if (win.maximized_horizontally) this._preSnapRects.delete(win);
-      else this._preSnapRects.set(win, this._floatingRects.get(win));
+      this._preSnapRects.set(win, { ...cached, tileMonitor: this._monitorOf(win) });
       return;
     }
-    // Read the snapshot, not the cache: X11 has already cached mutter's stale
-    // restore rect by now. https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/core/window.c#L3662
-    const wasSideTiled = this._preSnapRects.has(win);
+    // Not the cache: X11 has already cached mutter's stale restore rect.
+    // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/core/window.c#L3662
     const preSnap = this._preSnapRects.get(win);
     this._preSnapRects.delete(win);
     // A grab shake-loose already places the window; fix only its size.
@@ -119,16 +137,17 @@ export class snapRestoreFix {
     if (this._laterId) laters.remove(this._laterId);
     this._laterId = laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
       this._laterId = 0;
-      this._repair(win, wasSideTiled, preSnap, sizeOnly);
+      this._repair(win, preSnap, sizeOnly);
       return GLib.SOURCE_REMOVE;
     });
   }
 
   // The geometry signals this triggers re-cache the repaired rect.
-  _repair(win, wasSideTiled, preSnap, sizeOnly) {
+  _repair(win, preSnap, sizeOnly) {
     if (this._trackedWindow !== win || !this._isFloating(win)) return;
-    if (!shouldRepair(wasSideTiled, preSnap?.rect)) return;
-    if (preSnap.monitor !== win.get_monitor()) return;
+    if (!isUsableRect(preSnap?.rect)) return;
+    // Sent to another monitor while snapped: the old rect no longer applies.
+    if (preSnap.monitor !== preSnap.tileMonitor) return;
 
     const { width, height } = preSnap.rect;
     let { x, y } = preSnap.rect;

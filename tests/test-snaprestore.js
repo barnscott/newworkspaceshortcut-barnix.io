@@ -1,5 +1,5 @@
 // Headless test for the GNOME 49–51 snap-restore workaround. Run: gjs -m tests/test-snaprestore.js
-import { isUsableRect, shouldRepair } from '../newworkspaceshortcut@barnix.io/extension/snaprestore-pure.js';
+import { isUsableRect } from '../newworkspaceshortcut@barnix.io/extension/snaprestore-pure.js';
 import { check, finish } from './harness.js';
 
 const r = (x, y, width, height) => ({ x, y, width, height });
@@ -11,12 +11,5 @@ check('undefined',        isUsableRect(undefined), false);
 check('zero size',        isUsableRect(r(0, 0, 0, 0)), false);
 check('negative width',   isUsableRect(r(0, 0, -5, 600)), false);
 check('zero height',      isUsableRect(r(0, 0, 800, 0)), false);
-
-print('\n=== shouldRepair: only a side snap loses geometry ===');
-check('side-tiled, good cache',   shouldRepair(true, r(724, 500, 708, 452)), true);
-check('plain unmaximize',         shouldRepair(false, r(724, 500, 708, 452)), false);
-check('no tile state recorded',   shouldRepair(undefined, r(724, 500, 708, 452)), false);
-check('side-tiled, no cache',     shouldRepair(true, null), false);
-check('side-tiled, degenerate',   shouldRepair(true, r(0, 0, 0, 0)), false);
 
 finish();

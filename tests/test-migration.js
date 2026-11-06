@@ -1,5 +1,5 @@
-// Tests extension/migrate.js, the code the extension runs, against a keyfile
-// GSettings backend, so dconf is never touched. Run: gjs -m tests/test-migration.js
+// Tests extension/migrate.js on a keyfile backend; dconf is never touched.
+// Run: gjs -m tests/test-migration.js
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import { exit } from 'system';

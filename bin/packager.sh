@@ -173,8 +173,7 @@ main() {
   [[ -e "$zip_path" ]] && warn "overwriting existing $zip_name"
   rm -f "$zip_path"
 
-  # cd so paths are stored relative to the extension root. set -e is off in an
-  # if condition, hence the explicit &&. Info-ZIP reports errors on stdout.
+  # Zip from the extension root so paths are relative. Info-ZIP reports errors on stdout.
   local zip_out
   if ! zip_out=$(cd "$ext_dir" && zip -q -X "$zip_path" "${SHIP_FILES[@]}" 2>&1); then
     rm -f "$zip_path"

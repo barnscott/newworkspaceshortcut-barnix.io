@@ -88,7 +88,7 @@ export class focusChanger {
 
     // If nothing found on this monitor, try the nearest monitor in that direction
     if (!best) {
-      const nextMonitor = this._getAdjacentMonitor(direction, monitor, activeRect, activeWin.get_display());
+      const nextMonitor = this._getAdjacentMonitor(direction, monitor, activeWin.get_frame_rect(), activeWin.get_display());
       if (nextMonitor !== null) {
         const monitorRect = activeWin.get_display().get_monitor_geometry(monitor);
         return this._getBestCandidate(direction, nextMonitor, monitorRect, activeWin);
@@ -98,34 +98,35 @@ export class focusChanger {
     return best;
   }
 
-  // Mutter's adjacency rule (shared edge, overlap on the other axis), but picks
-  // the neighbour nearest the window, not the first listed.
+  // Mutter's adjacency rule, but picks the neighbour nearest the window, not the first.
   // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/backends/meta-logical-monitor.c#L319
-  _getAdjacentMonitor(direction, activeMonitorId, activeRect, display) {
+  _getAdjacentMonitor(direction, activeMonitorId, winRect, display) {
     const n = display.get_n_monitors();
     if (activeMonitorId < 0 || activeMonitorId >= n) return null;
     const a = display.get_monitor_geometry(activeMonitorId);
     const vertical = direction === 'focus-changer-up' || direction === 'focus-changer-down';
-    const along = vertical ? this._centerX(activeRect) : this._centerY(activeRect);
+    const touches = g => {
+      switch (direction) {
+        case 'focus-changer-up':   return g.y + g.height === a.y;
+        case 'focus-changer-down': return g.y === a.y + a.height;
+        case 'focus-changer-left': return g.x + g.width === a.x;
+        default:                   return g.x === a.x + a.width;
+      }
+    };
+    // Span on the axis perpendicular to travel.
+    const span = g => vertical ? [g.x, g.x + g.width] : [g.y, g.y + g.height];
+    const [aLo, aHi] = span(a);
+    const centre = vertical ? this._centerX(winRect) : this._centerY(winRect);
     let best = null;
     let bestDist = Infinity;
 
     for (let i = 0; i < n; i++) {
       if (i === activeMonitorId) continue;
       const g = display.get_monitor_geometry(i);
-      const touches = {
-        'focus-changer-up':    g.y + g.height === a.y,
-        'focus-changer-down':  g.y === a.y + a.height,
-        'focus-changer-left':  g.x + g.width === a.x,
-        'focus-changer-right': g.x === a.x + a.width,
-      }[direction];
-      const lo = vertical ? g.x : g.y;
-      const hi = lo + (vertical ? g.width : g.height);
-      const aLo = vertical ? a.x : a.y;
-      const aHi = aLo + (vertical ? a.width : a.height);
-      if (!touches || hi <= aLo || lo >= aHi) continue;
+      const [lo, hi] = span(g);
+      if (!touches(g) || hi <= aLo || lo >= aHi) continue;
 
-      const dist = along < lo ? lo - along : along > hi ? along - hi : 0;
+      const dist = centre < lo ? lo - centre : centre > hi ? centre - hi : 0;
       if (dist < bestDist) { best = i; bestDist = dist; }
     }
     return best;

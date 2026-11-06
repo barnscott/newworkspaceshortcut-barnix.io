@@ -4,6 +4,10 @@ import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import { isNormalWindow } from './utils.js';
+
+// Fallback for a state change that moves nothing, so sends no geometry signal.
+const SETTLE_FALLBACK_MS = 250;
 
 export class highlightFocus {
   constructor(settings) {
@@ -16,6 +20,7 @@ export class highlightFocus {
     this._watchedWindow = null;
     this._laterId = 0;
     this._settling = false;
+    this._settleTimeoutId = 0;
     this._drawnInset = 0;
     this._readSettings();
   }
@@ -73,28 +78,34 @@ export class highlightFocus {
   // Skip edge-flush windows: a snap reads as a vertical-only maximize.
   // https://gitlab.gnome.org/GNOME/mutter/-/issues/225
   _shouldSkip(win) {
-    return win === null ||
-      win.window_type !== Meta.WindowType.NORMAL ||
+    return !isNormalWindow(win) ||
       win.is_fullscreen() ||
       win.maximized_horizontally ||
       win.maximized_vertically;
   }
 
-  // Never draw here. A state change only hides the border; the next geometry
-  // change re-shows it. Not shown from notify: on Wayland the rect is stale then.
   _watchWindow(win) {
     this._watchedWindow = win;
-    const onStateChanged = () => {
-      this._borders.forEach(b => b.hide());
-      this._settling = true;
-    };
     this._handles_window = [
-      win.connect('notify::maximized-horizontally', onStateChanged),
-      win.connect('notify::maximized-vertically', onStateChanged),
-      win.connect('notify::fullscreen', onStateChanged),
+      win.connect('notify::maximized-horizontally', () => this._onStateChanged()),
+      win.connect('notify::maximized-vertically', () => this._onStateChanged()),
+      win.connect('notify::fullscreen', () => this._onStateChanged()),
       win.connect('position-changed', () => this._queueReposition()),
       win.connect('size-changed', () => this._queueReposition()),
     ];
+  }
+
+  // Never draw here: a Wayland rect is stale until the client acks.
+  // Geometry changes, or the fallback, re-show it.
+  _onStateChanged() {
+    this._borders.forEach(b => b.hide());
+    this._settling = true;
+    if (this._settleTimeoutId) GLib.Source.remove(this._settleTimeoutId);
+    this._settleTimeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, SETTLE_FALLBACK_MS, () => {
+      this._settleTimeoutId = 0;
+      this._queueReposition();
+      return GLib.SOURCE_REMOVE;
+    });
   }
 
   // Follows the window; never re-creates a border that auto-hide removed.
@@ -109,8 +120,8 @@ export class highlightFocus {
         border.hide();
         return GLib.SOURCE_REMOVE;
       }
-      // Wait one frame after a state change: snap restore repairs in this one.
-      // Laters queued now run next frame. https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/compositor/meta-later.c#L148
+      // Skip a frame after a state change; snap restore repairs in this one.
+      // https://gitlab.gnome.org/GNOME/mutter/-/blob/51.1/src/compositor/meta-later.c#L148
       if (this._settling) {
         this._settling = false;
         this._queueReposition();
@@ -140,6 +151,10 @@ export class highlightFocus {
     this._watchedWindow = null;
     this._handles_window = [];
     this._settling = false;
+    if (this._settleTimeoutId) {
+      GLib.Source.remove(this._settleTimeoutId);
+      this._settleTimeoutId = 0;
+    }
   }
 
   _highlightWindow() {
@@ -147,7 +162,10 @@ export class highlightFocus {
     this._unwatchWindow();
 
     const win = global.display.focus_window;
-    if (win === null || win.window_type !== Meta.WindowType.NORMAL) return;
+    if (!isNormalWindow(win)) return;
+    // With auto-hide off, an edge-flush window gets a hidden border to show on restore.
+    const edgeFlush = this._shouldSkip(win);
+    if (edgeFlush && !this._disableHiding) return;
 
     const border = new St.Bin();
     border.style = `border: ${this._borderWidth}px solid ${this._borderColor}; border-radius: ${this._borderRadius}px;`;
@@ -156,8 +174,7 @@ export class highlightFocus {
     this._placeBorder(border, win);
 
     global.window_group.add_child(border);
-    // Created hidden on an edge-flush window, so restoring it shows the border.
-    if (this._shouldSkip(win)) border.hide();
+    if (edgeFlush) border.hide();
     else border.show();
     this._borders.push(border);
 
